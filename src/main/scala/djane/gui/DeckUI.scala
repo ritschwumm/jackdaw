@@ -25,13 +25,13 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 	//------------------------------------------------------------------------------
 	//## input
 	
-	private val rhythmLines:Signal[Seq[RhythmLine]]	= 
-			deck.rhythmLines map { _.toSeq.flatten }
+	private val rhythmLines:Signal[ISeq[RhythmLine]]	= 
+			deck.rhythmLines map { _.toISeq.flatten }
 		
-	private val anchorLines:Signal[Seq[RhythmLine]]	=
+	private val anchorLines:Signal[ISeq[RhythmLine]]	=
 			rhythmLines map { _ collect { case x@RhythmLine.AnchorLine(_) => x } }
 	
-	private val cuePoints:Signal[Seq[Double]]	=
+	private val cuePoints:Signal[ISeq[Double]]	=
 			deck.cuePointsFlat
 	
 	private val cuePointsCount	= 
@@ -233,7 +233,7 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 		_	=> Some {
 			(files:Validated[Exception,Nes[File]]) => {
 				files
-				.badEffect	{ es => ERROR((es.toSeq):_*)	}
+				.badEffect	{ es => ERROR((es.toISeq):_*)	}
 				.toOption
 				.map		{ _.head }
 				.foreach	(deck.loadTrack)

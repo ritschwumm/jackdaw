@@ -3,11 +3,12 @@ package djane.gui.shape
 import java.awt.Shape
 import java.awt.geom._
 
+import scutil.lang.ISeq
 import scutil.implicits._
 
 import scgeom._
 
-case class Draft(close:Boolean, points:Seq[SgPoint]) {
+case class Draft(close:Boolean, points:ISeq[SgPoint]) {
 	def toShape:Shape	= 
 			new Path2D.Double doto appendTo
 	

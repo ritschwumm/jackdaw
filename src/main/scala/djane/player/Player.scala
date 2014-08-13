@@ -93,7 +93,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 				masterPeak		= peakDetector.decay
 			)
 	
-	private[player] def react(actions:Seq[PlayerAction]) {
+	private[player] def react(actions:ISeq[PlayerAction]) {
 		actions foreach {
 			case PlayerAction.RunningOn								=> runningOn()
 			case PlayerAction.RunningOff							=> runningOff()

@@ -12,7 +12,7 @@ object TrackData {
 	val empty	=
 			TrackData(
 				annotation	= "",
-				cuePoints	= Seq.empty,
+				cuePoints	= ISeq.empty,
 				raster		= None,
 				metadata	= None,
 				measure		= None
@@ -23,7 +23,7 @@ object TrackData {
 
 case class TrackData(
 	annotation:String,
-	cuePoints:Seq[Double],
+	cuePoints:ISeq[Double],
 	raster:Option[Rhythm],
 	metadata:Option[Stamped[Metadata]],
 	measure:Option[Stamped[Double]]

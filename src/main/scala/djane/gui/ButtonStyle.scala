@@ -1,10 +1,12 @@
 package djane.gui
 
+import scutil.lang.ISeq
+
 import sc2d._
 
 case class ButtonStyle(
-	disabled:Seq[Figure],
-	inactive:Seq[Figure],
-	hovered:Seq[Figure],
-	pressed:Seq[Figure]
+	disabled:ISeq[Figure],
+	inactive:ISeq[Figure],
+	hovered:ISeq[Figure],
+	pressed:ISeq[Figure]
 )

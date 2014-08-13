@@ -34,7 +34,7 @@ object Deck {
 }
 
 /** model for a single deck */
-final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[Seq[PlayerAction]], playerFeedback:Signal[PlayerFeedback]) extends Observing with Logging {
+final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]], playerFeedback:Signal[PlayerFeedback]) extends Observing with Logging {
 	// NOTE these are set by the DeckUI
 	val track		= cell[Option[Track]](None)
 	val scratching	= cell[Option[Double]](None)
@@ -97,11 +97,11 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[Seq[PlayerAction]],
 	val metadata:Signal[Option[Metadata]]		= (trackWrap flatMap { it => OptionSignal(it.metadata)	}).unwrap
 	val rhythm:Signal[Option[Rhythm]]			= (trackWrap flatMap { it => OptionSignal(it.rhythm)	}).unwrap
 	val fileName:Signal[Option[String]]			= signal { track.current map	{ _.fileName			} }
-	val cuePoints:Signal[Option[Seq[Double]]]	= signal { track.current map	{ _.cuePoints.current	} }
+	val cuePoints:Signal[Option[ISeq[Double]]]	= signal { track.current map	{ _.cuePoints.current	} }
 	val annotation:Signal[Option[String]]		= signal { track.current map	{ _.annotation.current	} }
 	val loaded:Signal[Boolean]					= signal { track.current exists	{ _.loaded.current		} }
 	
-	val cuePointsFlat	= signal { cuePoints.current.toSeq.flatten }
+	val cuePointsFlat	= signal { cuePoints.current.flattenMany }
 	
 	//------------------------------------------------------------------------------
 	//## player derivates
@@ -164,7 +164,7 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[Seq[PlayerAction]],
 			}
 	
 	/** all rhythm lines to be displayed */
-	val rhythmLines:Signal[Option[Seq[RhythmLine]]] =
+	val rhythmLines:Signal[Option[ISeq[RhythmLine]]] =
 			signal {
 				for { 
 					rhythm	<- rhythm.current
@@ -364,7 +364,7 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[Seq[PlayerAction]],
 			}
 	changeControl observeNow notifyPlayer
 
-	private val playerActions:Events[Seq[PlayerAction]]	=
+	private val playerActions:Events[ISeq[PlayerAction]]	=
 			events {
 				Vector(
 					runningEmitter.message,

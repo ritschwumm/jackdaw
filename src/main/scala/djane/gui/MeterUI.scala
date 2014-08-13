@@ -100,13 +100,13 @@ final class MeterUI(value:Signal[Float], meterRange:MeterRange, vertical:Boolean
 	//------------------------------------------------------------------------------
 	//## figures
 	
-	private val figures:Signal[Seq[Figure]]	=
+	private val figures:Signal[ISeq[Figure]]	=
 			signal {
 				val componentBoundsCur	= canvas.bounds.current
 				val activeImageCur		= activeImage.current
 				// LinearGradientPaint does not like an empty rectangle
 				if (componentBoundsCur.empty || activeImageCur == null) {
-					Seq.empty
+					ISeq.empty
 				}
 				else {
 					val fraction2guiCur	= fraction2gui.current

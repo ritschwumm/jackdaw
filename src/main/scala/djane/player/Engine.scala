@@ -96,13 +96,13 @@ final class Engine extends Logging {
 		old
 	}
 	
-	def react(actions:Seq[EngineAction]) {
+	def react(actions:ISeq[EngineAction]) {
 		incoming send actions
 	}
 	
 	// TODO lock ugly
 	
-	def reactPlayer(player:Int)(actions:Seq[PlayerAction]) {
+	def reactPlayer(player:Int)(actions:ISeq[PlayerAction]) {
 		react(Vector(EngineAction.ControlPlayer(player, actions)))
 	}
 	
@@ -111,7 +111,7 @@ final class Engine extends Logging {
 	
 	private var frame:Long	= 0
 	
-	private val incoming	= new TransferQueue[Seq[EngineAction]]
+	private val incoming	= new TransferQueue[ISeq[EngineAction]]
 	private val outgoing	= new TransferQueue[EngineFeedback]
 	
 	private def receiveControl() {

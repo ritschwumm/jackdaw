@@ -3,12 +3,14 @@ package djane.gui
 import java.awt.{ List=>AwtList, _ }
 import javax.swing._
 
+import scutil.lang.ISeq
+
 object VBoxUI {
 	def apply(subs:BoxItem*):VBoxUI	=
-			new VBoxUI(subs)
+			new VBoxUI(subs.toVector)
 }
 
-final class VBoxUI(subs:Seq[BoxItem]) extends UI {
+final class VBoxUI(subs:ISeq[BoxItem]) extends UI {
 	private val	panel	= new JPanel
 	panel setLayout new BoxLayout(panel, BoxLayout.Y_AXIS)
 	

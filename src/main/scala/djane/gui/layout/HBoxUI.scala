@@ -3,12 +3,14 @@ package djane.gui
 import java.awt.{ List=>AwtList, _ }
 import javax.swing._
 
+import scutil.lang.ISeq
+
 object HBoxUI {
 	def apply(subs:BoxItem*):HBoxUI	=
-			new HBoxUI(subs)
+			new HBoxUI(subs.toVector)
 }
 
-final class HBoxUI(subs:Seq[BoxItem]) extends UI {
+final class HBoxUI(subs:ISeq[BoxItem]) extends UI {
 	private val	panel	= new JPanel
 	panel setLayout new BoxLayout(panel, BoxLayout.X_AXIS)
 	

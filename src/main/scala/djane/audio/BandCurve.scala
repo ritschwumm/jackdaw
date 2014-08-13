@@ -51,10 +51,10 @@ object BandCurve {
 			summed	+= 1
 			
 			if (frame % rasterFrames == 0 || frame == sample.frameCount) {
-				valuesFull(chunk)	= (energyFull	/ summed).toFloat
-				valuesLow(chunk)	= (energyLow	/ summed).toFloat
-				valuesMiddle(chunk)	= (energyMiddle	/ summed).toFloat
-				valuesHigh(chunk)	= (energyHigh	/ summed).toFloat
+				valuesFull(chunk)	= energyFull.toFloat	/ summed
+				valuesLow(chunk)	= energyLow.toFloat		/ summed
+				valuesMiddle(chunk)	= energyMiddle.toFloat	/ summed
+				valuesHigh(chunk)	= energyHigh.toFloat	/ summed
 				energyFull		= 0
 				energyLow		= 0
 				energyMiddle	= 0

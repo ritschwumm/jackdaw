@@ -12,7 +12,7 @@ import scutil.log._
 import djane.audio.Metadata
 
 object Decoder extends Logging {
-	val all:Seq[Decoder]	=
+	val all:ISeq[Decoder]	=
 			Vector(
 				ExternalMadplay,
 				ExternalMpg123,
@@ -28,14 +28,14 @@ object Decoder extends Logging {
 	def convertToWav(input:File, output:File, frameRate:Int, channelCount:Int):Boolean	=
 			(worker { _ convertToWav (input, output, frameRate, channelCount) }).isDefined
 
-	private def worker[T](work:Decoder=>Tried[Seq[String],T]):Option[T] = {
-		type Outcome	= Tried[Seq[Problem],T]
-		type Problem	= Seq[String]
+	private def worker[T](work:Decoder=>Tried[ISeq[String],T]):Option[T] = {
+		type Outcome	= Tried[ISeq[Problem],T]
+		type Problem	= ISeq[String]
 		
-		def problem(decoder:Decoder, messages:Seq[String]):Seq[String]	=
+		def problem(decoder:Decoder, messages:ISeq[String]):ISeq[String]	=
 				decoder.name +: messages
 		
-		val start:Outcome	= Fail(Seq.empty[Problem])
+		val start:Outcome	= Fail(ISeq.empty[Problem])
 		val outcome:Outcome	=
 				(all foldLeft start) { (outcome:Outcome,decoder) =>
 					outcome match {
@@ -54,7 +54,7 @@ object Decoder extends Logging {
 
 /** interface to an external decoder command */
 trait Decoder extends Logging {
-	type Checked[T]	= Tried[Seq[String],T]
+	type Checked[T]	= Tried[ISeq[String],T]
 	
 	def name:String
 	
@@ -69,7 +69,7 @@ trait Decoder extends Logging {
 	protected def requireChecked(cond:Boolean, problem:String):Checked[Unit]	=
 			cond trueWin Vector(problem)
 		
-	protected def extractor(lines:Seq[String]):Regex=>Option[String]	=
+	protected def extractor(lines:ISeq[String]):Regex=>Option[String]	=
 			lines collapseFirst _.unapplySeq flatMap { _.headOption }
 		
 	protected def commandChecked(command:String):Checked[Unit]	=
@@ -86,6 +86,6 @@ trait Decoder extends Logging {
 		
 	protected def execChecked(command:String*):Checked[ExternalResult]	= {
 		DEBUG(command:_*)
-		External exec command result false triedBy { _.rc == 0 } mapFail { _.err }
+		External exec command.toVector result false triedBy { _.rc == 0 } mapFail { _.err }
 	}
 }

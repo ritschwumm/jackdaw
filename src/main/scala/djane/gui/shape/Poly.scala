@@ -3,9 +3,10 @@ package djane.gui.shape
 import java.awt.Shape
 import java.awt.geom._
 
+import scutil.lang.ISeq
 import scutil.implicits._
 
-case class Poly(drafts:Seq[Draft]) {
+case class Poly(drafts:ISeq[Draft]) {
 	def toShape:Shape	= 
 			new Path2D.Double doto appendTo
 	

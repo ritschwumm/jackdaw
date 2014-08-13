@@ -296,7 +296,7 @@ object Style {
 		}
 	}
 	
-	object strip {
+	object channel {
 		object border {
 			private val mkBorder	= focusBorder(true, false, false, false, 4, 6) _
 			val inFocus	= mkBorder(true)

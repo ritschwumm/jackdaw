@@ -1,5 +1,6 @@
 package djane
 
+import scutil.lang.ISeq
 import scutil.time._
 
 import scaudio.output._
@@ -10,7 +11,7 @@ import djane.audio.PitchMath._
 object Config {
 	val updateTick		= 40.millis 
 	
-	val outputConfig	= OutputConfig(Seq.empty, 44100, 512, 8, true)
+	val outputConfig	= OutputConfig(ISeq.empty, 44100, 512, 8, true)
 	
 	// (output.rate * Config.updateTick.millis / 1000).toInt / 4
 	val controlFrames	= 256

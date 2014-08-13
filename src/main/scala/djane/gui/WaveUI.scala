@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage
 
 import scala.math._
 
+import scutil.lang.ISeq
 import scutil.implicits._
 import scutil.geom._
 
@@ -28,8 +29,8 @@ final class WaveUI(
 	bandCurve:Signal[Option[BandCurve]],
 	frameOrigin:Signal[Double], 
 	playerPosition:Signal[Double],
-	cuePoints:Signal[Seq[Double]],
-	rhythmLines:Signal[Seq[RhythmLine]],
+	cuePoints:Signal[ISeq[Double]],
+	rhythmLines:Signal[ISeq[RhythmLine]],
 	widthOrigin:Double,	// 0..1 from left to right
 	shrink:Boolean
 ) extends UI with Observing {
@@ -123,14 +124,14 @@ final class WaveUI(
 	
 	//------------------------------------------------------------------------------
 	
-	private val figures:Signal[Seq[Figure]]	=
+	private val figures:Signal[ISeq[Figure]]	=
 			signal {
 				val coordsCur	= coords.current
 				
-				val playerPosFigures:Seq[Figure]	= 
-						renderLine(coordsCur, playerPosition.current, true).toSeq
+				val playerPosFigures:ISeq[Figure]	= 
+						renderLine(coordsCur, playerPosition.current, true).toISeq
 				
-				val rhythmLineFigures:Seq[Figure]	= 
+				val rhythmLineFigures:ISeq[Figure]	= 
 						rhythmLines.current flatMap {
 							case RhythmLine.AnchorLine(frame)	=> 
 								renderLine(coordsCur, frame, false).toSeq	++
@@ -142,7 +143,7 @@ final class WaveUI(
 								renderLine(coordsCur, frame, false).toSeq
 						}
 				
-				val cuePointFigures:Seq[Figure]	=
+				val cuePointFigures:ISeq[Figure]	=
 						cuePoints.current.zipWithIndex flatMap { case (frame,index) =>
 							renderLine(coordsCur, frame, false).toSeq		++
 							renderRectangleBoppel(coordsCur, frame).toSeq	++
@@ -214,7 +215,7 @@ final class WaveUI(
 		}
 	}
 	
-	private lazy val numberImages:Seq[BufferedImage]	= {
+	private lazy val numberImages:ISeq[BufferedImage]	= {
 		// TODO hardcoded insets
 		val size	= IntPoint(Style.wave.marker.rectangle.width-1, Style.wave.marker.rectangle.height-2)
 		val bounds	= SgRectangle topLeftZeroBy SgPoint(size.x-1, size.y-1)

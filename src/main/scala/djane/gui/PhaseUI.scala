@@ -6,6 +6,7 @@ import javax.swing._
 
 import scala.math._
 
+import scutil.lang.ISeq
 import scutil.implicits._
 
 import screact._
@@ -49,7 +50,7 @@ final class PhaseUI(value:Signal[Option[Double]], rhythm:Signal[Option[Rhythm]])
 	//------------------------------------------------------------------------------
 	//## figures
 	
-	private val figures:Signal[Seq[Figure]]	=
+	private val figures:Signal[ISeq[Figure]]	=
 			signal {
 				val trackBoundsCur	= canvas.bounds.current
 				val value2guiCur	= value2gui.current
@@ -95,7 +96,7 @@ final class PhaseUI(value:Signal[Option[Double]], rhythm:Signal[Option[Rhythm]])
 							)
 						}
 				
-				bar.toSeq ++ lines
+				bar.toISeq ++ lines
 			}
 	
 	//------------------------------------------------------------------------------

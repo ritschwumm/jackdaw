@@ -19,7 +19,7 @@ object Library extends Logging {
 
 	//------------------------------------------------------------------------------
 	
-	var allTracks:Synchronized[Seq[TrackFiles]]	= Synchronized(Vector.empty)
+	var allTracks:Synchronized[ISeq[TrackFiles]]	= Synchronized(Vector.empty)
 	
 	def init() {
 		// newest first
@@ -82,18 +82,18 @@ object Library extends Logging {
 	
 	case class Info(count:Int, space:Long) {
 		def human:String	=
-				(Human roundedBinary (2, space)) + "B for " + 
+				(Human roundedBinary space) + "B for " + 
 				count + " " + (count == 1 cata ("tracks", "track"))
 	}
 	
-	def info(tracks:Seq[TrackFiles]):Info	=
+	def info(tracks:ISeq[TrackFiles]):Info	=
 			Info(
 				tracks.size, 
 				(tracks map spaceNeeded).sum
 			)
 	
-	private def findTrackFiles:Seq[TrackFiles]	= {
-		def walk(dir:File):Seq[TrackFiles]	=  {
+	private def findTrackFiles:ISeq[TrackFiles]	= {
+		def walk(dir:File):ISeq[TrackFiles]	=  {
 			val candidate	= TrackFiles(dir)
 			if (interesting(candidate))	Vector(candidate)
 			else if (dir.isDirectory)	dir.children.flattenMany flatMap walk

@@ -2,18 +2,18 @@ name			:= "djane"
 
 organization	:= "de.djini"
 
-version			:= "1.0.0"
+version			:= "1.1.0"
 
-scalaVersion	:= "2.11.1"
+scalaVersion	:= "2.11.2"
 
 libraryDependencies	++= Seq(
-	"de.djini"					%% "scutil-core"	% "0.45.0"	% "compile",
-	"de.djini"					%% "scutil-swing"	% "0.45.0"	% "compile",
-	"de.djini"					%% "scaudio"		% "0.30.0"	% "compile",
-	"de.djini"					%% "scjson"			% "0.50.0"	% "compile",
-	"de.djini"					%% "screact"		% "0.51.0"	% "compile",
-	"de.djini"					%% "scgeom"			% "0.21.0"	% "compile",
-	"de.djini"					%% "sc2d"			% "0.14.0"	% "compile",
+	"de.djini"					%% "scutil-core"	% "0.48.0"	% "compile",
+	"de.djini"					%% "scutil-swing"	% "0.48.0"	% "compile",
+	"de.djini"					%% "scaudio"		% "0.33.0"	% "compile",
+	"de.djini"					%% "scjson"			% "0.53.0"	% "compile",
+	"de.djini"					%% "screact"		% "0.54.0"	% "compile",
+	"de.djini"					%% "scgeom"			% "0.22.0"	% "compile",
+	"de.djini"					%% "sc2d"			% "0.16.0"	% "compile",
 	"org.simplericity.macify"	%	"macify"		% "1.6"		% "compile"
 )
 

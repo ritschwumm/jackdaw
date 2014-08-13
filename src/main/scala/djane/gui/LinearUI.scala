@@ -54,7 +54,7 @@ final class LinearUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 	//------------------------------------------------------------------------------
 	//## figures
 		
-	private val figures:Signal[Seq[Figure]]	=
+	private val figures:Signal[ISeq[Figure]]	=
 			signal {
 				val componentBoundsCur	= canvas.bounds.current
 				val trackBoundsCur		= trackBounds.current

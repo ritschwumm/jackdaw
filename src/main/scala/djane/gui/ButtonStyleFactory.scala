@@ -3,6 +3,7 @@ package djane.gui
 import java.awt.{ List=>AwtList, Canvas=>AwtCanvas, _ }
 import java.awt.geom._
 
+import scutil.lang.ISeq
 import scutil.implicits._
 
 import scgeom._
@@ -101,7 +102,7 @@ object ButtonStyleFactory {
 	
 	private def outlineButtonStyle(poly:Poly):ButtonStyle	= {
 		val shape	= poly.toShape
-		def factory(shapePaint:Paint, shapeStroke:Stroke):Seq[Figure]	=
+		def factory(shapePaint:Paint, shapeStroke:Stroke):ISeq[Figure]	=
 				Vector(
 					StrokeShape(shape, shapePaint, shapeStroke)
 				)
@@ -112,7 +113,7 @@ object ButtonStyleFactory {
 	// BETTER make nice and use
 	private def filledButtonStyle(poly:Poly):ButtonStyle	= {
 		val shape	= poly.toShape
-		def factory(shapePaint:Paint, shapeStroke:Stroke):Seq[Figure]	= 
+		def factory(shapePaint:Paint, shapeStroke:Stroke):ISeq[Figure]	= 
 				Vector(
 					 FillShape(shape)					withPaint shapePaint,
 					StrokeShape(SshapeStroke, shape)	withPaint shapePaint
@@ -123,7 +124,7 @@ object ButtonStyleFactory {
 	
 	private def digitButtonStyle(base:Poly, digit:Shape):ButtonStyle	= {
 		val shape	= base.toShape
-		def factory(shapePaint:Paint, shapeStroke:Stroke):Seq[Figure]	= 
+		def factory(shapePaint:Paint, shapeStroke:Stroke):ISeq[Figure]	= 
 				Vector(
 					FillShape(shape, shapePaint),
 					StrokeShape(shape, shapePaint, shapeStroke),
@@ -134,7 +135,7 @@ object ButtonStyleFactory {
 	
 	private def trialButtonStyle(base:Poly, state:Option[Boolean]):ButtonStyle	= {
 		val shape	= base.toShape
-		def factory(shapePaint:Paint, shapeStroke:Stroke):Seq[Figure]	= 
+		def factory(shapePaint:Paint, shapeStroke:Stroke):ISeq[Figure]	= 
 				Vector(
 					FillShape(shape, trialPaint(state)),
 					StrokeShape(shape, shapePaint, shapeStroke)
@@ -142,7 +143,7 @@ object ButtonStyleFactory {
 		buttonStyle(factory)
 	}
 	
-	private def buttonStyle(factory:(Paint,Stroke)=>Seq[Figure]):ButtonStyle	=
+	private def buttonStyle(factory:(Paint,Stroke)=>ISeq[Figure]):ButtonStyle	=
 			ButtonStyle(
 				disabled	= factory(Style.button.shape.disabled.color,	Style.button.shape.disabled.stroke),
 				inactive	= factory(Style.button.shape.inactive.color,	Style.button.shape.inactive.stroke),
@@ -161,7 +162,7 @@ object ButtonStyleFactory {
 	
 	def digitCount	= DIGITS.size
 	
-	private lazy val DIGITS:Seq[Shape]	=
+	private lazy val DIGITS:ISeq[Shape]	=
 			LEDShape shapes (
 				(smallisher + 1	spanTo	biggisher - 1)	rectangleWith
 				(smallish   + 1	spanTo	biggish   - 1)

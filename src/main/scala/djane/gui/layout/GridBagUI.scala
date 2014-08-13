@@ -3,11 +3,14 @@ package djane.gui
 import java.awt.{ List=>AwtList, _ }
 import javax.swing._
 
+import scutil.lang.ISeq
+
 object GridBagUI {
-	def apply(subs:GridBagItem*):GridBagUI	= new GridBagUI(subs)
+	def apply(subs:GridBagItem*):GridBagUI	=
+			new GridBagUI(subs.toVector)
 }
 
-final class GridBagUI(subs:Seq[GridBagItem]) extends UI {
+final class GridBagUI(subs:ISeq[GridBagItem]) extends UI {
 	private val	panel	= new JPanel
 	panel setLayout new GridBagLayout
 	

@@ -2,6 +2,7 @@ package djane.model
 
 import java.io.File
 
+import scutil.lang.ISeq
 import scutil.implicits._
 import scutil.io.Files._
 import scutil.log._
@@ -16,7 +17,7 @@ object Storage extends Logging {
 	def metaDir(orig:File):File	=
 			meta /+ localPath(orig)
 	
-	private def localPath(file:File):Seq[String]	=
+	private def localPath(file:File):ISeq[String]	=
 			file
 			.selfAndParentChain
 			.reverse

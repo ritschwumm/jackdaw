@@ -14,7 +14,7 @@ object Strip {
 	def forMaster	= new Strip(VolumeRange.alot,	VolumeRange.alot,	MasterRange)
 	def forDeck		= new Strip(VolumeRange.max,	VolumeRange.min,	DeckRange)
 	
-	val step:Boolean=>Double	= _ cata (VolumeRange.size/20, VolumeRange.size/100)
+	val step:Boolean=>Double	= _ cata (VolumeRange.size/40, VolumeRange.size/100)
 	
 	val strip2gain:Endo[Double]	= gammaFade(+0.66)
 }

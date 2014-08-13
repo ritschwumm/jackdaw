@@ -8,6 +8,7 @@ import javax.swing.event._
 
 import scala.math._
 
+import scutil.lang.ISeq
 import scutil.implicits._
 import scutil.math._
 import scutil.gui.CasterInstances._
@@ -49,7 +50,7 @@ final class RotaryUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 	//## figures
 	
 	// TODO smaller angle difference for the knob to make it stay inside the track
-	private val figures:Signal[Seq[Figure]]	=
+	private val figures:Signal[ISeq[Figure]]	=
 			signal {
 				val boundsCur	= canvas.bounds.current
 				val valueCur	= value.current

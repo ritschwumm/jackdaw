@@ -3,6 +3,7 @@ package djane.model
 import scala.math._
 import scala.collection.mutable.ArrayBuffer
 
+import scutil.lang.ISeq
 import scutil.implicits._
 import scutil.math._
 
@@ -83,7 +84,7 @@ case class Rhythm(anchor:Double, measure:Double, beatsPerMeasure:Int) {
 	
 	//------------------------------------------------------------------------------
 	
-	def lines(start:Double, end:Double):Seq[RhythmLine] = {
+	def lines(start:Double, end:Double):ISeq[RhythmLine] = {
 		val	firstValue	= beatRaster ceil start
 		val firstIndex	= rint((firstValue - anchor) / beat).toInt
 		
