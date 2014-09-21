@@ -1,20 +1,21 @@
-name			:= "djane"
+name			:= "jackdaw"
 
 organization	:= "de.djini"
 
-version			:= "1.1.0"
+version			:= "1.2.0"
 
 scalaVersion	:= "2.11.2"
 
 libraryDependencies	++= Seq(
-	"de.djini"					%% "scutil-core"	% "0.48.0"	% "compile",
-	"de.djini"					%% "scutil-swing"	% "0.48.0"	% "compile",
-	"de.djini"					%% "scaudio"		% "0.33.0"	% "compile",
-	"de.djini"					%% "scjson"			% "0.53.0"	% "compile",
-	"de.djini"					%% "screact"		% "0.54.0"	% "compile",
-	"de.djini"					%% "scgeom"			% "0.22.0"	% "compile",
-	"de.djini"					%% "sc2d"			% "0.16.0"	% "compile",
-	"org.simplericity.macify"	%	"macify"		% "1.6"		% "compile"
+	"de.djini"					%%	"scutil-core"	% "0.50.0"	% "compile",
+	"de.djini"					%%	"scutil-swing"	% "0.50.0"	% "compile",
+	"de.djini"					%%	"scaudio"		% "0.35.0"	% "compile",
+	"de.djini"					%%	"scjson"		% "0.55.0"	% "compile",
+	"de.djini"					%%	"screact"		% "0.56.0"	% "compile",
+	"de.djini"					%%	"scgeom"		% "0.22.0"	% "compile",
+	"de.djini"					%%	"sc2d"			% "0.16.0"	% "compile",
+	"org.simplericity.macify"	%	"macify"		% "1.6"		% "compile",
+	"javazoom"					%	"jlayer"		% "1.0.1"	% "compile"
 )
 
 scalacOptions	++= Seq(
@@ -39,15 +40,15 @@ sourceGenerators in Compile	<+= buildInfo
 
 buildInfoKeys		:= Seq[BuildInfoKey](name, version)	// name, version, scalaVersion, sbtVersion
 
-buildInfoPackage	:= "djane"
+buildInfoPackage	:= "jackdaw"
 
 //--------------------------------------------------------------------------------
 
 scriptstartSettings
 
 scriptstartConfigs	:= Seq(ScriptConfig(
-	scriptName	= "djane",
-	mainClass	= "djane.DJane",
+	scriptName	= "jackdaw",
+	mainClass	= "jackdaw.Boot",
 	// @see http://download.oracle.com/javase/1.5.0/docs/guide/2d/flags.html
 	// -Dsun.java2d.trace=log
 	vmArguments	= Seq(
@@ -90,13 +91,13 @@ inTask(scriptstart)(zipperSettings ++ Seq(
 
 osxappSettings
 
-osxappBundleName	:= "djane"
+osxappBundleName	:= "jackdaw"
 
 osxappBundleIcons	:= baseDirectory.value / "src/main/osxapp/default.icns"
 
 osxappVm			:= OracleJava7()	// AppleJava6()
 
-osxappMainClass		:= Some("djane.DJane")
+osxappMainClass		:= Some("jackdaw.Boot")
 
 osxappVmOptions		:= Seq(
 	"-server",

@@ -1,90 +1,4 @@
-djane is a minimalistic 3-deck dj tool. 
-it's written in scala and runs on the JVM.
-
-features
--   cross platform (tested on linux and os x)
--   3 decks
--   3-band equalizer
--   12dB dj filter (lowpass/highpass with a single knob)
--   beatgrids
--   multiple cue points
--   color-coded waveforms
--   many formats supported through external decoders
--   clean sound using sinc interpolation
--   headphone support
-
-non-features
--   quite high latency
--   litters ~/.djane with lots (currently up to 10GB) of .wav files
--	no support for controllers
-
-requirements
--   java 7
--   avconv & avprobe, faad, flac & metaflac, madplay, mpg123 or
-    oggdec & vorbiscomment in the system path
-
-usage
-    run bin/djane
-    
-    load files by dragging them onto a deck.
-
-keyboard commands (mouse hovering over a deck)
-
-    shift           lessens an actions effect
-    
-    space           toggle play/pause
-    cursor up       drag forward
-    cursor down     drag backwards
-    cursor right    seek forward
-    cursor left     seek backwards
-    
-    delete          reset pitch to zero
-    home            pitch up
-    end             pitch down
-    
-    insert          toggle between synchronized and freerunning
-    
-    enter           add a cue point at the cursor
-    backspace       remove the cue point near the cursor
-    0..9            jump to cuepoint 0..9
-    ^/~             jump to cuepoint 0
-    
-    r               toggle beatgrid on/off
-    t               set beatgrid anchor to cursor
-    
-    q               reduce beatgrid size
-    w               increase beatgrid size
-    a               halve beatgrid size
-    s               double beatgrid size
-    y/z             move beatgrid left
-    x               move beatgrid right
-    
-    e               enter annotation editor
-
-keyboard commands (annotation editor active)
-
-    enter/escape    leave the editor
-    
-keyboard commands (mouse hovering over a channel strip)
-
-    shift           lessens an actions effect
-    
-    insert          reset the equalizer and filter
-    num-1           decrease bass
-    num-2           reset bass
-    num-3           increase bass
-    num-4           decrease middle
-    num-5           reset middle
-    num-6           increase middle
-    num-7           decrease treble
-    num-8           reset treble
-    num-9           increase treble
-    num-divide      decrease filter
-    num-multiply    reset filter
-    num-subtract    increase filter
-    
-    num-add         increase speaker volume
-    num-enter       decrease speaker volume
+jackdaw is a minimalistic 3-deck dj tool. it's written in scala and runs on the JVM.
 
 building
 
@@ -103,6 +17,6 @@ building
         https://github.com/ritschwumm/screact
         
     clone the repository and build
-        git clone git@github.com:ritschwumm/djane.git
-        cd djane
+        git clone git@github.com:ritschwumm/jackdaw.git
+        cd jackdaw
         sbt bundle
