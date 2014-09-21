@@ -1,7 +1,9 @@
 target/
 project/boot/
 
-bin/
-doc/
-versatz/
+/bin/
+/doc/
+/versatz/
+/dist.sbt
+/src/main/doc/
 
