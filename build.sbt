@@ -2,7 +2,7 @@ name			:= "jackdaw"
 
 organization	:= "de.djini"
 
-version			:= "1.2.0"
+version			:= "1.3.0"
 
 scalaVersion	:= "2.11.2"
 
@@ -15,7 +15,8 @@ libraryDependencies	++= Seq(
 	"de.djini"					%%	"scgeom"		% "0.22.0"	% "compile",
 	"de.djini"					%%	"sc2d"			% "0.16.0"	% "compile",
 	"org.simplericity.macify"	%	"macify"		% "1.6"		% "compile",
-	"javazoom"					%	"jlayer"		% "1.0.1"	% "compile"
+	"javazoom"					%	"jlayer"		% "1.0.1"	% "compile",
+	"com.mpatric"				%	"mp3agic"		% "0.8.2"	% "compile"
 )
 
 scalacOptions	++= Seq(
@@ -95,7 +96,7 @@ osxappBundleName	:= "jackdaw"
 
 osxappBundleIcons	:= baseDirectory.value / "src/main/osxapp/default.icns"
 
-osxappVm			:= OracleJava7()	// AppleJava6()
+osxappVm			:= OracleJava7()
 
 osxappMainClass		:= Some("jackdaw.Boot")
 
@@ -112,8 +113,6 @@ osxappProperties	:= Map(
 	//	prevents memleaks for windows
 	"swing.bufferPerWindow"					-> "false"
 )
-
-// osxappApplicationStub	:= baseDirectory.value / "src/osxapp/resources/JavaApplicationStub"
 
 // osxapp::zipper
 inTask(osxapp)(zipperSettings ++ Seq(

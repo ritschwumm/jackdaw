@@ -50,6 +50,8 @@ object ExternalFaad extends Decoder {
 							"-q",
 							input.getPath
 						)
+				// NOTE faad rc is 0 regardless of whether it worked or not
+				_	<- requirement(output.exists, "output file not generated")
 			}
 			yield ()
 	

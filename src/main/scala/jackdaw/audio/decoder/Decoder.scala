@@ -20,7 +20,7 @@ object Decoder extends Logging {
 				ExternalVorbisTools, 
 				ExternalFlac,
 				ExternalAvconv,
-				InternalJLayer
+				InternalJLayerMp3agic
 			)
 	
 	def readMetadata(input:File):Option[Metadata]	= 

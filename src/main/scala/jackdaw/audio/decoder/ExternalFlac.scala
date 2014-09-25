@@ -55,6 +55,8 @@ object ExternalFlac extends Decoder {
 							"-s",					// silent
 							input.getPath
 						)
+				// NOTE flac rc is 0 regardless of whether it worked or not
+				_	<- requirement(output.exists, "output file not generated")
 			}
 			yield ()
 	

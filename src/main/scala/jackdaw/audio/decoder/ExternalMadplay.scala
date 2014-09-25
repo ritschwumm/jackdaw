@@ -41,7 +41,7 @@ object ExternalMadplay extends Decoder {
 				_	<- commandAvailable("faad")
 				_	<- requirement(channelCount >= 1,	"expected channelCount >= 1")
 				_	<- requirement(channelCount <= 2,	"expected channelCount <= 2")
-				_	<-
+				res	<-
 						exec(
 							"madplay", 
 							"--output",			"wav:" + output.getPath,
@@ -56,6 +56,17 @@ object ExternalMadplay extends Decoder {
 							// "--time",		"44100/44100",
 							input.getPath
 						)
+				_	<-
+						requirement(
+							!(res.err contains "error: frame 0: lost synchronization"), 
+							"file cannot be decoded"
+						) orElse
+						requirement(
+							output.length > 44, 
+							"output file broken"
+						) failEffect { 
+							_ => output.delete() 
+						}
 			}
 			yield ()
 			
