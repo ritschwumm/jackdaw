@@ -4,8 +4,12 @@ import scutil.gui.SwingUtil.edt
 import scutil.platform.ExceptionUtil
 import scutil.log._
 
+import jackdaw.gui.Style
+
 object Boot extends Logging {
 	def main(args:Array[String]) {
+		System setProperty ("apple.awt.application.name", BuildInfo.name)
+		
 		ExceptionUtil logAllExceptions { (thread,throwable) =>
 			ERROR("unexpected error", thread, throwable)
 		}

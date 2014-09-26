@@ -38,7 +38,7 @@ object ExternalMadplay extends Decoder {
 	def convertToWav(input:File, output:File, frameRate:Int, channelCount:Int):Checked[Unit] =
 			for {
 				_	<- suffixChecked(input)
-				_	<- commandAvailable("faad")
+				_	<- commandAvailable("madplay")
 				_	<- requirement(channelCount >= 1,	"expected channelCount >= 1")
 				_	<- requirement(channelCount <= 2,	"expected channelCount <= 2")
 				res	<-
