@@ -1,35 +1,30 @@
-package jackdaw.audio.decoder
+package jackdaw.media
 
-import java.io._
-
-import scutil.lang._
-import scutil.implicits._
-import scutil.log.Logging
+import java.io.File
 
 import jackdaw.audio.Metadata
 
-/** interface to an external madplay command */
-object ExternalMadplay extends Decoder {
+object Madplay extends Inspector with Decoder {
 	def name	= "madplay"
 	
 	def readMetadata(input:File):Checked[Metadata] =
 			for {
-				_		<- suffixChecked(input)
-				_		<- commandAvailable("madplay")
+				_		<- recognizeFile(input)
+				_		<- MediaUtil requireCommand "madplay"
 				result	<-
-						exec(
+						MediaUtil runCommand (
 							"madplay", 
 							"-T",
 							input.getPath
 						)
 			}
 			yield {
-				val extract	= extractor(result.err)
+				val extract	= MediaUtil extractFrom result.err
 				Metadata(
 					title	= extract("""\s*Title: (.*)""".r), 
 					artist	= extract("""\s*Artist: (.*)""".r), 
-					album	= extract("""\s*Album: (.*)""".r), 
-					genre	= extract("""\s*Genre: (.*)""".r)
+					album	= extract("""\s*Album: (.*)""".r)
+					// genre		= extract("""\s*Genre: (.*)""".r)
 					// publisher	= extract("""\s*Publisher: (.*)""".r),
 					// comment		= extract("""\s*Comment: (.*)""".r),
 				)
@@ -37,12 +32,12 @@ object ExternalMadplay extends Decoder {
 	
 	def convertToWav(input:File, output:File, frameRate:Int, channelCount:Int):Checked[Unit] =
 			for {
-				_	<- suffixChecked(input)
-				_	<- commandAvailable("madplay")
-				_	<- requirement(channelCount >= 1,	"expected channelCount >= 1")
-				_	<- requirement(channelCount <= 2,	"expected channelCount <= 2")
+				_	<- recognizeFile(input)
+				_	<- MediaUtil requireCommand "madplay"
+				_	<- Checked trueWin1 (channelCount >= 1,	"expected channelCount >= 1")
+				_	<- Checked trueWin1 (channelCount <= 2,	"expected channelCount <= 2")
 				res	<-
-						exec(
+						MediaUtil runCommand (
 							"madplay", 
 							"--output",			"wav:" + output.getPath,
 							"--bit-depth",		"16",
@@ -57,19 +52,19 @@ object ExternalMadplay extends Decoder {
 							input.getPath
 						)
 				_	<-
-						requirement(
+						(Checked trueWin1 (
 							!(res.err contains "error: frame 0: lost synchronization"), 
 							"file cannot be decoded"
-						) orElse
-						requirement(
+						)) orElse
+						(Checked trueWin1 (
 							output.length > 44, 
 							"output file broken"
-						) failEffect { 
+						)) failEffect { 
 							_ => output.delete() 
 						}
 			}
 			yield ()
 			
-	private val suffixChecked:File=>Checked[Unit]	=
-			suffixIn(".mp3")
+	private val recognizeFile:File=>Checked[Unit]	=
+			MediaUtil requireFileSuffixIn (".mp3")
 }

@@ -14,7 +14,7 @@ import screact._
 
 import jackdaw.Config
 import jackdaw.audio._
-import jackdaw.audio.decoder._
+import jackdaw.media._
 import jackdaw.model.persistence._
 import jackdaw.model.persistence.JSONProtocol._
 import jackdaw.util.LRU
@@ -110,7 +110,7 @@ final class Track(file:File) extends Observing with Logging {
 						}
 						.orElse {
 							INFO("reading metadata")
-							Decoder readMetadata file map { Stamped(fileModified, _) }
+							Inspector readMetadata file map { Stamped(fileModified, _) }
 						}
 						.noneEffect {
 							WARN("cannot read metadata")

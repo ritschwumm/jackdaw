@@ -1,22 +1,22 @@
 jackdaw is a minimalistic 3-deck dj tool. it's written in scala and runs on the JVM.
 
-building
-
-    get sbt from https://github.com/sbt/sbt and install it
+building needs sbt
+    get it from https://github.com/sbt/sbt
     
-    get and build libraries
-        https://github.com/ritschwumm/xsbt-classpath
-        https://github.com/ritschwumm/xsbt-scriptstart
-        https://github.com/ritschwumm/xsbt-osxapp
-        https://github.com/ritschwumm/xsbt-zipper
-        https://github.com/ritschwumm/scutil
-        https://github.com/ritschwumm/scjson
-        https://github.com/ritschwumm/scaudio
-        https://github.com/ritschwumm/scgeom
-        https://github.com/ritschwumm/sc2d
-        https://github.com/ritschwumm/screact
-        
-    clone the repository and build
-        git clone git@github.com:ritschwumm/jackdaw.git
-        cd jackdaw
-        sbt bundle
+you need these libraries:
+	https://github.com/ritschwumm/xsbt-classpath
+	https://github.com/ritschwumm/xsbt-scriptstart
+	https://github.com/ritschwumm/xsbt-osxapp
+	https://github.com/ritschwumm/xsbt-capsule
+	https://github.com/ritschwumm/xsbt-zipper
+	https://github.com/ritschwumm/scutil
+	https://github.com/ritschwumm/scjson
+	https://github.com/ritschwumm/scaudio
+	https://github.com/ritschwumm/scgeom
+	https://github.com/ritschwumm/sc2d
+	https://github.com/ritschwumm/screact
+	
+now clone the repository and build
+	git clone git@github.com:ritschwumm/jackdaw.git
+	cd jackdaw
+	sbt bundle

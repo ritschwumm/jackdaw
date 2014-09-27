@@ -1,23 +1,18 @@
-package jackdaw.audio.decoder
+package jackdaw.media
 
-import java.io._
-
-import scutil.lang._
-import scutil.implicits._
-import scutil.log.Logging
+import java.io.File
 
 import jackdaw.audio.Metadata
 
-/** interface to an external madplay command */
-object ExternalMpg123 extends Decoder {
+object Mpg123 extends Inspector with Decoder {
 	def name	= "mpg123"
 	
 	def readMetadata(input:File):Checked[Metadata] =
 			for {
-				_		<- recognized(input)
-				_		<- commandAvailable("mpg123")
+				_		<- recognizeFile(input)
+				_		<- MediaUtil requireCommand "mpg123"
 				result	<-
-						exec(
+						MediaUtil runCommand (
 							"mpg123", 
 							"-n",	"1",
 							// "--stdout",
@@ -26,24 +21,24 @@ object ExternalMpg123 extends Decoder {
 						)
 			}
 			yield {
-				val extract	= extractor(result.err)
+				val extract	= MediaUtil extractFrom result.err
 				Metadata(
 					title	= extract("""Title:\s+(.*?)\s+Artist:\s+(?:.*)""".r), 
 					artist	= extract("""Title:\s+(?:.*?)\s+Artist:\s+(.*)""".r), 
-					album	= extract("""Album:\s+(.*)""".r), 
-					genre	= extract("""Genre:\s+(.*)""".r)
+					album	= extract("""Album:\s+(.*)""".r) 
+					// genre	= extract("""Genre:\s+(.*)""".r)
 					// MPEG 1.0 layer III, 192 kbit/s, 44100 Hz stereo
 				)
 			}
 	
 	def convertToWav(input:File, output:File, frameRate:Int, channelCount:Int):Checked[Unit] =
 			for {
-				_	<- recognized(input)
-				_	<- commandAvailable("mpg123")
-				_	<- requirement(channelCount >= 1,	"expected channelCount >= 1")
-				_	<- requirement(channelCount <= 2,	"expected channelCount <= 2")
+				_	<- recognizeFile(input)
+				_	<- MediaUtil requireCommand "mpg123"
+				_	<- Checked trueWin1 (channelCount >= 1,	"expected channelCount >= 1")
+				_	<- Checked trueWin1 (channelCount <= 2,	"expected channelCount <= 2")
 				_	<-
-						exec(
+						MediaUtil runCommand (
 							"mpg123", 
 							"-w",	output.getPath,	
 							// -8bit
@@ -58,6 +53,6 @@ object ExternalMpg123 extends Decoder {
 			}
 			yield ()
 	
-	private val recognized:File=>Checked[Unit]	=
-			suffixIn(".mp3")
+	private val recognizeFile:File=>Checked[Unit]	=
+			MediaUtil requireFileSuffixIn (".mp3")
 }

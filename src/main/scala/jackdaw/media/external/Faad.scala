@@ -1,47 +1,42 @@
-package jackdaw.audio.decoder
+package jackdaw.media
 
-import java.io._
-
-import scutil.lang._
-import scutil.implicits._
-import scutil.log.Logging
+import java.io.File
 
 import jackdaw.audio.Metadata
 
-/** interface to an external faad command */
-object ExternalFaad extends Decoder {
+object Faad extends Inspector with Decoder {
 	def name	= "faad"
 	
 	def readMetadata(input:File):Checked[Metadata] =
 			for {
-				_		<- recognized(input)
-				_		<- commandAvailable("faad")
+				_		<- recognizeFile(input)
+				_		<- MediaUtil requireCommand "faad"
 				result	<-
-						exec(
+						MediaUtil runCommand (
 							"faad", 
 							"-i",	
 							input.getPath
 						)
 			}
 			yield {
-				val extract	= extractor(result.err)
+				val extract	= MediaUtil extractFrom result.err
 				Metadata(
 					title	= extract("""title: (.*)""".r), 
 					artist	= extract("""artist: (.*)""".r), 
-					album	= extract("""album: (.*)""".r), 
-					genre	= extract("""genre: (.*)""".r)
+					album	= extract("""album: (.*)""".r) 
+					// genre		= extract("""genre: (.*)""".r)
 					// albumArtist	= extract("""album_artist: (.*)""".r), 
 				)
 			}
 	
 	def convertToWav(input:File, output:File, frameRate:Int, channelCount:Int):Checked[Unit] =
 			for {
-				_	<- recognized(input)
-				_	<- commandAvailable("faad")
-				_	<- requirement(frameRate == 44100,	"expected frameRate 44100")
-				_	<- requirement(channelCount == 2,	"expected channelCount 2")
+				_	<- recognizeFile(input)
+				_	<- MediaUtil requireCommand "faad"
+				_	<- Checked trueWin1 (frameRate		== 44100,	"expected frameRate 44100")
+				_	<- Checked trueWin1 (channelCount	== 2,		"expected channelCount 2")
 				_	<-
-						exec(
+						MediaUtil runCommand (
 							"faad", 
 							"-o",	output.getPath,
 							"-b",	"1",			// 16 bit signed short
@@ -51,10 +46,10 @@ object ExternalFaad extends Decoder {
 							input.getPath
 						)
 				// NOTE faad rc is 0 regardless of whether it worked or not
-				_	<- requirement(output.exists, "output file not generated")
+				_	<- Checked trueWin1 (output.exists, "output file not generated")
 			}
 			yield ()
 	
-	private val recognized:File=>Checked[Unit]	=
-			suffixIn(".m4a", ".aac")
+	private val recognizeFile:File=>Checked[Unit]	=
+			MediaUtil requireFileSuffixIn (".m4a", ".aac")
 }

@@ -12,7 +12,6 @@ import scutil.math._
 
 import jackdaw.audio.BandCurve
 import jackdaw.util.LRU
-import jackdaw.util.Math._
 import jackdaw.gui.util.ImageUtil
 
 final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
@@ -199,7 +198,7 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 	}
 	
 	private def sumColor(low:Float, middle:Float, high:Float):Color	= {
-		val max	= max3(low, middle, high)
+		val max	= max3Float(low, middle, high)
 		new Color(
 			low		/ max, 
 			middle	/ max,
