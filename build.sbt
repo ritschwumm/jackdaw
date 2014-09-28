@@ -2,16 +2,16 @@ name			:= "jackdaw"
 
 organization	:= "de.djini"
 
-version			:= "1.4.0"
+version			:= "1.4.1"
 
 scalaVersion	:= "2.11.2"
 
 libraryDependencies	++= Seq(
-	"de.djini"					%%	"scutil-core"	% "0.51.0"	% "compile",
-	"de.djini"					%%	"scutil-swing"	% "0.51.0"	% "compile",
-	"de.djini"					%%	"scaudio"		% "0.36.0"	% "compile",
-	"de.djini"					%%	"scjson"		% "0.56.0"	% "compile",
-	"de.djini"					%%	"screact"		% "0.57.0"	% "compile",
+	"de.djini"					%%	"scutil-core"	% "0.51.1"	% "compile",
+	"de.djini"					%%	"scutil-swing"	% "0.51.1"	% "compile",
+	"de.djini"					%%	"scaudio"		% "0.36.1"	% "compile",
+	"de.djini"					%%	"scjson"		% "0.56.1"	% "compile",
+	"de.djini"					%%	"screact"		% "0.57.1"	% "compile",
 	"de.djini"					%%	"scgeom"		% "0.22.0"	% "compile",
 	"de.djini"					%%	"sc2d"			% "0.16.0"	% "compile",
 	"org.simplericity.macify"	%	"macify"		% "1.6"		% "compile",
