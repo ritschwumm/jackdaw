@@ -4,19 +4,19 @@ building needs sbt
     get it from https://github.com/sbt/sbt
     
 you need these libraries:
-	https://github.com/ritschwumm/xsbt-classpath
-	https://github.com/ritschwumm/xsbt-scriptstart
-	https://github.com/ritschwumm/xsbt-osxapp
-	https://github.com/ritschwumm/xsbt-capsule
-	https://github.com/ritschwumm/xsbt-zipper
-	https://github.com/ritschwumm/scutil
-	https://github.com/ritschwumm/scjson
-	https://github.com/ritschwumm/scaudio
-	https://github.com/ritschwumm/scgeom
-	https://github.com/ritschwumm/sc2d
-	https://github.com/ritschwumm/screact
-	
+    https://github.com/ritschwumm/xsbt-classpath
+    https://github.com/ritschwumm/xsbt-scriptstart
+    https://github.com/ritschwumm/xsbt-osxapp
+    https://github.com/ritschwumm/xsbt-capsule
+    https://github.com/ritschwumm/xsbt-zipper
+    https://github.com/ritschwumm/scutil
+    https://github.com/ritschwumm/scjson
+    https://github.com/ritschwumm/scaudio
+    https://github.com/ritschwumm/scgeom
+    https://github.com/ritschwumm/sc2d
+    https://github.com/ritschwumm/screact
+    
 now clone the repository and build
-	git clone git@github.com:ritschwumm/jackdaw.git
-	cd jackdaw
-	sbt bundle
+    git clone git@github.com:ritschwumm/jackdaw.git
+    cd jackdaw
+    sbt bundle
