@@ -2,6 +2,8 @@ package jackdaw.media
 
 import java.io.File
 
+import scutil.math.clampInt
+
 import jackdaw.audio.Metadata
 
 object Mpg123 extends Inspector with Decoder {
@@ -31,22 +33,20 @@ object Mpg123 extends Inspector with Decoder {
 				)
 			}
 	
-	def convertToWav(input:File, output:File, frameRate:Int, channelCount:Int):Checked[Unit] =
+	def convertToWav(input:File, output:File, preferredFrameRate:Int, preferredChannelCount:Int):Checked[Unit] =
 			for {
 				_	<- recognizeFile(input)
 				_	<- MediaUtil requireCommand "mpg123"
-				_	<- Checked trueWin1 (channelCount >= 1,	"expected channelCount >= 1")
-				_	<- Checked trueWin1 (channelCount <= 2,	"expected channelCount <= 2")
 				_	<-
 						MediaUtil runCommand (
 							"mpg123", 
 							"-w",	output.getPath,	
 							// -8bit
-							"-r",	frameRate.toString,
-							(channelCount match {
+							"-r",	preferredFrameRate.toString,
+							(clampInt(preferredChannelCount, 1, 2) match {
 								case 1	=> "--mono"
 								case 2	=> "--stereo"
-								case _	=> sys error ("unexpected channelCount: " + channelCount)
+								case _	=> sys error "unexpected channelCount"
 							}),
 							input.getPath
 						)

@@ -116,7 +116,12 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 	phaseUI.jump				observe	(deck syncPhaseManually	(RhythmUnit.Measure, _))
 	phaseUI.mouseWheel.withFine	trigger	(deck movePhase			(RhythmUnit.Measure, _:Int, _:Boolean))
 
-	transportUI.eject trigger deck.ejectTrack
+	private val ejectTrackKey:Events[Unit]	=
+			Key(VK_LESS ,	KEY_LOCATION_STANDARD).asAction
+	private val ejectTrack:Events[Unit]	=
+			ejectTrackKey		orElse
+			transportUI.eject 
+	ejectTrack trigger deck.ejectTrack
 		
 	private val editAnnotationKey:Events[Unit]	=
 			Key(VK_E,		KEY_LOCATION_STANDARD).asAction

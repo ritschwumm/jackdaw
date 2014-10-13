@@ -2,7 +2,7 @@ name			:= "jackdaw"
 
 organization	:= "de.djini"
 
-version			:= "1.4.1"
+version			:= "1.5.0"
 
 scalaVersion	:= "2.11.2"
 
@@ -34,6 +34,8 @@ scalacOptions	++= Seq(
 	"-optimize"
 )
 
+enablePlugins(ScriptStartPlugin, OsxAppPlugin, CapsulePlugin)
+
 //------------------------------------------------------------------------------
 
 buildInfoSettings
@@ -45,8 +47,6 @@ buildInfoKeys		:= Seq[BuildInfoKey](name, version)
 buildInfoPackage	:= "jackdaw"
 
 //--------------------------------------------------------------------------------
-
-scriptstartSettings
 
 scriptstartConfigs	:= Seq(ScriptConfig(
 	scriptName	= "jackdaw",
@@ -86,14 +86,7 @@ scriptstartConfigs	:= Seq(ScriptConfig(
 	)
 ))
 
-// scriptstart::zipper
-inTask(scriptstart)(zipperSettings ++ Seq(
-	zipperFiles	:= selectSubpaths(scriptstart.value, -DirectoryFilter).toSeq
-))
-
 //------------------------------------------------------------------------------
-
-osxappSettings
 
 osxappBundleName	:= "jackdaw"
 
@@ -117,15 +110,7 @@ osxappSystemProperties	:= Map(
 	"swing.bufferPerWindow"					-> "false"
 )
 
-// osxapp::zipper
-inTask(osxapp)(zipperSettings ++ Seq(
-	zipperFiles		:= selectSubpaths(osxapp.value, -DirectoryFilter).toSeq,
-	zipperBundle	:= zipperBundle.value + ".app" 
-))
-
 //------------------------------------------------------------------------------
-
-capsuleSettings
 
 capsuleMainClass			:= Some("jackdaw.Boot")
 
@@ -145,12 +130,12 @@ capsuleSystemProperties		:= Map(
 
 capsuleMinJavaVersion		:= Some("1.7.0")
 
-capsulePrependExecHeader	:= true
-	
+capsuleMakeExecutable		:= true
+
 //------------------------------------------------------------------------------
 
 TaskKey[Seq[File]]("bundle")	:= Seq(
-	(zipper in scriptstart).value,
-	(zipper in osxapp).value,
+	scriptstartZip.value,
+	osxappZip.value,
 	capsule.value
 )

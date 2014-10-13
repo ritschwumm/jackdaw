@@ -7,16 +7,15 @@ import jackdaw.audio.Metadata
 object Opusdec extends Decoder {
 	def name	= "opusdec"
 	
-	def convertToWav(input:File, output:File, frameRate:Int, channelCount:Int):Checked[Unit] =
+	def convertToWav(input:File, output:File, preferredFrameRate:Int, preferredChannelCount:Int):Checked[Unit] =
 			for {
 				_	<- recognizeFile(input)
 				_	<- MediaUtil requireCommand "opusdec"
-				_	<- Checked trueWin1 (channelCount == 2,	"expected channelCount 2")
 				_	<-
 						MediaUtil runCommand (
 							"opusdec",
 							"--quiet",
-							"--rate",	frameRate.toString,
+							"--rate",	preferredFrameRate.toString,
 							input.getPath,
 							output.getPath
 						)

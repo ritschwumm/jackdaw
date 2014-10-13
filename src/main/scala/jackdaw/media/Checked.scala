@@ -10,6 +10,6 @@ object Checked {
 	def fail1[T](problem:String):Checked[T]	=
 			Fail(problem1(problem))
 		
-	def problem1(problem:String):ISeq[String]	=
-			Vector(problem)
+	def problem1(problem:String):Nes[String]	=
+			Nes single problem
 }

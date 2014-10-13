@@ -134,8 +134,19 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 		if (sample == this.sample)	return
 		this.sample	= sample
 		
-		inputL	= new SampleChannel(sample, 0)
-		inputR	= new SampleChannel(sample, 1)
+		sample.channelCount match {
+			case 0	=>
+				inputL	= EmptyChannel
+				inputR	= EmptyChannel
+			case 1	=>
+				val mono	= new SampleChannel(sample, 0)
+				inputL	= mono
+				inputR	= mono
+			case _	=>
+				inputL	= new SampleChannel(sample, 0)
+				inputR	= new SampleChannel(sample, 1)
+		}
+		
 		rate	= sample.frameRate.toDouble
 		
 		endFrame	= sample.frameCount + outputRate*Player.endDelay

@@ -221,7 +221,7 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]]
 		switchedToLoadedTrack orElse currentTrackGotLoaded
 	}
 		
-	// TODO do this earlier, can be done as soon as the cue has been provided! 
+	// TODO should be done as soon as the cue has been provided! 
 	private val gotoCueOnLoad:Events[PlayerAction.PositionAbsolute]	= {
 		val loadPoint:Signal[Double]	= cuePointsFlat map { _ lift 0 getOrElse 0.0 }
 		trackGotLoaded snapshotOnly loadPoint map PlayerAction.PositionAbsolute.apply

@@ -19,7 +19,7 @@ object Mp3agic extends Inspector with Logging {
 				mp3file	<-
 						Catch.exception in new Mp3File(input.getAbsolutePath) mapFail { e =>
 							ERROR("cannot create Mp3File", e)
-							ISeq("cannot create Mp3File")
+							Checked problem1 "cannot create Mp3File"
 						}
 						
 				v1		= mp3file.hasId3v1Tag guard mp3file.getId3v1Tag

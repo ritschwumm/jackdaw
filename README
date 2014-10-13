@@ -4,11 +4,11 @@ building needs sbt
     get it from https://github.com/sbt/sbt
     
 you need these libraries:
+    https://github.com/ritschwumm/xsbt-util
     https://github.com/ritschwumm/xsbt-classpath
     https://github.com/ritschwumm/xsbt-scriptstart
     https://github.com/ritschwumm/xsbt-osxapp
     https://github.com/ritschwumm/xsbt-capsule
-    https://github.com/ritschwumm/xsbt-zipper
     https://github.com/ritschwumm/scutil
     https://github.com/ritschwumm/scjson
     https://github.com/ritschwumm/scaudio

@@ -14,8 +14,8 @@ object Avprobe extends Inspector {
 				result	<-
 						MediaUtil runCommand (
 							"avprobe",	input.getPath
-							// this no longer works
 							/*
+							// this no longer works
 							"avconv",	"-y",		
 							"-i",		input.getPath,
 							"-vn",		"-an",

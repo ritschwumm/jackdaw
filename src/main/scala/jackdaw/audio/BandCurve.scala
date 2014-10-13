@@ -101,7 +101,7 @@ case class BandCurve(sampleRate:Double, rasterFrames:Int, chunkCount:Int, values
 	}
 	
 	val fragmentRate	= sampleRate / rasterFrames
-	// TODO curve: ugly
+	// NOTE this might be up to rasterFrames-1 more than the sample actually contains
 	val frameCount		= chunkCount * rasterFrames
 }
 	

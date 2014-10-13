@@ -39,11 +39,12 @@ object Config {
 	
 	// TODO rethink these
 	
-	// NOTE most be more than the number of decks
+	// NOTE must be greater than the number of decks
 	val curTrackCount	= 4
 	
-	// NOTE must be above minLruCount
 	val minCacheCount	= curTrackCount * 2
+	
+	require(minCacheCount > curTrackCount)
 	
 	val maxCacheSize	= 10 * 1024L * 1024L * 1024L	// 10 gig
 }

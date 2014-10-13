@@ -80,13 +80,13 @@ object Library extends Logging {
 		}
 	}
 	
-	case class Info(count:Int, space:Long) {
+	private case class Info(count:Int, space:Long) {
 		def human:String	=
 				(Human roundedBinary space) + "B for " + 
 				count + " " + (count == 1 cata ("tracks", "track"))
 	}
 	
-	def info(tracks:ISeq[TrackFiles]):Info	=
+	private def info(tracks:ISeq[TrackFiles]):Info	=
 			Info(
 				tracks.size, 
 				(tracks map spaceNeeded).sum

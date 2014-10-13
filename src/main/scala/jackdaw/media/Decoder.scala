@@ -18,12 +18,12 @@ object Decoder {
 				JOgg
 			)
 	
-	def convertToWav(input:File, output:File, frameRate:Int, channelCount:Int):Boolean	=
-			MediaUtil
+	def convertToWav(input:File, output:File, preferredFrameRate:Int, preferredChannelCount:Int):Boolean	=
+		MediaUtil
 			.worker[Decoder,Unit](
 				all,
 				_.name,
-				_ convertToWav (input, output, frameRate, channelCount)
+				_ convertToWav (input, output, preferredFrameRate, preferredChannelCount)
 			)
 			.isDefined
 }
@@ -32,5 +32,5 @@ trait Decoder {
 	def name:String
 	
 	/** decode file and write into a wav file */
-	def convertToWav(input:File, output:File, frameRate:Int, channelCount:Int):Checked[Unit]
+	def convertToWav(input:File, output:File, preferredFrameRate:Int, preferredChannelCount:Int):Checked[Unit]
 }

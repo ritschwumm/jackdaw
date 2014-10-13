@@ -5,12 +5,10 @@ import java.io.File
 object Flac extends Decoder {
 	def name	= "flac"
 	
-	def convertToWav(input:File, output:File, frameRate:Int, channelCount:Int):Checked[Unit] =
+	def convertToWav(input:File, output:File, preferredFrameRate:Int, preferredChannelCount:Int):Checked[Unit] =
 			for {
 				_	<- recognizeFile(input)
 				_	<- MediaUtil requireCommand "flac"
-				_	<- Checked trueWin1 (frameRate		== 44100,	"expected frameRate 44100")
-				_	<- Checked trueWin1 (channelCount	== 2,		"expected channelCount 2")
 				_	<-
 						MediaUtil runCommand (
 							"flac",

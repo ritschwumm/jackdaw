@@ -12,26 +12,36 @@ import scutil.log._
 
 object MediaUtil extends Logging {
 	/** try one S after another to get a Win */
-	def worker[S,T](all:ISeq[S], name:S=>String, work:S=>Tried[ISeq[String],T]):Option[T] = {
-		type Outcome	= Tried[ISeq[Problem],T]
-		type Problem	= ISeq[String]
+	def worker[S,T](all:ISeq[S], name:S=>String, work:S=>Checked[T]):Option[T] = {
+		type Outcome	= Tried[ISeq[Group],T]
 		
-		def problem(item:S, messages:ISeq[String]):ISeq[String]	=
-				name(item) +: messages
+		case class Group(worker:String, messages:Nes[String])
 		
-		val start:Outcome	= Fail(ISeq.empty[Problem])
+		val start:Outcome	= Fail(ISeq.empty[Group])
 		val outcome:Outcome	=
 				(all foldLeft start) { (outcome:Outcome, item) =>
 					outcome match {
-						case Fail(p)	=> work(item) match {
-							case Fail(messages)	=> Fail(problem(item, messages) +: p)
-							case Win(t)			=> Win(t)
-						}
-						case Win(t)		=> Win(t)
+						case Win(t)	=>
+							// already won, no need to keep on
+							Win(t)
+						case Fail(p)	=>
+							// try next worker
+							work(item) match {
+								case Fail(messages)	=>
+									// record the failure
+									Fail(p :+ Group(name(item), messages))
+								case Win(t)	=>
+									Win(t)
+							}
 					}
 				}
 				
-		outcome.swap.toVector.flatten foreach { it => WARN(it:_*) }
+		// TODO scutil 0.52.0 flattenMany
+		val errorGroups:ISeq[Group]	= outcome.swap.toVector.flatten
+		errorGroups foreach { it =>
+			it.worker +: (it.messages map { "\t" + _ }) foreach { WARN(_) }
+		}
+		
 		outcome.toOption
 	}
 	
@@ -57,7 +67,10 @@ object MediaUtil extends Logging {
 			
 	def runCommand(command:String*)(implicit sl:SourceLocation):Checked[ExternalResult]	= {
 		DEBUG(command:_*)
-		External exec command.toVector result false triedBy { _.rc == 0 } mapFail { _.err }
+		External exec command.toVector result false triedBy { _.rc == 0 } mapFail { res =>
+			val first	= "command failed: " + (command mkString " ")
+			Nes(first, res.err)
+		}
 	}
 	
 	//------------------------------------------------------------------------------

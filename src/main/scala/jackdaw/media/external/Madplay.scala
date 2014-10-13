@@ -2,6 +2,8 @@ package jackdaw.media
 
 import java.io.File
 
+import scutil.math.clampInt
+
 import jackdaw.audio.Metadata
 
 object Madplay extends Inspector with Decoder {
@@ -30,22 +32,20 @@ object Madplay extends Inspector with Decoder {
 				)
 			}
 	
-	def convertToWav(input:File, output:File, frameRate:Int, channelCount:Int):Checked[Unit] =
+	def convertToWav(input:File, output:File, preferredFrameRate:Int, preferredChannelCount:Int):Checked[Unit] =
 			for {
 				_	<- recognizeFile(input)
 				_	<- MediaUtil requireCommand "madplay"
-				_	<- Checked trueWin1 (channelCount >= 1,	"expected channelCount >= 1")
-				_	<- Checked trueWin1 (channelCount <= 2,	"expected channelCount <= 2")
 				res	<-
 						MediaUtil runCommand (
 							"madplay", 
 							"--output",			"wav:" + output.getPath,
 							"--bit-depth",		"16",
-							"--sample-rate",	frameRate.toString,
-							(channelCount match {
+							"--sample-rate",	preferredFrameRate.toString,
+							(clampInt(preferredChannelCount, 1, 2) match {
 								case 1	=> "--mono"
 								case 2	=> "--stereo"
-								case _	=> sys error ("unexpected channelCount: " + channelCount)
+								case _	=> sys error "unexpected channelCount"
 							}),
 							// "--start",		"0/44100",
 							// "--time",		"44100/44100",

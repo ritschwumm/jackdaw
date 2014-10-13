@@ -42,9 +42,9 @@ object Track extends Logging {
 		lru.dispose()
 	}
 			
-	// NOTE hardcoded
-	private val decodeFrameRate		= 44100
-	private val decodeChannelCount	= 2
+	// TODO move these
+	private val preferredFrameRate		= Config.outputConfig.rate
+	private val preferredChannelCount	= 2
 }
 
 final class Track(file:File) extends Observing with Logging {
@@ -136,8 +136,8 @@ final class Track(file:File) extends Observing with Logging {
 									Decoder convertToWav (
 										file,
 										files.wav,
-										Track.decodeFrameRate,
-										Track.decodeChannelCount
+										Track.preferredFrameRate,
+										Track.preferredChannelCount
 									)
 							success guard files.wav
 						}
@@ -155,12 +155,6 @@ final class Track(file:File) extends Observing with Logging {
 								ERROR("cannot get sample", e)
 							}
 							.toOption
-							.filter {
-								_.frameRate		== Track.decodeFrameRate	falseEffect { ERROR("frame rate mismatch") }
-							}
-							.filter {
-								_.channelCount	== Track.decodeChannelCount	falseEffect { ERROR("channel count mismatch") }
-							}
 						}
 				edtWait { sampleSet set sampleVal }
 				

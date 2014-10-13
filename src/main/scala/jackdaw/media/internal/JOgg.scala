@@ -6,6 +6,8 @@ import java.io.RandomAccessFile
 import de.jarnbjo.ogg._
 import de.jarnbjo.vorbis._
 
+import scala.annotation.tailrec
+
 import scutil.lang._
 import scutil.implicits._
 import scutil.io.Charsets._
@@ -19,12 +21,14 @@ object JOgg extends Inspector with Decoder with Logging {
 	
 	private implicit def PhysicalOggStreamIsDisposable(physical:PhysicalOggStream):Disposable	=
 			disposable { physical.close() }
+		
+	private type BufferWriter	= (Array[Byte], Int) => Unit
 	
 	def readMetadata(input:File):Checked[Metadata] =
 			for {
 				_	<- recognizeFile(input)
 				out	<-
-						forVorbis(input) { vorbis =>
+						withVorbisStream(input) { vorbis =>
 							DEBUG(s"reading metadata with ${name}")
 							val header		= vorbis.getCommentHeader
 							Win(Metadata(
@@ -38,37 +42,17 @@ object JOgg extends Inspector with Decoder with Logging {
 			yield out
 			
 	// BETTER use scalaz, this is a mess. should be using a Resource monad transformer
-	def convertToWav(input:File, output:File, frameRate:Int, channelCount:Int):Checked[Unit] =
+	def convertToWav(input:File, output:File, preferredFrameRate:Int, preferredChannelCount:Int):Checked[Unit] =
 			for {
 				_	<- recognizeFile(input)
 				_	<-                
-					forVorbis(input) { vorbis =>
+					withVorbisStream(input) { vorbis =>
 						DEBUG(s"decoding with ${name}")
 						val header	= vorbis.getIdentificationHeader
 						for {
-							_		<- header.getSampleRate	== frameRate 	trueWin ISeq("sample rate mismatch")
-							_		<- header.getChannels	== channelCount	trueWin ISeq("channel count mismatch")
 							_		<-
-									MediaUtil checkedExceptions {
-										writeWav(output, frameRate, channelCount.toShort) { append:((Array[Byte],Int)=>Unit) => 
-											val buffer	= new Array[Byte](16384)
-											def copyLoop() {
-												while (true) {
-													try {
-														val len = vorbis readPcm (buffer, 0, buffer.length)
-														// BETTER use AudioFormat_S2LE.putShort?
-														// convert to little endian
-														swapEndianShort(buffer, len)
-														append(buffer, len)
-													}
-													catch { case e:EndOfOggStreamException =>
-														return
-													}
-												}
-											}
-											copyLoop()
-										}
-										Win(())
+									writeWavChecked(output, header.getSampleRate, header.getChannels.toShort) { append:BufferWriter => 
+										copyPcm(vorbis, append)
 									} failEffect {
 										_ => output.delete() 
 									}
@@ -78,27 +62,60 @@ object JOgg extends Inspector with Decoder with Logging {
 			}
 			yield ()
 			
-	private def forVorbis[T](file:File)(func:VorbisStream=>Checked[T]):Checked[T]	=
-			for {
-				out	<-
-					MediaUtil checkedExceptions {
-						new FileStream(new RandomAccessFile(file, "r")) use { physical =>
-							for {
-								logical	<-
-										physical.getLogicalStreams.toIterable.singleOption
-										.map	{ _.asInstanceOf[LogicalOggStream] }
-										.toWin	(ISeq("expected exactly one logical stream"))
-								vorbis	= new VorbisStream(logical)
-								out		<- func(vorbis)
-							}
-							yield out
-						}
-					}
+	private def copyPcm(vorbisStream:VorbisStream, append:(Array[Byte], Int)=>Unit) {
+		val buffer	= new Array[Byte](16384)
+		while (true) {
+			try {
+				val len = vorbisStream readPcm (buffer, 0, buffer.length)
+				// BETTER use AudioFormat_S2LE.putShort?
+				// convert to little endian
+				swapEndianShort(buffer, len)
+				append(buffer, len)
 			}
-			yield out
+			catch { case e:EndOfOggStreamException =>
+				return
+			}
+		}
+	}
+	
+	private def swapEndianShort(it:Array[Byte], byteCount:Int) {
+		var i	= 0
+		while (i < byteCount) {
+			val h	= it(i)
+			val l	= it(i+1)
+			it(i)	= l
+			it(i+1)	= h
+			i		+= 2
+		}
+	}
+			
+	private def withVorbisStream[T](file:File)(func:VorbisStream=>Checked[T]):Checked[T]	=
+			withLogicalOggStream(file) { logical =>
+				func(new VorbisStream(logical))
+			}
+			
+	private def withLogicalOggStream[T](file:File)(func:LogicalOggStream=>Checked[T]):Checked[T]	=
+			MediaUtil checkedExceptions {
+				new FileStream(new RandomAccessFile(file, "r")) use { physical =>
+					for {
+						logical	<-
+								physical.getLogicalStreams.toIterable.singleOption
+								.map	{ _.asInstanceOf[LogicalOggStream] }
+								.toWin	(Checked problem1 "expected exactly one logical stream")
+						out		<- func(logical)
+					}
+					yield out
+				}
+			}
+			
+	private def writeWavChecked(output:File, frameRate:Int, channelCount:Short)(generator:Effect[BufferWriter])	=
+			MediaUtil checkedExceptions {
+				writeWav(output, frameRate, channelCount.toShort)(generator)
+				Win(())
+			}
 		
 	// generator must provide interleaved little endian signed shorts
-	private def writeWav(output:File, frameRate:Int, channelCount:Short)(generator:Effect[(Array[Byte],Int)=>Unit]) {
+	private def writeWav(output:File, frameRate:Int, channelCount:Short)(generator:Effect[BufferWriter]) {
 		new RandomAccessFile(output, "rw") use { outFile =>
 			val UIntMaxValue	= 1L<<32-1
 			
@@ -154,17 +171,6 @@ object JOgg extends Inspector with Decoder with Logging {
 		}				
 	}
 	
-	private def swapEndianShort(it:Array[Byte], byteCount:Int) {
-		var i	= 0
-		while (i < byteCount) {
-			val h	= it(i)
-			val l	= it(i+1)
-			it(i)	= l
-			it(i+1)	= h
-			i		+= 2
-		}
-	}
-			
 	private val recognizeFile:File=>Checked[Unit]	=
 			MediaUtil requireFileSuffixIn (".ogg")
 }
