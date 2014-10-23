@@ -12,5 +12,26 @@ final class TransferQueue[T] {
 	def send(item:T) { queue offer item }
 	def receive:Option[T]	= Option(queue.poll)
 	
+	@tailrec
+	def receiveWith(effect:Effect[T]) {
+		val item	= queue.poll
+		if (item != null) {
+			effect(item)
+			receiveWith(effect)
+		}
+	}
+	
+	/*
+	def receiveAll:ISeq[T]	= {
+		var out	= Vector.empty[T]
+		while  (true) {
+			val item	= queue.poll
+			if (item == null)	return out
+			out	:+= item
+		}
+		nothing
+	}
+	*/
+	
 	def size	= queue.size
 }

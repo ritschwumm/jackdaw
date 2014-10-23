@@ -28,7 +28,9 @@ object Player {
 	private val filterOff	= 0
 	private val filterHP	= +1
 	
-	// TODO check
+	// ignore small aberrations
+	private val	positionEpsilon	= 1.0E-4
+	
 	private val filterEpsilon	= 1.0E-5
 }
 
@@ -65,7 +67,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 	
 	private val peakDetector	= new PeakDetector
 	
-	private var mode:PlayerMode		= PlayerMode.Playing
+	private var mode:PlayerMode		= Playing
 	private var scratchBase			= 0.0
 	private val springSpeedLimit	= outputRate*100
 	private var endFrame			= Player.noEnd
@@ -85,34 +87,41 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 				afterEnd		= afterEnd,
 				position		= x,
 				pitch			= pitch,
-				measureMatch	= running flatGuard phaseMatch(RhythmUnit.Measure),
+				measureMatch	= running flatGuard phaseMatch(Measure),
 				beatRate		= beatRate,
 				needSync		= needSync,
 				hasSync			= hasSync,
 				// NOTE this resets the peak detector
 				masterPeak		= peakDetector.decay
 			)
-	
-	private[player] def react(actions:ISeq[PlayerAction]) {
-		actions foreach {
-			case PlayerAction.RunningOn								=> runningOn()
-			case PlayerAction.RunningOff							=> runningOff()
-			case PlayerAction.PitchAbsolute(pitch)					=> pitchAbsolute(pitch)
-			case PlayerAction.PhaseAbsolute(rhythmUnit, offset)		=> syncPhaseTo(rhythmUnit, offset)
-			case PlayerAction.PhaseRelative(rhythmUnit, offset)		=> movePhaseBy(rhythmUnit, offset)
-			case PlayerAction.PositionAbsolute(frame)				=> positionAbsolute(frame)
-			case PlayerAction.PositionJump(frame, rhythmUnit)		=> positionJump(frame, rhythmUnit)
-			case PlayerAction.PositionSeek(steps, rhythmUnit)		=> positionSeek(steps, rhythmUnit)
-			case PlayerAction.DragBegin								=> dragBegin()
-			case PlayerAction.DragEnd								=> dragEnd()
-			case PlayerAction.DragAbsolute(v)						=> dragAbsolute(v)
-			case PlayerAction.ScratchBegin							=> scratchBegin()
-			case PlayerAction.ScratchEnd							=> scratchEnd()
-			case PlayerAction.ScratchRelative(frames)				=> scratchRelative(frames)
-			case PlayerAction.SetNeedSync(needSync)					=> setNeedSync(needSync)
-			case c@PlayerAction.ChangeControl(_,_,_,_,_,_,_,_,_)	=> changeControl(c)
-		}
-	}
+			
+	private[player] def react(actions:ISeq[PlayerAction]):Unit	=
+			actions foreach {
+				case x:PlayerAction.NeedsFading if isFading		=> 
+					fadeLater	= Some(x)
+				case x	=>
+					reactOne(x)
+			}
+			
+	private def reactOne(action:PlayerAction):Unit	=
+			action match {
+				case PlayerAction.RunningOn								=> runningOn()
+				case PlayerAction.RunningOff							=> runningOff()
+				case PlayerAction.PitchAbsolute(pitch)					=> pitchAbsolute(pitch)
+				case x@PlayerAction.PhaseAbsolute(rhythmUnit, offset)	=> syncPhaseTo(rhythmUnit, offset)
+				case x@PlayerAction.PhaseRelative(rhythmUnit, offset)	=> movePhaseBy(rhythmUnit, offset)
+				case x@PlayerAction.PositionAbsolute(frame)				=> positionAbsolute(frame)
+				case x@PlayerAction.PositionJump(frame, rhythmUnit)		=> positionJump(frame, rhythmUnit)
+				case x@PlayerAction.PositionSeek(steps, rhythmUnit)		=> positionSeek(steps, rhythmUnit)
+				case PlayerAction.DragBegin								=> dragBegin()
+				case PlayerAction.DragEnd								=> dragEnd()
+				case PlayerAction.DragAbsolute(v)						=> dragAbsolute(v)
+				case PlayerAction.ScratchBegin							=> scratchBegin()
+				case PlayerAction.ScratchEnd							=> scratchEnd()
+				case PlayerAction.ScratchRelative(frames)				=> scratchRelative(frames)
+				case PlayerAction.SetNeedSync(needSync)					=> setNeedSync(needSync)
+				case c@PlayerAction.ChangeControl(_,_,_,_,_,_,_,_,_)	=> changeControl(c)
+			}
 	
 	//------------------------------------------------------------------------------
 	//## common control
@@ -245,8 +254,8 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 		updateV()
 		
 		// autosync on start
-		if (needSync && canSync && running && mode == PlayerMode.Playing) {
-			syncPhaseTo(RhythmUnit.Measure, 0)
+		if (needSync && canSync && running && mode == Playing) {
+			syncPhaseTo(Measure, 0)
 		}
 		
 		stopFade()
@@ -274,22 +283,19 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 	
 	/** jump for a given number of rhythm while staying in sync */
 	private def positionSeek(steps:Double, rhythmUnit:RhythmUnit) {
-		// ignore small aberrations
-		val	epsilon	= 1.0/10000
-		
 		// TODO stupid fake
 		def fakeRhythm:Rhythm	= Rhythm simple (0, sample.frameRate)
-				
-		val	raster	= rhythm getOrElse fakeRhythm  raster rhythmUnit
-		startFade(
+		val	raster:Raster		= rhythm getOrElse fakeRhythm raster rhythmUnit
+		val position:Double		=
 				if (running) {
 					 x + steps * raster.size
 				}
 				else {
-					val	offset 	= (0.5 - epsilon) * signum(steps)
+					val	offset 	= (0.5 - Player.positionEpsilon) * signum(steps)
 					val	raw		= x + (steps - offset) * raster.size
 					raster round raw
-				})
+				}
+		startFade(position)
 	}
 					
 	//------------------------------------------------------------------------------
@@ -308,7 +314,8 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 	
 	// motor -> scratch
 	private def scratchBegin() {
-		mode		= PlayerMode.Scratching
+		fadeLater	= None
+		mode		= Scratching
 		scratchBase	= x
 		o			= x
 		a			= 0
@@ -316,13 +323,13 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 	}
 	
 	private def scratchRelative(frames:Double) {
-		if (mode != PlayerMode.Scratching)	throw new IllegalArgumentException("not in scratch mode??")
+		if (mode != Scratching)	throw new IllegalArgumentException("not in scratch mode??")
 		o	= scratchBase - frames
 	}
 	
 	// scratch -> motor
 	private def scratchEnd() {
-		mode	= PlayerMode.Playing
+		mode	= Playing
 		updateV()
 	}
 	
@@ -331,17 +338,17 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 	
 	// motor -> scratch
 	private def dragBegin() {
-		mode	= PlayerMode.Dragging
+		mode	= Dragging
 	}
 	
 	private def dragAbsolute(speed:Double) {
-		if (mode != PlayerMode.Dragging)	throw new IllegalArgumentException("not in drag mode??")
+		if (mode != Dragging)	throw new IllegalArgumentException("not in drag mode??")
 		v	= speed * rate
 	}
 	
 	// scratch -> motor
 	private def dragEnd() {
-		mode	= PlayerMode.Playing
+		mode	= Playing
 		updateV()
 	}
 	
@@ -350,10 +357,20 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 	
 	// depends on running, mode, pitch, rate
 	private def updateV() {
-		if (mode != PlayerMode.Scratching) {
+		if (mode != Scratching) {
 			v	= if (running) pitch * rate else 0
 		}
 	}
+	
+	private val fadeStep	= 1.0 / (Player.fadeTime * outputRate)
+	private val fadeMin		= 0.0
+	private val fadeMax		= 1.0
+	private var fade		= fadeMax
+	
+	private var fadeLater:Option[PlayerAction.NeedsFading]	= None
+	
+	@inline
+	private def isFading	= fade < fadeMax
 	
 	private def startFade(newX:Double) {
 		xf		= x
@@ -361,8 +378,25 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 		fade	= fadeMin
 	}
 	
+	@inline
 	private def stopFade() {
-		fade	= fadeMax
+		fade		= fadeMax
+		fadeLater	= None
+	}
+	
+	@inline
+	private def doFade() {
+		fade	+= fadeStep
+		if (!isFading) {
+			if (fadeLater.isDefined) {
+				fade			= fadeMax
+				reactOne(fadeLater.get)
+				fadeLater	= None
+			}
+			else {
+				stopFade()
+			}
+		}
 	}
 	
 	// spring
@@ -378,12 +412,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 	var	a	= 0.0	// acceleration, non-zero when scratching
 	
 	private def afterEnd	= endFrame != Player.noEnd && x > endFrame
-	private def autoStop	= afterEnd && running && mode == PlayerMode.Playing
-	
-	private val fadeStep	= 1.0 / (Player.fadeTime * outputRate)
-	private val fadeMin		= 0.0
-	private val fadeMax		= 1.0
-	private var fade		= fadeMax
+	private def autoStop	= afterEnd && running && mode == Playing
 	
 	private var filterModeOld	= Player.filterOff
 		
@@ -401,15 +430,13 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 		// optionally fade out pre-jump head
 		var audioL	= 0d
 		var audioR	= 0d
-		if (fade != fadeMax) {
+		// stopFade sets fade to fadeMax
+		if (isFading) {
 			val fadeoutL	= interpolation interpolate (inputL, xf, headSpeed)
 			val fadeoutR	= interpolation interpolate (inputR, xf, headSpeed)
 			audioL	= fadeinL * fade + fadeoutL * (1-fade)
 			audioR	= fadeinR * fade + fadeoutR * (1-fade)
-			fade	+= fadeStep
-			if (fade >= fadeMax) {
-				stopFade()
-			}
+			doFade()
 		}
 		else {
 			audioL	= fadeinL
@@ -474,7 +501,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 			}
 		}
 		
-		if (mode == PlayerMode.Scratching) {
+		if (mode == Scratching) {
 			val	c	= df*2*sqrt(k*m)
 			val d	= x-o	// -l
 			a	= (-k*d - c*v)/m
@@ -495,7 +522,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 		phone.step()
 	}
 	
-	// (0+filterLow)..(nyquist-gilterHigh), predivided by outputrate
+	// (0+filterLow)..(nyquist-filterHigh), predivided by outputRate
 	private val filterLow	= log2(Config.filterLow / outputRate)
 	private val filterHigh	= log2(1.0 / 2.0 - Config.filterHigh / outputRate)
 	private val filterSize	= filterHigh - filterLow

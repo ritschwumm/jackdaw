@@ -19,21 +19,21 @@ final class ChannelUI(strip:Strip, tone:Option[Tone], peak:Signal[Float], phoneE
 	//------------------------------------------------------------------------------
 	//## components
 	
-	private val topUI	= 
+	private val delayedToneUI	= 
 			new DelayUI(
 					tone cata (
 						ToneUI.spacer,
 						tone => new ToneUI(tone, focusInput)
 					))
 	
-	private val delayUI	= 
+	private val delayedStripUI	= 
 			new DelayUI(new StripUI(strip, peak, phoneEnabled, focusInput))
 	
 	private val z		= (Style.linear.knob.size / 2).toInt
 	private val	panel	= 
 			GridBagUI(
-				topUI		pos(0,0) size(1,1) weight(1,0) fill NONE		anchor CENTER	insetsTLBR(0,0,6,0),
-				delayUI		pos(0,1) size(1,1) weight(1,1) fill VERTICAL	anchor EAST		insetsTLBR(6,0,0,0)
+				delayedToneUI	pos(0,0) size(1,1) weight(1,0) fill NONE		anchor CENTER	insetsTLBR(0,0,6,0),
+				delayedStripUI	pos(0,1) size(1,1) weight(1,1) fill VERTICAL	anchor EAST		insetsTLBR(6,0,0,0)
 			)
 	val component:JComponent	= panel.component
 	
@@ -48,7 +48,6 @@ final class ChannelUI(strip:Strip, tone:Option[Tone], peak:Signal[Float], phoneE
 				on			= Style.channel.border.inFocus
 			)
 
-	// TODO ugly
-	topUI.init()
-	delayUI.init()
+	delayedToneUI.init()
+	delayedStripUI.init()
 }

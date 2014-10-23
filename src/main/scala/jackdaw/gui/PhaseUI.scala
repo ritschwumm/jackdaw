@@ -18,6 +18,9 @@ import jackdaw.gui.util._
 
 object PhaseUI {
 	private val subDivide	= Rhythm.defaultBeatsPerMeasure
+	
+	// TODO hardcoded insets
+	private val lineInsets	= SgSpanInsets(2, 3)
 }
 
 /** values are linear [-.5..+.5] */
@@ -58,8 +61,7 @@ final class PhaseUI(value:Signal[Option[Double]], rhythm:Signal[Option[Rhythm]])
 				val rhythmCur		= rhythm.current
 				val guiNeutral		= value2guiCur(0.0)
 				
-				// TODO hardcoded insets
-				val lineSpan		= trackBoundsCur.y inset SgSpanInsets(2, 3)
+				val lineSpan		= trackBoundsCur.y inset PhaseUI.lineInsets
 				
 				val bar	= 
 						for {

@@ -19,6 +19,8 @@ final class JSONPersister[T:Format] extends Persister[T] with Logging {
 	}
 		
 	def save(file:File)(value:T) {
+		file.parentOption.foreach { _.mkdirs() }
+		
 		value					|> 
 		JSONIO.writeAST[T]		|>
 		JSONCodec.encodePretty	|> 

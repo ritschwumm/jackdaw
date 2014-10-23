@@ -57,15 +57,15 @@ final class Model extends Observing {
 	//## incoming
 	
 	private val changeSpeed	= signal {
-		Vector(EngineAction.SetBeatRate(speed.beatRate.current))
+		EngineAction.SetBeatRate(speed.beatRate.current)
 	}
 	changeSpeed observeNow engine.react
 	
 	private val changeControl	= signal {
-		Vector(EngineAction.ChangeControl(
+		EngineAction.ChangeControl(
 			speaker	= mix.master.speakerGain.current,
 			phone	= mix.master.phoneGain.current
-		))
+		)
 	}
 	changeControl observeNow engine.react
 	

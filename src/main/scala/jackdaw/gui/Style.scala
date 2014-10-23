@@ -10,6 +10,7 @@ import javax.imageio.ImageIO
 
 import scutil.implicits._
 import scutil.color._
+import scutil.geom._
 import scutil.gui.implicits._
 import scutil.gui.Colors
 
@@ -284,6 +285,8 @@ object Style {
 			object number {
 				val stroke	= SIMPLE_STROKE
 				val color	= STRONG_BACKGROUND
+				val size	= IntPoint(rectangle.width-1, rectangle.height-2)
+				val end		= size - IntPoint.one
 			}
 		}
 	}

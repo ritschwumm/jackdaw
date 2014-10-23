@@ -9,7 +9,6 @@ import scutil.geom._
 import scutil.gui.implicits._
 
 object ImageUtil {
-	// TODO graco ugly
 	def forComponent(component:Component):ImageUtil	=
 			new ImageUtil(
 				component.getGraphicsConfiguration.guardNotNull getOrElse

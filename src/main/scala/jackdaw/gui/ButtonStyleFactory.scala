@@ -115,7 +115,7 @@ object ButtonStyleFactory {
 		val shape	= poly.toShape
 		def factory(shapePaint:Paint, shapeStroke:Stroke):ISeq[Figure]	= 
 				Vector(
-					 FillShape(shape)					withPaint shapePaint,
+					FillShape(shape)					withPaint shapePaint,
 					StrokeShape(SshapeStroke, shape)	withPaint shapePaint
 				)
 		buttonStyle(factory)

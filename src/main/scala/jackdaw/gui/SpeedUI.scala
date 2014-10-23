@@ -92,15 +92,14 @@ final class SpeedUI(speed:Speed, keyboardEnabled:Signal[Boolean]) extends UI wit
 	
 	// actions
 	
-	private val pitchKey:Events[Boolean]	= 
-			Key(VK_HOME,	KEY_LOCATION_STANDARD).asAction	upDown
-			Key(VK_END,		KEY_LOCATION_STANDARD).asAction
-	private val pitchButton:Events[Boolean]	=
-			upButton.actions	upDown
-			downButton.actions
+	private val pitchKey:Signal[Option[Boolean]]	= 
+			Key(VK_HOME,	KEY_LOCATION_STANDARD).asModifier	upDown
+			Key(VK_END,		KEY_LOCATION_STANDARD).asModifier
+	private val pitchButton:Signal[Option[Boolean]]	=
+			upButton.pressed	upDown
+			downButton.pressed
 	private val pitch:Events[Int]	=
-			pitchKey.steps		orElse
-			pitchButton.steps	orElse
+			(pitchKey	merge pitchButton).repeated.steps	orElse
 			speedEditor.wheel
 	pitch.withFine	trigger speed.moveSteps
 	

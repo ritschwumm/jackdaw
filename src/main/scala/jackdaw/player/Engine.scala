@@ -96,14 +96,12 @@ final class Engine extends Logging {
 		old
 	}
 	
-	def react(actions:ISeq[EngineAction]) {
-		incoming send actions
+	def react(action:EngineAction) {
+		incoming send action
 	}
 	
-	// TODO lock ugly
-	
 	def reactPlayer(player:Int)(actions:ISeq[PlayerAction]) {
-		react(Vector(EngineAction.ControlPlayer(player, actions)))
+		react(EngineAction.ControlPlayer(player, actions))
 	}
 	
 	//------------------------------------------------------------------------------
@@ -111,21 +109,17 @@ final class Engine extends Logging {
 	
 	private var frame:Long	= 0
 	
-	private val incoming	= new TransferQueue[ISeq[EngineAction]]
+	private val incoming	= new TransferQueue[EngineAction]
 	private val outgoing	= new TransferQueue[EngineFeedback]
 	
 	private def receiveControl() {
-		incoming.receive foreach { actions =>
-			actions foreach {
-				case EngineAction.SetBeatRate(beatRate)		=> metronome setBeatRate beatRate
-				case c@EngineAction.ChangeControl(_, _)		=> changeControl(c)
-				case EngineAction.ControlPlayer(1,actions)	=> player1 react actions
-				case EngineAction.ControlPlayer(2,actions)	=> player2 react actions
-				case EngineAction.ControlPlayer(3,actions)	=> player3 react actions
-				case EngineAction.ControlPlayer(x,_)			=> ERROR("unexpected player", x)
-			}
-			// loop until the queue is empty
-			receiveControl()
+		incoming.receiveWith {
+			case EngineAction.SetBeatRate(beatRate)		=> metronome setBeatRate beatRate
+			case c@EngineAction.ChangeControl(_, _)		=> changeControl(c)
+			case EngineAction.ControlPlayer(1, actions)	=> player1 react actions
+			case EngineAction.ControlPlayer(2, actions)	=> player2 react actions
+			case EngineAction.ControlPlayer(3, actions)	=> player3 react actions
+			case EngineAction.ControlPlayer(x, _)		=> ERROR("unexpected player", x)
 		}
 	}
 	

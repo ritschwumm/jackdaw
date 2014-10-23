@@ -83,6 +83,8 @@ final class WaveUI(
 		def frame2pixel(frame:Double):Int	= round((frame - frameOrig) / zoomFactor + pixelOrig).toInt
 		def value2y(value:Double):Int		= (bottomY - value * sizeY).toInt
 		
+		// NOTE clipping fails for extreme values
+		// pixel > -16384 && pixel < 16384 guard {
 		def display(pixel:Int):Boolean	=
 				pixel >= (leftX		- WaveUI.maxFigureWidth) &&
 				pixel <= (rightX	+ WaveUI.maxFigureWidth)
@@ -94,11 +96,6 @@ final class WaveUI(
 	//------------------------------------------------------------------------------
 	
 	private val mouse	= new Mouse(component)
-	
-	val jump:Events[Double]	= 
-			(mouse.leftPress orElse mouse.leftDrag snapshotWith coords) {
-				_.getX |> _.pixel2frame 
-			}
 	
 	private val scratchRelative:Events[Double]	=
 			for {
@@ -122,90 +119,124 @@ final class WaveUI(
 	val seek:Events[Int]	=
 			mouse.wheelRotation
 	
+	// TODO ugly, boppel rects are already calculated elsewhere
+	private val cuepointViews:Signal[ISeq[(Shape,Double)]]	=
+			signal {
+				val coordsCur	= coords.current
+				for {
+					cuePoint	<- cuePoints.current
+					shape		<- rectangleBoppelShape(coordsCur, cuePoint)
+				}
+				yield (shape, cuePoint)
+			}
+			
+	val jumpCuepoint:Events[Double]	= 
+			((mouse.leftPress snapshotWith cuepointViews) { (ev, views) =>
+				views collapseFirst { 
+					case (shape, frame) => shape contains (ev.getX, ev.getY) guard frame
+				}
+			})
+			.filterOption
+			
+	val jumpOutside:Events[Double]	= 
+			(mouse.leftPress orElse mouse.leftDrag snapshotWith coords) {
+				_.getX |> _.pixel2frame 
+			}
+	
+	val jump:Events[Double]	=
+			jumpCuepoint orElse jumpOutside
+			
 	//------------------------------------------------------------------------------
+	//## decorations
 	
 	private val figures:Signal[ISeq[Figure]]	=
 			signal {
 				val coordsCur	= coords.current
 				
 				val playerPosFigures:ISeq[Figure]	= 
-						renderLine(coordsCur, playerPosition.current, true).toISeq
+						positionLineFigure(coordsCur, playerPosition.current).toISeq
 				
 				val rhythmLineFigures:ISeq[Figure]	= 
 						rhythmLines.current flatMap {
-							case RhythmLine.AnchorLine(frame)	=> 
-								renderLine(coordsCur, frame, false).toSeq	++
-								renderRectangleBoppel(coordsCur, frame).toSeq
-							case RhythmLine.MeasureLine(frame)	=> 
-								renderLine(coordsCur, frame, false).toSeq	++
-								renderTriangleBoppel(coordsCur, frame).toSeq
-							case RhythmLine.BeatLine(frame)	=>
-								renderLine(coordsCur, frame, false).toSeq
+							case AnchorLine(frame)	=> 
+								markerLineFigure(coordsCur, frame).toSeq	++
+								rectangleBoppelFigure(coordsCur, frame).toSeq
+							case MeasureLine(frame)	=> 
+								markerLineFigure(coordsCur, frame).toSeq	++
+								triangleBoppelFigure(coordsCur, frame).toSeq
+							case BeatLine(frame)	=>
+								markerLineFigure(coordsCur, frame).toSeq
 						}
 				
 				val cuePointFigures:ISeq[Figure]	=
-						cuePoints.current.zipWithIndex flatMap { case (frame,index) =>
-							renderLine(coordsCur, frame, false).toSeq		++
-							renderRectangleBoppel(coordsCur, frame).toSeq	++
-							renderNumberLabel(coordsCur, frame, index).toSeq
+						cuePoints.current.zipWithIndex flatMap { case (frame, index) =>
+							markerLineFigure(coordsCur, frame).toSeq		++
+							rectangleBoppelFigure(coordsCur, frame).toSeq	++
+							numberLabelFigure(coordsCur, frame, index).toSeq
 						}
 				
 				rhythmLineFigures ++ cuePointFigures ++ playerPosFigures
 			}
 	
-	private def renderLine(coords:Coords, frame:Double, position:Boolean ):Option[Figure]	= {
+	private def positionLineFigure(coords:Coords, frame:Double):Option[Figure]	=
+			lineShape(coords, frame) map { shape =>
+				StrokeShape(shape, Style.wave.position.color,	Style.wave.position.stroke)
+			}
+			
+	private def markerLineFigure(coords:Coords, frame:Double):Option[Figure]	=
+			lineShape(coords, frame) map { shape =>
+				StrokeShape(shape, Style.wave.marker.color,		Style.wave.marker.stroke) 
+			}
+			
+	private def rectangleBoppelFigure(coords:Coords, frame:Double):Option[Figure]	=
+			rectangleBoppelShape(coords, frame) map { shape =>
+				FillShape(shape, Style.wave.marker.color)
+			}
+	
+	private def triangleBoppelFigure(coords:Coords, frame:Double):Option[Figure]	=
+			triangleBoppelShape(coords, frame) map { shape =>
+				FillShape(shape, Style.wave.marker.color)
+			}
+	
+	private def lineShape(coords:Coords, frame:Double):Option[Shape]	= {
 		import coords._
 		val	pixel	= frame2pixel(frame)
-		// NOTE clipping fails for extreme values
-		//pixel > -16384 && pixel < 16384 guard {
 		coords display pixel guard {
-			val shape	= new Line2D.Double(pixel, topY, pixel, bottomY)
-			if (position)	StrokeShape(shape, Style.wave.position.color, Style.wave.position.stroke)
-			else			StrokeShape(shape, Style.wave.marker.color, Style.wave.marker.stroke) 
+			new Line2D.Double(pixel, topY, pixel, bottomY)
 		}
 	}
 	
-	private def renderTriangleBoppel(coords:Coords, frame:Double):Option[Figure]	= {
+	private def triangleBoppelShape(coords:Coords, frame:Double):Option[Shape]	= {
 		import coords._
 		val	pixel	= frame2pixel(frame)
-		// NOTE clipping fails for extreme values
-		// pixel > -16384 && pixel < 16384 guard {
 		coords display pixel guard {
 			val size	= Style.wave.marker.triangle.size
 			val left	= pixel - size/2
 			val top		= topY
 			val middle	= top + size/2
 			val bottom	= top + size
-			val shape	= new Polygon(
-						Array[Int](pixel, left, pixel),
-						Array[Int](top, middle, bottom),
-						3)
-			FillShape(shape, Style.wave.marker.color)
+			new Polygon(
+					Array[Int](pixel,	left,	pixel),
+					Array[Int](top,		middle,	bottom),
+					3)
 		}
 	}
 	
-	private def renderRectangleBoppel(coords:Coords, frame:Double):Option[Figure]	= {
+	private def rectangleBoppelShape(coords:Coords, frame:Double):Option[Shape]	= {
 		import coords._
 		val	pixel	= frame2pixel(frame)
-		// NOTE clipping fails for extreme values
-		// pixel > -16384 && pixel < 16384 guard {
 		coords display pixel guard {
-			val left	= pixel - Style.wave.marker.rectangle.width
-			val top		= topY
-			val bottom	= top + Style.wave.marker.rectangle.height
-			val shape	= new Polygon(
-					Array[Int](pixel, left, left, pixel),
-					Array[Int](top, top, bottom, bottom),
-					4)
-			FillShape(shape, Style.wave.marker.color)
+			new Rectangle(
+					pixel - Style.wave.marker.rectangle.width,
+					topY,
+					Style.wave.marker.rectangle.width,
+					Style.wave.marker.rectangle.height)
 		}
 	}
 	
-	private def renderNumberLabel(coords:Coords, frame:Double, number:Int):Option[Figure]	= {
+	private def numberLabelFigure(coords:Coords, frame:Double, number:Int):Option[Figure]	= {
 		import coords._
 		val	pixel	= frame2pixel(frame)
-		// NOTE clipping fails for extreme values
-		// pixel > -16384 && pixel < 16384 && number >= 0 && number < numberImages.size guard {
 		(coords display pixel) && number >= 0 && number < numberImages.size guard {
 			val image	= numberImages(number)
 			val size	= Style.wave.marker.rectangle.width
@@ -215,15 +246,18 @@ final class WaveUI(
 		}
 	}
 	
-	private lazy val numberImages:ISeq[BufferedImage]	= {
-		// TODO hardcoded insets
-		val size	= IntPoint(Style.wave.marker.rectangle.width-1, Style.wave.marker.rectangle.height-2)
-		val bounds	= SgRectangle topLeftZeroBy SgPoint(size.x-1, size.y-1)
+	private val numberImages:ISeq[BufferedImage]	= {
+		val size	= Style.wave.marker.number.size
+		val end		= Style.wave.marker.number.end
+		val bounds	= SgRectangle topLeftZeroBy SgPoint(end.x, end.y)
 		LEDShape shapes bounds map { shape	=>
 			val figure	= StrokeShape(shape, Style.wave.marker.number.color, Style.wave.marker.number.stroke)
 			imageUtil renderImage (size, true, figure.paint)
 		}
 	}
+		
+	//------------------------------------------------------------------------------
+	//## repaint
 	
 	// repaint everything on size, origin or source changes
 	private val fullRepaints	= 

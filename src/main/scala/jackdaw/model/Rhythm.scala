@@ -49,8 +49,8 @@ case class Rhythm(anchor:Double, measure:Double, beatsPerMeasure:Int) {
 	//------------------------------------------------------------------------------
 
 	def raster(rhythmUnit:RhythmUnit):Raster	= rhythmUnit match {
-		case RhythmUnit.Measure	=> measureRaster
-		case RhythmUnit.Beat	=> beatRaster
+		case Measure	=> measureRaster
+		case Beat		=> beatRaster
 	}
 	
 	lazy val measureRaster:Raster	= Raster(measure,	anchor)
@@ -93,9 +93,9 @@ case class Rhythm(anchor:Double, measure:Double, beatsPerMeasure:Int) {
 		var value	= firstValue
 		while (value < end) {
 			out		+= (
-					 if (index == 0)					RhythmLine.AnchorLine(value)
-				else if (index % beatsPerMeasure == 0)	RhythmLine.MeasureLine(value)
-				else									RhythmLine.BeatLine(value)
+					 if (index == 0)					AnchorLine(value)
+				else if (index % beatsPerMeasure == 0)	MeasureLine(value)
+				else									BeatLine(value)
 			)
 			value	+= beat
 			index	+= 1

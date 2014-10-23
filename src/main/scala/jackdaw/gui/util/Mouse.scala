@@ -11,20 +11,20 @@ import screact._
 import screact.swing._
 
 final class Mouse(component:Component) {
-	lazy val events	= 
+	val events	= 
 			(SwingWidget	events	(component:MouseCaster).connect)		orElse
 			(SwingWidget	events	(component:MouseMotionCaster).connect)	orElse
 			(SwingWidget	events	(component:MouseWheelCaster).connect)	
 			
-	lazy val leftPress		= events filter (mousePressed	&& button1)
-	lazy val leftRelease	= events filter (mouseReleased	&& button1)
-	lazy val leftDrag		= events filter (mouseDragged	&& buttonDown1)
+	val leftPress	= events filter (mousePressed	&& button1)
+	val leftRelease	= events filter (mouseReleased	&& button1)
+	val leftDrag	= events filter (mouseDragged	&& buttonDown1)
 	
-	lazy val rightPress		= events filter (mousePressed	&& button3)
+	val rightPress	= events filter (mousePressed	&& button3)
 	
-	lazy val wheel			= events filter mouseWheeled
+	val wheel		= events filter mouseWheeled
 
-	lazy val wheelRotation:Events[Int]	=
+	val wheelRotation:Events[Int]	=
 			wheel collect {
 				case ev:MouseWheelEvent => -ev.getWheelRotation
 			}

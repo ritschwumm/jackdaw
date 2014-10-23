@@ -4,8 +4,7 @@ import scutil.lang._
 
 import screact._
 
-import jackdaw.model.Rhythm
-import jackdaw.model.RhythmUnit
+import jackdaw.model._
 
 trait MetronomeContext {
 	def beatRateChanged(beatRate:Double):Unit
@@ -43,8 +42,8 @@ final class Metronome(outputRate:Double, ctx:MetronomeContext) {
 	
 	private[player] def phase(rhythmUnit:RhythmUnit):Double	=
 			rhythmUnit match {
-				case RhythmUnit.Measure	=> mPhase
-				case RhythmUnit.Beat	=> bPhase
+				case Measure	=> mPhase
+				case Beat		=> bPhase
 			}
 	
 	private[player] def	beatRate:Double	= bRate

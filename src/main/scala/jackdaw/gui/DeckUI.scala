@@ -26,10 +26,10 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 	//## input
 	
 	private val rhythmLines:Signal[ISeq[RhythmLine]]	= 
-			deck.rhythmLines map { _.toISeq.flatten }
+			deck.rhythmLines map { _.flattenMany }
 		
 	private val anchorLines:Signal[ISeq[RhythmLine]]	=
-			rhythmLines map { _ collect { case x@RhythmLine.AnchorLine(_) => x } }
+			rhythmLines map { _ collect { case x@AnchorLine(_) => x } }
 	
 	private val cuePoints:Signal[ISeq[Double]]	=
 			deck.cuePointsFlat
@@ -113,8 +113,8 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 	
 	overviewUI.jump.withFine	trigger	deck.jumpFrame
 	
-	phaseUI.jump				observe	(deck syncPhaseManually	(RhythmUnit.Measure, _))
-	phaseUI.mouseWheel.withFine	trigger	(deck movePhase			(RhythmUnit.Measure, _:Int, _:Boolean))
+	phaseUI.jump				observe	(deck syncPhaseManually	(Measure, _))
+	phaseUI.mouseWheel.withFine	trigger	(deck movePhase			(Measure, _:Int, _:Boolean))
 
 	private val ejectTrackKey:Events[Unit]	=
 			Key(VK_LESS ,	KEY_LOCATION_STANDARD).asAction

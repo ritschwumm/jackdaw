@@ -67,12 +67,13 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]]
 	}
 	
 	def jumpFrame(frame:Double, fine:Boolean) {
-		val rhythmUnit	= fine cata (RhythmUnit.Measure, RhythmUnit.Beat)
+		val rhythmUnit	= fine cata (Measure, Beat)
 		jumpEmitter emit PlayerAction.PositionJump(frame, rhythmUnit)
 	}
 	
 	def seek(steps:Int, fine:Boolean) {
-		seekEmitter emit PlayerAction.PositionSeek(steps, fine cata (RhythmUnit.Measure, RhythmUnit.Beat))
+		val rhythmUnit	= fine cata (Measure, Beat)
+		seekEmitter emit PlayerAction.PositionSeek(steps, rhythmUnit)
 	}
 	
 	def syncPhaseManually(rhythmUnit:RhythmUnit, offset:Double) {
@@ -101,7 +102,7 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]]
 	val annotation:Signal[Option[String]]		= signal { track.current map	{ _.annotation.current	} }
 	val loaded:Signal[Boolean]					= signal { track.current exists	{ _.loaded.current		} }
 	
-	val cuePointsFlat	= signal { cuePoints.current.flattenMany }
+	val cuePointsFlat:Signal[ISeq[Double]]		= signal { cuePoints.current.flattenMany }
 	
 	//------------------------------------------------------------------------------
 	//## player derivates
@@ -130,38 +131,8 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]]
 	/** whether the player's pitch is non-unit */
 	val pitched		= pitch map { _ != unitFrequency }
 	
-	/*
-	// number of seconds until the track ends
-	val remainingSeconds:Signal[Option[Double]]	=
-			signal {
-				for {
-					sample	<- sample.current
-				}
-				yield (sample.frameCount.toDouble - position.current) / sample.frameRate
-			}
-	*/
-	
-	/** how far it is from the player position to the next cue point */
-	val beforeCuePoint:Signal[Option[Int]]	=
-			signal {
-				// NOTE cue points are always sorted by position
-				val positionCur	= position.current
-				val nextOpt		= (cuePointsFlat.current dropWhile { _ <= positionCur }).headOption
-				for {
-					rhythm	<- rhythm.current
-					next	<- nextOpt
-				}
-				yield rhythm measureDistance (next - positionCur)
-			}
-	
-	/** player position (almost) floored to rhythm points */
-	val rhythmIndex:Signal[Option[RhythmIndex]]	=
-			signal {
-				for {
-					rhythm	<- rhythm.current
-				}
-				yield rhythm index position.current
-			}
+	//------------------------------------------------------------------------------
+	//## position
 	
 	/** all rhythm lines to be displayed */
 	val rhythmLines:Signal[Option[ISeq[RhythmLine]]] =
@@ -172,6 +143,39 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]]
 				}
 				yield rhythm lines (0, sample.frameCount)
 			}
+	
+	/*
+	// number of seconds until the track ends
+	val playerRemainingSeconds:Signal[Option[Double]]	=
+			signal {
+				for {
+					sample	<- sample.current
+				}
+				yield (sample.frameCount.toDouble - position.current) / sample.frameRate
+			}
+	*/
+	
+	/** player position (almost) floored to rhythm points */
+	val playerRhythmIndex:Signal[Option[RhythmIndex]]	=
+			signal {
+				for {
+					rhythm	<- rhythm.current
+				}
+				yield rhythm index position.current
+			}
+			
+	/** how far it is from the player position to the next cue point */
+	val playerBeforeCuePoint:Signal[Option[Int]]	=
+			signal {
+				for {
+					rhythm		<- rhythm.current
+					measures	<- calculateNextCuepoint(rhythm, cuePointsFlat.current, position.current)
+				}
+				yield measures
+			}
+			
+	private def calculateNextCuepoint(rhythm:Rhythm, cuePoints:ISeq[Double], position:Double):Option[Int]	=
+			cuePoints map { _ - position } find { _ > 0 } map rhythm.measureDistance
 	
 	//------------------------------------------------------------------------------
 	//## gui derivates
@@ -262,7 +266,7 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]]
 		changeTrack {
 			_ addCuePoint (
 					position.current,
-					fine cata (RhythmUnit.Measure, RhythmUnit.Beat))
+					fine cata (Measure, Beat))
 		}
 	}
 	

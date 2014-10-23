@@ -42,7 +42,6 @@ object Track extends Logging {
 		lru.dispose()
 	}
 			
-	// TODO move these
 	private val preferredFrameRate		= Config.outputConfig.rate
 	private val preferredChannelCount	= 2
 }
