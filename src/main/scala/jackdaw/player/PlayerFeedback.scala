@@ -1,5 +1,7 @@
 package jackdaw.player
 
+import jackdaw.model.Span
+
 object PlayerFeedback {
 	val empty	= PlayerFeedback(
 		running			= false,
@@ -10,7 +12,8 @@ object PlayerFeedback {
 		beatRate		= None,
 		needSync		= true,
 		hasSync			= false,
-		masterPeak		= 0
+		masterPeak		= 0,
+		loop			= None
 	)
 }
 
@@ -23,5 +26,6 @@ case class PlayerFeedback(
 	beatRate:Option[Double],
 	needSync:Boolean,
 	hasSync:Boolean,
-	masterPeak:Float
+	masterPeak:Float,
+	loop:Option[Span]
 )

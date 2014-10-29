@@ -20,10 +20,6 @@ import scaudio.math._
 import jackdaw.audio._
 import jackdaw.gui.util._
 
-object MeterUI {
-	
-}
-
 /** value is linear [0..1] and displayed in fader values */
 final class MeterUI(value:Signal[Float], meterRange:MeterRange, vertical:Boolean) extends UI with Observing {
 	//------------------------------------------------------------------------------

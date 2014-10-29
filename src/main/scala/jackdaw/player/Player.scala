@@ -76,6 +76,14 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 	private var pitch		= unitFrequency
 	private var needSync	= true
 	
+	private val fadeStep	= 1.0 / (Player.fadeTime * outputRate)
+	private val fadeMin		= 0.0
+	private val fadeMax		= 1.0
+	private var fade		= fadeMax
+	private var fadeLater:Option[Task]	= None
+	
+	private var loop:Option[Span]	= None
+	
 	//------------------------------------------------------------------------------
 	//## engine api
 	
@@ -87,23 +95,30 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 				afterEnd		= afterEnd,
 				position		= x,
 				pitch			= pitch,
-				measureMatch	= running flatGuard phaseMatch(Measure),
+				measureMatch	= measureMatch,
 				beatRate		= beatRate,
 				needSync		= needSync,
 				hasSync			= hasSync,
 				// NOTE this resets the peak detector
-				masterPeak		= peakDetector.decay
+				masterPeak		= peakDetector.decay,
+				loop			= loop
 			)
 			
 	private[player] def react(actions:ISeq[PlayerAction]):Unit	=
-			actions foreach {
-				case x:PlayerAction.NeedsFading if isFading		=> 
-					fadeLater	= Some(x)
+			actions foreach reactDelaying
+			
+	private def reactDelaying(action:PlayerAction):Unit	=
+			action match {
+				// TODO might be better
+				//case x:PlayerAction.NeedsFading if isFading		=> 
+				//	fadeLater	= Some(thunk { reactImmediately(x) })
+				case x:PlayerAction.NeedsFading =>
+					fadeNowOrLater(thunk { reactImmediately(x)  })
 				case x	=>
-					reactOne(x)
+					reactImmediately(x)
 			}
 			
-	private def reactOne(action:PlayerAction):Unit	=
+	private def reactImmediately(action:PlayerAction):Unit	=
 			action match {
 				case PlayerAction.RunningOn								=> runningOn()
 				case PlayerAction.RunningOff							=> runningOff()
@@ -120,6 +135,8 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 				case PlayerAction.ScratchEnd							=> scratchEnd()
 				case PlayerAction.ScratchRelative(frames)				=> scratchRelative(frames)
 				case PlayerAction.SetNeedSync(needSync)					=> setNeedSync(needSync)
+				case PlayerAction.LoopEnable(steps, rhythmUnit)			=> loopEnable(steps, rhythmUnit)
+				case PlayerAction.LoopDisable							=> loopDisable()
 				case c@PlayerAction.ChangeControl(_,_,_,_,_,_,_,_,_)	=> changeControl(c)
 			}
 	
@@ -156,9 +173,9 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 				inputR	= new SampleChannel(sample, 1)
 		}
 		
-		rate	= sample.frameRate.toDouble
-		
+		rate		= sample.frameRate.toDouble
 		endFrame	= sample.frameCount + outputRate*Player.endDelay
+		loop		= None
 			
 		updateV()
 		keepSpeedSynced()
@@ -178,66 +195,6 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 		keepSpeedSynced()
 	}
 	
-	//------------------------------------------------------------------------------
-	//## beat rate
-	
-	/** called whenever the Metronome has changed its beatRate value */
-	private [player] def metronomeBeatRateChanged() {
-		keepSpeedSynced()
-	}
-	
-	/** beats per second */
-	private def beatRate:Option[Double]	=
-			for {
-				rhythm	<- rhythm
-			}
-			yield pitch * sample.frameRate / rhythm.beat
-			
-	//------------------------------------------------------------------------------
-	//## sync
-	
-	private def hasSync:Boolean	=
-			needSync && canSync
-		
-	private def canSync:Boolean	=
-			sample != EmptySample &&
-			rhythm.isDefined
-	
-	// depends on metronome.beatRate, beatRate (sample&rhythm) and needSync
-	private def keepSpeedSynced() {
-		if (!hasSync)	return
-		beatRate foreach { beatRate =>
-			pitch	= pitch * metronome.beatRate / beatRate
-			updateV()
-		}
-	}
-	
-	/** set the phase to an absolute value measured in RasterUnits */
-	private def syncPhaseTo(rhythmUnit:RhythmUnit, offset:Double) {
-		for {
-			phaseMatch	<- phaseMatch(rhythmUnit)
-		} {
-			movePhaseBy(rhythmUnit, offset - phaseMatch)
-		}
-	}
-			
-	/** change the phase by some offset measured in RasterUnits */
-	private def movePhaseBy(rhythmUnit:RhythmUnit, offset:Double) {
-		for {
-			rhythm	<- rhythm
-		} {
-			startFade(x + offset * (rhythm raster rhythmUnit).size)
-		}
-	}
-	
-	/** how far we are from the rhythm of the Metronome in [-.5..+.5] rhythmUnits for late to early */
-	private def phaseMatch(rhythmUnit:RhythmUnit):Option[Double]	=
-			rhythm map { rhythm => 
-				val here	= rhythm raster rhythmUnit phase x
-				val there	= metronome	phase rhythmUnit
-				moduloDouble(here - there + 0.5, 1) - 0.5
-			}
-			
 	//------------------------------------------------------------------------------
 	//## motor running
 	
@@ -262,42 +219,19 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 	}
 	
 	//------------------------------------------------------------------------------
-	//## motor position
+	//## beat rate
 	
-	private def positionAbsolute(frame:Double) {
-		startFade(frame)
+	/** called whenever the Metronome has changed its beatRate value */
+	private [player] def metronomeBeatRateChanged() {
+		keepSpeedSynced()
 	}
 	
-	/** jump to a given position without while staying in sync  */
-	private def positionJump(frame:Double, rhythmUnit:RhythmUnit) {
-		rhythm match {
-			case Some(rhythm)	=>
-				val	app		= rhythm raster rhythmUnit
-				val raw		= (frame - x) / app.size
-				val steps	= if (running) rint(raw) else raw
-				positionSeek(steps, rhythmUnit)
-			case None	=>
-				positionAbsolute(frame)
-		}
-	}
-	
-	/** jump for a given number of rhythm while staying in sync */
-	private def positionSeek(steps:Double, rhythmUnit:RhythmUnit) {
-		// TODO stupid fake
-		def fakeRhythm:Rhythm	= Rhythm simple (0, sample.frameRate)
-		val	raster:Raster		= rhythm getOrElse fakeRhythm raster rhythmUnit
-		val position:Double		=
-				if (running) {
-					 x + steps * raster.size
-				}
-				else {
-					val	offset 	= (0.5 - Player.positionEpsilon) * signum(steps)
-					val	raw		= x + (steps - offset) * raster.size
-					raster round raw
-				}
-		startFade(position)
-	}
-					
+	/** beats per second */
+	private def beatRate:Option[Double]	=
+			rhythm map { rhythmGot =>
+				pitch * rate / rhythmGot.beat
+			}
+			
 	//------------------------------------------------------------------------------
 	//## motor speed
 	
@@ -309,6 +243,108 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 		needSync	= false
 	}
 			
+	//------------------------------------------------------------------------------
+	//## sync
+	
+	private def hasSync:Boolean	=
+			needSync && canSync
+		
+	private def canSync:Boolean	=
+			sample != EmptySample &&
+			rhythm.isDefined
+	
+	// depends on metronome.beatRate, beatRate (sample&rhythm) and needSync
+	private def keepSpeedSynced() {
+		if (!hasSync)	return
+		beatRate foreach { beatRateGot =>
+			pitch	= pitch * metronome.beatRate / beatRateGot
+			updateV()
+		}
+	}
+	
+	/** set the phase to an absolute value measured in RasterUnits */
+	private def syncPhaseTo(rhythmUnit:RhythmUnit, offset:Double) {
+		phaseMatch(rhythmUnit) foreach { phaseGot =>
+			movePhaseBy(rhythmUnit, offset - phaseGot)
+		}
+	}
+			
+	/** change the phase by some offset measured in RasterUnits */
+	private def movePhaseBy(rhythmUnit:RhythmUnit, offset:Double) {
+		currentRhythmRaster(rhythmUnit) foreach { raster =>
+			// TODO ensure we don't leave a loop here
+			startFade(x + offset * raster.size)
+		}
+	}
+	
+	private def measureMatch:Option[Double]	=
+			if (running)	phaseMatch(Measure)
+			else			phaseStatic(Measure)
+		
+	/** how far we are from the rhythm of the Metronome in [-.5..+.5] rhythmUnits for late to early */
+	private def phaseMatch(rhythmUnit:RhythmUnit):Option[Double]	=
+			currentRhythmPhase(rhythmUnit) map { here =>
+				val there	= metronome	phase rhythmUnit
+				moduloDouble(here - there + 0.5, 1) - 0.5
+			}
+			
+	/** how far we are from the track beat in [-.5..+.5] rhythmUnits for late to early */
+	private def phaseStatic(rhythmUnit:RhythmUnit):Option[Double]	=
+			currentRhythmPhase(rhythmUnit) map { here =>
+				moduloDouble(here + 0.5, 1) - 0.5
+			}
+			
+	private def currentRhythmPhase(rhythmUnit:RhythmUnit):Option[Double]	=
+			currentRhythmRaster(rhythmUnit) map { _ phase x }
+			
+	private def currentRhythmRaster(rhythmUnit:RhythmUnit):Option[Raster]	=
+			rhythm map { _ raster rhythmUnit }
+			
+	//------------------------------------------------------------------------------
+	//## motor position
+	
+	private def positionAbsolute(frame:Double) {
+		startFade(frame)
+	}
+	
+	/** jump to a given position without while staying in sync  */
+	private def positionJump(frame:Double, rhythmUnit:RhythmUnit) {
+		rhythm match {
+			case Some(rhythm)	=>
+					val	raster	= rhythm raster rhythmUnit
+					positionJumpWithRaster(frame, raster)
+			case None			=>
+					positionAbsolute(frame)
+		}
+	}
+	
+	/** jump to a given position without while staying in sync  */
+	private def positionJumpWithRaster(frame:Double, raster:Raster) {
+		val raw		= (frame - x) / raster.size
+		val steps	= if (running) rint(raw) else raw
+		positionSeekWithRaster(steps, raster)
+	}
+	
+	/** jump for a given number of rhythm while staying in sync */
+	private def positionSeek(steps:Double, rhythmUnit:RhythmUnit) {
+		val raster	= rhythm getOrElse (Rhythm simple (0, rate)) raster rhythmUnit
+		positionSeekWithRaster(steps, raster)
+	}
+	
+	/** jump for a given number of rhythm while staying in sync */
+	private def positionSeekWithRaster(steps:Double, raster:Raster) {
+		val position:Double		=
+				if (running) {
+					 x + steps * raster.size
+				}
+				else {
+					val	offset 	= (0.5 - Player.positionEpsilon) * signum(steps)
+					val	raw		= x + (steps - offset) * raster.size
+					raster round raw
+				}
+		moveTo(position)
+	}
+	
 	//------------------------------------------------------------------------------
 	//## motor scratch
 	
@@ -353,24 +389,15 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 	}
 	
 	//------------------------------------------------------------------------------
-	//## generator
-	
-	// depends on running, mode, pitch, rate
-	private def updateV() {
-		if (mode != Scratching) {
-			v	= if (running) pitch * rate else 0
-		}
-	}
-	
-	private val fadeStep	= 1.0 / (Player.fadeTime * outputRate)
-	private val fadeMin		= 0.0
-	private val fadeMax		= 1.0
-	private var fade		= fadeMax
-	
-	private var fadeLater:Option[PlayerAction.NeedsFading]	= None
+	//## fading
 	
 	@inline
 	private def isFading	= fade < fadeMax
+	
+	private def fadeNowOrLater(task:Task) {
+		if (isFading)	fadeLater	= Some(task)
+		else			task()
+	}
 	
 	private def startFade(newX:Double) {
 		xf		= x
@@ -389,13 +416,84 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 		fade	+= fadeStep
 		if (!isFading) {
 			if (fadeLater.isDefined) {
-				fade			= fadeMax
-				reactOne(fadeLater.get)
+				fade		= fadeMax
+				fadeLater.get.apply()
 				fadeLater	= None
 			}
 			else {
 				stopFade()
 			}
+		}
+	}
+	
+	//------------------------------------------------------------------------------
+	//## filter calculation
+	
+	private var filterModeOld	= Player.filterOff
+	
+	// (0+filterLow)..(nyquist-filterHigh), predivided by outputRate
+	private val filterLow	= log2(Config.filterLow / outputRate)
+	private val filterHigh	= log2(1.0 / 2.0 - Config.filterHigh / outputRate)
+	private val filterSize	= filterHigh - filterLow
+	
+	// value in 0..1
+	private def filterFreq(offset:Double):Double	=
+			exp2(offset * filterSize + filterLow)
+		
+	// returns a filter mode
+	private def filterMode(value:Double):Int	=
+				 if (value < -Player.filterEpsilon)	Player.filterLP
+			else if (value > +Player.filterEpsilon)	Player.filterHP
+			else									Player.filterOff
+			
+	//------------------------------------------------------------------------------
+	//## loop calculation
+	
+	private def loopEnable(steps:Double, rhythmUnit:RhythmUnit) {
+		loop	= mkLoop(x, steps, rhythmUnit)
+	}
+	
+	private def loopDisable() {
+		loop	= None
+	}
+	
+	private def mkLoop(frame:Double, steps:Double, rhythmUnit:RhythmUnit):Option[Span]	=
+			currentRhythmRaster(rhythmUnit) map { raster1 =>
+				// NOTE rastering the start to a scaled raster might not make sense
+				val raster	= raster1	scale steps
+				val start	= raster	floor frame
+				Span(raster floor frame, raster.size)
+			}
+		
+	/** moves a loop we're in around the new position */
+	private def moveTo(position:Double) {
+		val offset	= position - x
+		loop	= loop map { it =>
+			if (it contains x)	it copy (start = it.start + offset)
+				else			it
+		}
+		startFade(position)
+	}
+	
+	private def keepInLoop(oldX:Double) {
+		if (mode == Playing && loop.isDefined) {
+			val loopGot	= loop.get
+			val loopEnd	= loopGot.end
+			if (oldX < loopEnd && x >= loopEnd) {
+				fadeNowOrLater(thunk {
+					startFade(x - loopGot.size)
+				})
+			}
+		}
+	}	
+	
+	//------------------------------------------------------------------------------
+	//## generator
+	
+	// depends on running, mode, pitch, rate
+	private def updateV() {
+		if (mode != Scratching) {
+			v	= if (running) pitch * rate else 0
 		}
 	}
 	
@@ -412,13 +510,10 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 	var	a	= 0.0	// acceleration, non-zero when scratching
 	
 	private def afterEnd	= endFrame != Player.noEnd && x > endFrame
-	private def autoStop	= afterEnd && running && mode == Playing
 	
-	private var filterModeOld	= Player.filterOff
-		
 	def generate(speakerBuffer:FrameBuffer, phoneBuffer:FrameBuffer) {
 		// NOTE hack
-		if (autoStop) {
+		if (running && mode == Playing && afterEnd) {
 			runningOff()
 		}
 		
@@ -509,10 +604,13 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 			v	= clampDouble(v1, -springSpeedLimit, springSpeedLimit)
 		}
 		
+		val oldX	= x
 		val move	= v*dt
 		x	+= move
 		xf	+= move
 		
+		keepInLoop(oldX)
+
 		trim.step()
 		filter.step()
 		low.step()
@@ -521,19 +619,4 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 		speaker.step()
 		phone.step()
 	}
-	
-	// (0+filterLow)..(nyquist-filterHigh), predivided by outputRate
-	private val filterLow	= log2(Config.filterLow / outputRate)
-	private val filterHigh	= log2(1.0 / 2.0 - Config.filterHigh / outputRate)
-	private val filterSize	= filterHigh - filterLow
-	
-	// value in 0..1
-	private def filterFreq(offset:Double):Double	=
-			exp2(offset * filterSize + filterLow)
-		
-	// returns a filter mode
-	private def filterMode(value:Double):Int	=
-				 if (value < -Player.filterEpsilon)	Player.filterLP
-			else if (value > +Player.filterEpsilon)	Player.filterHP
-			else									Player.filterOff
 }

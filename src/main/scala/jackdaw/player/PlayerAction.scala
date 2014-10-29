@@ -34,8 +34,12 @@ object PlayerAction {
 	case object DragEnd					extends Drag
 	case class  DragAbsolute(v:Double)	extends Drag
 	
+	sealed abstract class Looping	extends PlayerAction
+	case class LoopEnable(steps:Double, rhythmUnit:RhythmUnit)	extends Looping
+	case object LoopDisable										extends Looping
+	
 	sealed abstract class Control	extends PlayerAction
-	case class SetNeedSync(needSync:Boolean)		extends Control
+	case class SetNeedSync(needSync:Boolean)					extends Control
 	case class ChangeControl(
 		trim:Double,
 		filter:Double,

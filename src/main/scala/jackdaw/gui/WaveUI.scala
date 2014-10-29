@@ -31,6 +31,7 @@ final class WaveUI(
 	playerPosition:Signal[Double],
 	cuePoints:Signal[ISeq[Double]],
 	rhythmLines:Signal[ISeq[RhythmLine]],
+	loop:Signal[Option[Span]],
 	widthOrigin:Double,	// 0..1 from left to right
 	shrink:Boolean
 ) extends UI with Observing {
@@ -83,11 +84,23 @@ final class WaveUI(
 		def frame2pixel(frame:Double):Int	= round((frame - frameOrig) / zoomFactor + pixelOrig).toInt
 		def value2y(value:Double):Int		= (bottomY - value * sizeY).toInt
 		
+		def frame2pixelGuarded(frame:Double):Option[Int]	=
+				frame2pixel(frame) guardBy display
+				
 		// NOTE clipping fails for extreme values
 		// pixel > -16384 && pixel < 16384 guard {
-		def display(pixel:Int):Boolean	=
+		private def display(pixel:Int):Boolean	=
 				pixel >= (leftX		- WaveUI.maxFigureWidth) &&
 				pixel <= (rightX	+ WaveUI.maxFigureWidth)
+				
+		def span2pixelsGuarded(span:Span):Option[(Int,Int)]	=
+				(frame2pixel(span.start), frame2pixel(span.end)) guardBy (display2 _).tupled
+				
+		private def display2(startPixel:Int, endPixel:Int):Boolean	=
+				startPixel	<= leftX	&&
+				endPixel	>= rightX	||
+				display(startPixel)		||
+				display(endPixel)
 				
 		def goodSize:Boolean	=
 				sizeX > 0 && sizeY > 0
@@ -153,6 +166,11 @@ final class WaveUI(
 			signal {
 				val coordsCur	= coords.current
 				
+				val loopFigures:ISeq[Figure]	=
+						loop.current.toVector flatMap { loop =>
+							loopSpanFigure(coordsCur, loop).toVector
+						}
+
 				val playerPosFigures:ISeq[Figure]	= 
 						positionLineFigure(coordsCur, playerPosition.current).toISeq
 				
@@ -167,15 +185,20 @@ final class WaveUI(
 							case BeatLine(frame)	=>
 								markerLineFigure(coordsCur, frame).toSeq
 						}
-				
+						
 				val cuePointFigures:ISeq[Figure]	=
 						cuePoints.current.zipWithIndex flatMap { case (frame, index) =>
 							markerLineFigure(coordsCur, frame).toSeq		++
 							rectangleBoppelFigure(coordsCur, frame).toSeq	++
 							numberLabelFigure(coordsCur, frame, index).toSeq
 						}
-				
-				rhythmLineFigures ++ cuePointFigures ++ playerPosFigures
+						
+				loopFigures ++ rhythmLineFigures ++ cuePointFigures ++ playerPosFigures
+			}
+	
+	private def loopSpanFigure(coords:Coords, loop:Span):Option[Figure]	=
+			spanShape(coords, loop) map { shape =>
+				FillShape(shape, Style.wave.loop.color)
 			}
 	
 	private def positionLineFigure(coords:Coords, frame:Double):Option[Figure]	=
@@ -200,16 +223,21 @@ final class WaveUI(
 	
 	private def lineShape(coords:Coords, frame:Double):Option[Shape]	= {
 		import coords._
-		val	pixel	= frame2pixel(frame)
-		coords display pixel guard {
+		frame2pixelGuarded(frame) map { pixel => 
 			new Line2D.Double(pixel, topY, pixel, bottomY)
+		}
+	}
+	
+	private def spanShape(coords:Coords, span:Span):Option[Shape]	= {
+		import coords._
+		span2pixelsGuarded(span) map { case (startPixel, endPixel) =>
+			new Rectangle2D.Double(startPixel, topY, endPixel-startPixel, bottomY)
 		}
 	}
 	
 	private def triangleBoppelShape(coords:Coords, frame:Double):Option[Shape]	= {
 		import coords._
-		val	pixel	= frame2pixel(frame)
-		coords display pixel guard {
+		frame2pixelGuarded(frame) map { pixel => 
 			val size	= Style.wave.marker.triangle.size
 			val left	= pixel - size/2
 			val top		= topY
@@ -224,8 +252,7 @@ final class WaveUI(
 	
 	private def rectangleBoppelShape(coords:Coords, frame:Double):Option[Shape]	= {
 		import coords._
-		val	pixel	= frame2pixel(frame)
-		coords display pixel guard {
+		frame2pixelGuarded(frame) map { pixel => 
 			new Rectangle(
 					pixel - Style.wave.marker.rectangle.width,
 					topY,
@@ -236,13 +263,13 @@ final class WaveUI(
 	
 	private def numberLabelFigure(coords:Coords, frame:Double, number:Int):Option[Figure]	= {
 		import coords._
-		val	pixel	= frame2pixel(frame)
-		(coords display pixel) && number >= 0 && number < numberImages.size guard {
-			val image	= numberImages(number)
-			val size	= Style.wave.marker.rectangle.width
-			val left	= pixel - size + 1
-			val top		= topY + 1
-			DrawImage(image, left, top)
+		numberImages lift number flatMap { image =>
+			frame2pixelGuarded(frame) map { pixel =>
+				val size	= Style.wave.marker.rectangle.width
+				val left	= pixel - size + 1
+				val top		= topY + 1
+				DrawImage(image, left, top)
+			}
 		}
 	}
 	
@@ -255,7 +282,7 @@ final class WaveUI(
 			imageUtil renderImage (size, true, figure.paint)
 		}
 	}
-		
+	
 	//------------------------------------------------------------------------------
 	//## repaint
 	

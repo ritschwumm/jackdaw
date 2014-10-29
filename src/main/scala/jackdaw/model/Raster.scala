@@ -12,6 +12,9 @@ case class Raster(size:Double, offset:Double) {
 	
 	def phase(it:Double):Double	= normalize(it) % 1.0
 	
+	def scale(factor:Double):Raster	=
+			copy(size = size*factor)
+	
 	/*
 	def previous(position:Double):Double	= {
 		val rounded	= RasterMath floorRasterOffset (size, anchor, position)

@@ -50,6 +50,7 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]]
 	private val seekEmitter		= emitter[PlayerAction.PositionSeek]
 	private val phaseEmitter	= emitter[PlayerAction.Phase]
 	private val needSyncEmitter	= emitter[PlayerAction.SetNeedSync]
+	private val loopingEmitter	= emitter[PlayerAction.Looping]
 	
 	private def setRunning(running:Boolean) {
 		runningEmitter emit (running cata (PlayerAction.RunningOff, PlayerAction.RunningOn))
@@ -60,10 +61,6 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]]
 	}
 	def setPitchOctave(octave:Double) {
 		setPitch(octave2frequency(octave))
-	}
-	
-	private def gotoFrame(frame:Double) {
-		gotoEmitter emit PlayerAction.PositionAbsolute(frame)
 	}
 	
 	def jumpFrame(frame:Double, fine:Boolean) {
@@ -89,6 +86,16 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]]
  		needSyncEmitter	emit PlayerAction.SetNeedSync(needSync)
  	}
  	
+ 	private def emitLooping(enable:Boolean) {
+ 		loopingEmitter	emit (
+ 			enable cata (
+ 				PlayerAction.LoopDisable,
+ 				// TODO loop hardcoded
+ 				PlayerAction.LoopEnable(1, Measure)
+ 			)
+ 		)
+ 	}
+ 	
 	//------------------------------------------------------------------------------
 	//## track derivates
 
@@ -112,6 +119,7 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]]
 	val position		= playerFeedback map { _.position		} 
 	val measureMatch	= playerFeedback map { _.measureMatch	}
 	val beatRate		= playerFeedback map { _.beatRate		}
+	val loop			= playerFeedback map { _.loop			}
 	
 	val synced:Signal[Option[Boolean]]	=
 			signal {
@@ -252,11 +260,13 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]]
 		setRunning(!running.current)
 	}
 	
+	def loopToggle() {
+		emitLooping(!playerFeedback.current.loop.isDefined)
+	}
+	
 	def jumpCue(index:Int, fine:Boolean) {
 		cuePointsFlat.current lift index foreach { frame =>
 			changeTrack { track =>
-				// setRunning(false)
-				// gotoFrame(frame)
 				jumpFrame(frame, fine)
 			}
 		}
@@ -381,10 +391,9 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]]
 					scratchingRelative.message,
 					draggingState.message,		
 					draggingAbsolute.message,
-					// syncPhaseEvents.message,
-					// syncSpeedEvents.message,
 					gotoCueOnLoad.message,
-					needSyncEmitter.message
+					needSyncEmitter.message,
+					loopingEmitter.message
 				).flatten guardBy { _.nonEmpty }
 			}
 	playerActions observe	notifyPlayer

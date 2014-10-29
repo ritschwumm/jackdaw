@@ -34,8 +34,14 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 	private val cuePoints:Signal[ISeq[Double]]	=
 			deck.cuePointsFlat
 	
-	private val cuePointsCount	= 
+	private val cuePointsCount:Signal[Int]	= 
 			cuePoints map { _.size }
+		
+	private val looping:Signal[Boolean]	=
+			deck.loop map { _.isDefined }
+
+	private val rhythmic:Signal[Boolean]	=
+			deck.rhythm map { _.isDefined }
 	
 	//------------------------------------------------------------------------------
 	//## components
@@ -48,6 +54,7 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 				playerPosition	= deck.position,
 				cuePoints		= cuePoints,
 				rhythmLines		= rhythmLines,
+				loop			= deck.loop,
 				widthOrigin		= 0.5,
 				shrink			= false
 			)
@@ -58,11 +65,20 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 				playerPosition	= deck.position,
 				cuePoints		= cuePoints,
 				rhythmLines		= anchorLines,
+				loop			= static(None),	// deck.loop,
 				widthOrigin		= 0.0,
 				shrink			= true
 			)
 	private val phaseUI			= new PhaseUI(deck.measureMatch, deck.rhythm)
-	private val transportUI		= new TransportUI(deck.running, deck.afterEnd, deck.loaded, cuePointsCount)
+	private val transportUI		= 
+			new TransportUI(
+				trackLoaded		= deck.loaded,
+				playing			= deck.running,
+				afterEnd		= deck.afterEnd,
+				looping			= looping,
+				rhythmic		= rhythmic,
+				cuePointsCount	= cuePointsCount
+			)
 	private val pitchSlider		= UIFactory pitchLinear deck.pitchOctave
 	private val matchUI			= new MatchUI(deck.synced, deck.pitched)
 	
@@ -134,6 +150,13 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 			detailUI.playToggle	orElse
 			transportUI.playToggle	
 	playToggle	trigger	deck.playToggle
+	
+	private val loopToggleKey:Events[Unit]	=
+			Key(VK_NUMBER_SIGN,	KEY_LOCATION_STANDARD).asAction
+	private val loopToggle:Events[Unit]	=
+			loopToggleKey		orElse
+			transportUI.loopToggle	
+	loopToggle	trigger	deck.loopToggle
 	
 	private val syncToggleKey:Events[Unit]	=
 			Key(VK_INSERT,		KEY_LOCATION_STANDARD).asAction

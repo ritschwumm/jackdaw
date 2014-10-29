@@ -35,19 +35,10 @@ final class PhaseUI(value:Signal[Option[Double]], rhythm:Signal[Option[Rhythm]])
 	
 	//------------------------------------------------------------------------------
 	//## input
-
-	private val miniMax			= SgSpan(-0.5, +0.5)
-	
-	// NOTE hack to show inverse a little bit more often
-	private val epsilon			= -0.0001
-	private val insideMiniMax	= GeomUtil containsInclusive (miniMax, epsilon)
-		
-	private def clampMiniMax(raw:Double):Double	=
-			GeomUtil clampValue (miniMax, raw)
 	
 	private val value2gui	= 
 			canvas.bounds map { it =>
-				SgSpanTransform fromSpans (miniMax, it.x)
+				SgSpanTransform fromSpans (PhaseRange.span, it.x)
 			}
 	
 	//------------------------------------------------------------------------------
@@ -68,7 +59,7 @@ final class PhaseUI(value:Signal[Option[Double]], rhythm:Signal[Option[Rhythm]])
 							value	<- valueCur
 							rect	= 
 									// extreme values fill complete area
-									if (insideMiniMax(value)) {
+									if (PhaseRange inside value) {
 										// NOTE hack to make it change less often
 										rint(value2guiCur(value)) spanTo guiNeutral rectangleWith trackBoundsCur.y
 									}
@@ -118,7 +109,7 @@ final class PhaseUI(value:Signal[Option[Double]], rhythm:Signal[Option[Rhythm]])
 			{ _.getX }										snapshot
 			value2gui										map 
 			{ case (x, value2gui) => value2gui inverse x }	map
-			clampMiniMax
+			PhaseRange.clamp
 	
 	private val middleReset:Events[Double]	= 
 			canvas.mouse.rightPress tag 0.0

@@ -36,8 +36,7 @@ object MediaUtil extends Logging {
 					}
 				}
 				
-		// TODO scutil 0.52.0 flattenMany
-		val errorGroups:ISeq[Group]	= outcome.swap.toVector.flatten
+		val errorGroups:ISeq[Group]	= outcome.swap.flattenMany
 		errorGroups foreach { it =>
 			it.worker +: (it.messages map { "\t" + _ }) foreach { WARN(_) }
 		}

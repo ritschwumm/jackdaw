@@ -272,6 +272,9 @@ object Style {
 			val color	= STRONG_FOREGROUND
 			val stroke	= SIMPLE_STROKE
 		}
+		object loop {
+			val color	= DISABLED_BACKGROUND withAlpha 0.4f
+		}
 		object marker {
 			val color	= WEAK_FOREGROUND
 			val stroke	= SIMPLE_STROKE

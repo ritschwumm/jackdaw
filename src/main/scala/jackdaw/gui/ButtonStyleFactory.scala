@@ -13,86 +13,105 @@ import sc2d._
 import jackdaw.gui.shape._
 
 object ButtonStyleFactory {
-	private lazy val maximumI	= 18
+	private val maximumI	= 18
 	val size	= new Dimension(maximumI, maximumI)
 	
-	private lazy val maximum	= maximumI.toDouble
-	private lazy val inset		= 3d
-	private lazy val insetter	= 2d
+	private val maximum	= maximumI.toDouble
+	private val inset		= 3d
+	private val insetter	= 2d
 	
-	private lazy val small		= 0+inset
-	private lazy val smallish	= small+insetter
-	private lazy val smallisher	= smallish+insetter
-	private lazy val medium		= (small+big)/2
-	private lazy val biggisher	= biggish-insetter
-	private lazy val biggish	= big-insetter
-	private lazy val big		= maximum-inset
+	private val small		= 0+inset
+	private val smallish	= small+insetter
+	private val smallisher	= smallish+insetter
+	private val big			= maximum-inset
+	private val biggish		= big-insetter
+	private val biggisher	= biggish-insetter
+	private val medium		= (small+big)/2
+	private val seri		= Vector(small, smallish, smallisher, medium, biggisher, biggish, big)
+	
+	private val Vector(a1,b1,c1,d1,e1,f1,g1)	= seri map { SgPoint(_, small)			}
+	private val Vector(a2,b2,c2,d2,e2,f2,g2)	= seri map { SgPoint(_, smallish)		}
+	private val Vector(a3,b3,c3,d3,e3,f3,g3)	= seri map { SgPoint(_, smallisher)		}
+	private val Vector(a4,b4,c4,d4,e4,f4,g4)	= seri map { SgPoint(_, medium)			}
+	private val Vector(a5,b5,c5,d5,e5,f5,g5)	= seri map { SgPoint(_, biggisher)		}
+	private val Vector(a6,b6,c6,d6,e6,f6,g6)	= seri map { SgPoint(_, biggish)		}
+	private val Vector(a7,b7,c7,d7,e7,f7,g7)	= seri map { SgPoint(_, big)			}
 	
 	val PLAY	= outlineButtonStyle(poly(
-		closed(	(small,small),		(big,medium),		(small,big)		)
+		draft(	a1,	g4,	a7, a1	)
 	))
 	val STOP	= outlineButtonStyle(poly(
-		closed(	(small,small),		(big,small),		(big,big),		(small,big)	)
+		draft(	a1,	g1,	g7,	a7, a1	)
+	))
+	val LOOP	= outlineButtonStyle(poly(
+		draft(	f1, g2, g6, f7, b7, a6, a2, b1	)
+	))
+	val UNLOOP	= outlineButtonStyle(poly(
+		draft(	e1, f1, g2, g6, f7, b7, a6, a2, b1, c1	)
 	))
 	val EJECT	= outlineButtonStyle(poly(
-		open(	(small,big),		(big,big)),
-		closed(	(smallish,medium),	(medium,small),	(biggish,medium))
+		draft(	a7,	g7	),
+		draft(	b4,	d1,	f4, b4	)
 	))
 	val LEFT	= outlineButtonStyle(poly(
-		open(	(big,small),		(medium,medium),	(big,big)		),
-		open(	(medium,small),		(small,medium),		(medium,big)	)
+		draft(	g1,	d4,	g7	),
+		draft(	d1,	a4,	d7	)
 	))
 	val RIGHT	= outlineButtonStyle(poly(
-		open(	(small,small),		(medium,medium),	(small,big)		),
-		open(	(medium,small),		(big,medium),		(medium,big)	)
+		draft(	a1,	d4,	a7	),
+		draft(	d1,	g4,	d7	)
 	))
 	val UP		= outlineButtonStyle(poly(
-		open(	(small,big),		(medium,medium),	(big,big)		),
-		open(	(small,medium),		(medium,small),		(big,medium)	)
+		draft(	a7,	d4,	g7	),
+		draft(	a4,	d1,	g4	)
 	))
 	val DOWN	= outlineButtonStyle(poly(
-		open(	(small,small),		(medium,medium),	(big,small)		),
-		open(	(small,medium),		(medium,big),		(big,medium)	)
+		draft(	a1,	d4,	g1	),
+		draft(	a4,	d7,	g4	)
 	))
 	val PLUS	= outlineButtonStyle(poly(
-		open(	(medium,small),		(medium,big)	),
-		open(	(small,medium),		(big,medium)	)
+		draft(	d1,	d7	),
+		draft(	a4,	g4	)
 	))
 	val MINUS	= outlineButtonStyle(poly(
-		open(	(small,medium),		(big,medium)	)
+		draft(	a4,	g4	)
 	))
 	val CROSS	= outlineButtonStyle(poly(
-		open(	(small,small),		(big,big)		),
-		open(	(small,big),		(big,small)		)
+		draft(	a1,	g7	),
+		draft(	a7,	g1	)
 	))
 	val PAUSE	= outlineButtonStyle(poly(
-		open(	(smallish,small),	(smallish,big)	),
-		open(	(biggish,small),	(biggish,big)	)
+		draft(	b1,	b7	),
+		draft(	f1,	f7	)
 	))
 	val RECORD	= outlineButtonStyle(poly(
-		closed(	
-			(smallisher,small),	(small,smallisher),	(small,biggisher),	
-			(smallisher,big),	(biggisher,big),	(big,biggisher),	
-			(big,smallisher),	(biggisher,small)	
+		draft(	
+			c1,	a3,	a5,	
+			c7,	e7,	g5,	
+			g3,	e1,	c1
 		)
 	))
 	
-	def STOP_DIGIT(digit:Int):ButtonStyle	= {
-		val shape	= poly(
-			closed(	(small,small),	(big,small),		(big,big),		(small,big)	)
-		)
-		if (digit < DIGITS.size)	digitButtonStyle(shape, DIGITS(digit))
-		else						outlineButtonStyle(shape)
-	}
+	def STOP_DIGIT(digit:Int):ButtonStyle	=
+			(DIGITS lift digit)
+			.cata (
+				outlineButtonStyle _,
+				digitButtonStyle _
+			)
+			.apply (
+				poly(
+					draft(	a1,	g1,	g7,	a7,	a1	)
+				)
+			)
 	
 	def TRIAL(state:Option[Boolean]):ButtonStyle	=
 			trialButtonStyle(
 				// identical to RECORD
 				poly(
-					closed(
-						(smallisher,small),	(small,smallisher),	(small,biggisher),	
-						(smallisher,big), 	(biggisher,big),	(big,biggisher),	
-						(big,smallisher),	(biggisher,small)	
+					draft(
+						c1,	a3,	a5,	
+						c7, e7,	g5,	
+						g3,	e1,	c1	
 					)
 				),
 				state
@@ -100,48 +119,44 @@ object ButtonStyleFactory {
 	
 	//------------------------------------------------------------------------------
 	
-	private def outlineButtonStyle(poly:Poly):ButtonStyle	= {
-		val shape	= poly.toShape
-		def factory(shapePaint:Paint, shapeStroke:Stroke):ISeq[Figure]	=
+	private def outlineButtonStyle(poly:Poly):ButtonStyle	=
+			buttonStyle { (shapePaint, shapeStroke) =>
+				val shape	= polyShape(poly)
 				Vector(
 					StrokeShape(shape, shapePaint, shapeStroke)
 				)
-		buttonStyle(factory)
-	}
+			}
 	
-	/*
 	// BETTER make nice and use
-	private def filledButtonStyle(poly:Poly):ButtonStyle	= {
-		val shape	= poly.toShape
-		def factory(shapePaint:Paint, shapeStroke:Stroke):ISeq[Figure]	= 
+	/*
+	private def filledButtonStyle(poly:Poly):ButtonStyle	=
+			buttonStyle { (shapePaint, shapeStroke) =>
+				val shape	= poly.toShape
 				Vector(
-					FillShape(shape)					withPaint shapePaint,
-					StrokeShape(SshapeStroke, shape)	withPaint shapePaint
+					FillShape(shape, shapePaint),
+					StrokeShape(shape, shapePaint, shapeStroke)
 				)
-		buttonStyle(factory)
-	}
+			}
 	*/
 	
-	private def digitButtonStyle(base:Poly, digit:Shape):ButtonStyle	= {
-		val shape	= base.toShape
-		def factory(shapePaint:Paint, shapeStroke:Stroke):ISeq[Figure]	= 
+	private def digitButtonStyle(digit:Shape)(base:Poly):ButtonStyle	=
+			buttonStyle { (shapePaint, shapeStroke) =>
+				val shape	= polyShape(base)
 				Vector(
 					FillShape(shape, shapePaint),
 					StrokeShape(shape, shapePaint, shapeStroke),
 					StrokeShape(digit, Style.button.label.color, Style.button.label.stroke)	
 				)
-		buttonStyle(factory)
-	}
+			}
 	
-	private def trialButtonStyle(base:Poly, state:Option[Boolean]):ButtonStyle	= {
-		val shape	= base.toShape
-		def factory(shapePaint:Paint, shapeStroke:Stroke):ISeq[Figure]	= 
+	private def trialButtonStyle(base:Poly, state:Option[Boolean]):ButtonStyle	=
+			buttonStyle { (shapePaint, shapeStroke) =>
+				val shape	= polyShape(base)
 				Vector(
 					FillShape(shape, trialPaint(state)),
 					StrokeShape(shape, shapePaint, shapeStroke)
 				)
-		buttonStyle(factory)
-	}
+			}
 	
 	private def buttonStyle(factory:(Paint,Stroke)=>ISeq[Figure]):ButtonStyle	=
 			ButtonStyle(
@@ -151,7 +166,7 @@ object ButtonStyleFactory {
 				pressed		= factory(Style.button.shape.pressed.color,		Style.button.shape.pressed.stroke)
 			)
 	
-	private lazy val trialPaint:Map[Option[Boolean],Paint]	= 
+	private lazy val trialPaint:Option[Boolean]=>Paint	= 
 			Map(
 				Some(true)	-> Style.button.trial.yes,
 				Some(false)	-> Style.button.trial.please,

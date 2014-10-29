@@ -31,11 +31,11 @@ object LEDShape {
 				pointPositions(it) bimap (horizontal, vertical) into SgPoint.fromPair
 		
 		def segment(it:Segment):Draft	=
-				Draft(false, segmentPoints(it).toISeq map point)
+				Draft(segmentPoints(it).toNes map point)
 		
 		def number(it:Number):Poly	=
 				Poly(numberSegments(it).toISeq map segment)
 		
-		numbers map { number(_).toShape }
+		numbers map { it => polyShape(number(it)) }
 	}
 }

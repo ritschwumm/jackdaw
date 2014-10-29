@@ -48,10 +48,11 @@ case class Rhythm(anchor:Double, measure:Double, beatsPerMeasure:Int) {
 
 	//------------------------------------------------------------------------------
 
-	def raster(rhythmUnit:RhythmUnit):Raster	= rhythmUnit match {
-		case Measure	=> measureRaster
-		case Beat		=> beatRaster
-	}
+	def raster(rhythmUnit:RhythmUnit):Raster	=
+			rhythmUnit match {
+				case Measure	=> measureRaster
+				case Beat		=> beatRaster
+			}
 	
 	lazy val measureRaster:Raster	= Raster(measure,	anchor)
 	lazy val beatRaster:Raster		= Raster(beat,		anchor)
