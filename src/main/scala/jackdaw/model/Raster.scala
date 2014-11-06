@@ -14,20 +14,4 @@ case class Raster(size:Double, offset:Double) {
 	
 	def scale(factor:Double):Raster	=
 			copy(size = size*factor)
-	
-	/*
-	def previous(position:Double):Double	= {
-		val rounded	= RasterMath floorRasterOffset (size, anchor, position)
-		if (near(position, rounded))	rounded - size else rounded
-	}
-	
-	def next(position:Double):Double	= {
-		val rounded	= RasterMath ceilRasterOffset (size, anchor, position)
-		if (near(position, rounded))	rounded + size else rounded
-	}
-	
-	// we are nearly there. skip one more
-	def near(position:Double, rounded:Double):Boolean =
-			abs(position - rounded) < (size / 100)
-	*/
 }

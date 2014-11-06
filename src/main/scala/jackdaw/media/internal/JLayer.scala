@@ -11,6 +11,8 @@ import scutil.lang._
 import scutil.implicits._
 import scutil.log._
 
+import jackdaw.util.Checked
+
 object JLayer extends Decoder with Logging {
 	def name	= "JLayer"
 	

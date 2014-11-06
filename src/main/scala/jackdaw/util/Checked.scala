@@ -1,4 +1,4 @@
-package jackdaw.media
+package jackdaw.util
 
 import scutil.implicits._
 import scutil.lang._

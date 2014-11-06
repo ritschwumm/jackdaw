@@ -3,6 +3,7 @@ package jackdaw.media
 import java.io.File
 
 import jackdaw.audio.Metadata
+import jackdaw.util.Checked
 
 object Faad extends Inspector with Decoder {
 	def name	= "faad"

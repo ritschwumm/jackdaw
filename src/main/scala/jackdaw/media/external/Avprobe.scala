@@ -3,6 +3,7 @@ package jackdaw.media
 import java.io.File
 
 import jackdaw.audio.Metadata
+import jackdaw.util.Checked
 
 object Avprobe extends Inspector {
 	def name	= "avprobe"

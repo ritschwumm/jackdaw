@@ -37,6 +37,12 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 	private val cuePointsCount:Signal[Int]	= 
 			cuePoints map { _.size }
 		
+	private val loopChoices:ISeq[(LoopDef,Signal[Boolean])]	=
+			LoopDef.all map { it =>
+				val active	= deck.loopDef map { _ ==== (Some(it):Option[LoopDef]) }
+				(it, active)
+			}
+		
 	private val rhythmic:Signal[Boolean]	=
 			deck.rhythm map { _.isDefined }
 	
@@ -72,7 +78,7 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 				trackLoaded		= deck.fullyLoaded,
 				playing			= deck.running,
 				afterEnd		= deck.afterEnd,
-				loopDef			= deck.loopDef,
+				loopChoices		= loopChoices,
 				rhythmic		= rhythmic,
 				cuePointsCount	= cuePointsCount
 			)
@@ -149,12 +155,13 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 			transportUI.playToggle	
 	playToggle	trigger	deck.playToggle
 	
+	//private val loopChoices:ISeq[(LoopDef,Signal[Boolean])]	=
+	
 	private val setLoopKeyActions:Events[Option[LoopDef]]	=
 			Events multiOrElse (
-				ISeq(VK_U, VK_I, VK_O, VK_P)
-				.zip	(LoopDef.all)
-				.map	{ case (k, preset)	=>
-					Key(k,	KEY_LOCATION_STANDARD).asAction tag Some(preset)
+				(loopChoices zip ISeq(VK_U, VK_I, VK_O, VK_P))
+				.map { case ((loopDef, active), key) =>
+					Key(key, KEY_LOCATION_STANDARD).asAction tag Some(loopDef)
 				}
 			)
 	private val resetLoopKeyAction:Events[Option[LoopDef]]	=

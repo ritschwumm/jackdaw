@@ -99,7 +99,7 @@ object Style {
 	object window {
 		val title	= s"${BuildInfo.name} ${BuildInfo.version}"
 		val icon	= bufferedImage("/logo.png") // imageIcon("/logo.png").getImage
-		val size	= new Dimension(640, 640)
+		val size	= new Dimension(678, 640)
 	}
 	
 	//------------------------------------------------------------------------------

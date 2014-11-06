@@ -78,25 +78,23 @@ object ButtonStyleFactory {
 		draft(	a4,	g4	)
 	))
 	
-	/*
-	val LOOP	= outlineButtonStyle(poly(
-		draft(	f1, g2, g6, f7, b7, a6, a2, b1	)
-	))
-	*/
-	def LOOP(digit:Int):ButtonStyle	=
+	def LOOP_ON(digit:Int):ButtonStyle	=
 			loopButtonStyle(
 				poly(
 					draft(	/*f1,g2*/g4, g6, f7, b7, a6, a4/*a2,b1*/	)
 				),
 				DIGITS lift digit
 			)
-	def UNLOOP(digit:Int):ButtonStyle	=
+	def LOOP_OFF(digit:Int):ButtonStyle	=
 			loopButtonStyle(
 				poly(
 					draft(	e1, f1, g2, g6, f7, b7, a6, a2, b1, c1	)
 				),
 				DIGITS lift digit
 			)
+	val LOOP_RESET:ButtonStyle	= outlineButtonStyle(poly(
+		draft(	a7, f7, d5	)
+	))
 			
 	val RECORD	= outlineButtonStyle(poly(
 		draft(	

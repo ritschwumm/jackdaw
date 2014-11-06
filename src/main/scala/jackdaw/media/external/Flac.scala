@@ -2,6 +2,8 @@ package jackdaw.media
 
 import java.io.File
 
+import jackdaw.util.Checked
+
 object Flac extends Decoder {
 	def name	= "flac"
 	

@@ -2,6 +2,6 @@ package jackdaw
 
 import scutil.lang._
 
-package object media {
+package object util {
 	type Checked[T]	= Tried[Nes[String],T]
 }

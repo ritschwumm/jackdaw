@@ -5,6 +5,7 @@ import java.io.File
 import scutil.lang._
 
 import jackdaw.audio.Metadata
+import jackdaw.util.Checked
 
 object Inspector {
 	val all:ISeq[Inspector]	=

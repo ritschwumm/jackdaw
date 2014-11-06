@@ -10,6 +10,8 @@ import scutil.implicits._
 import scutil.platform._
 import scutil.log._
 
+import jackdaw.util.Checked
+
 object MediaUtil extends Logging {
 	/** try one S after another to get a Win */
 	def worker[S,T](all:ISeq[S], name:S=>String, work:S=>Checked[T]):Option[T] = {

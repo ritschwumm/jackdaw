@@ -17,23 +17,7 @@ object TransportUI {
 }
 
 /** playback control */
-final class TransportUI(trackLoaded:Signal[Boolean], playing:Signal[Boolean], afterEnd:Signal[Boolean], loopDef:Signal[Option[LoopDef]], rhythmic:Signal[Boolean], cuePointsCount:Signal[Int]) extends UI with Observing {
-	//------------------------------------------------------------------------------
-	//## input
-	
-	private val playingIcon:Signal[ButtonStyle]	= 
-			playing map { _ cata (ButtonStyleFactory.PLAY, ButtonStyleFactory.PAUSE) }
-		
-	// TODO ugly
-	
-	private def loopingAt(it:LoopDef):Signal[Boolean]	=
-			loopDef map { _ ==== (Some(it):Option[LoopDef]) }
-	
-	private def loopingIcon(it:LoopDef):Signal[ButtonStyle]	=
-			loopingAt(it) map {
-				_ cata (ButtonStyleFactory.LOOP _, ButtonStyleFactory.UNLOOP _) apply it.measures
-			} 
-	
+final class TransportUI(trackLoaded:Signal[Boolean], playing:Signal[Boolean], afterEnd:Signal[Boolean], loopChoices:ISeq[(LoopDef,Signal[Boolean])], rhythmic:Signal[Boolean], cuePointsCount:Signal[Int]) extends UI with Observing {
 	//------------------------------------------------------------------------------
 	//## cue point components
 	
@@ -97,44 +81,62 @@ final class TransportUI(trackLoaded:Signal[Boolean], playing:Signal[Boolean], af
 	//------------------------------------------------------------------------------
 	//## loop components
 	
-	val (loopUIs, loopActionEvents)	=
-			(	LoopDef.all map { loopDef =>
+	val (loopSetUIs, loopSetActionEvents)	=
+			(	loopChoices map { case (choice, active) =>
+					val style	=
+							active map {
+								_ cata (ButtonStyleFactory.LOOP_ON _, ButtonStyleFactory.LOOP_OFF _) apply choice.measures
+							}
 					val button	=
 							new ButtonUI(
 								size	= ButtonStyleFactory.size,
-								style	= loopingIcon(loopDef),
+								style	= style,
 								enabled	= canLoop
 							)
 					val action	=
-							button.actions snapshotOnly loopingAt(loopDef) map { _ prevent loopDef }
+							button.actions tag Some(choice)
 					(button, action)
 				}
 			).unzip
-	// loopUIs:ISeq[UI]
-	// loopActionEvents:ISeq[Events[Option[LoopDef]]]
-			
+	val loopResetUI	= 
+			new ButtonUI(
+				size	= ButtonStyleFactory.size,
+				style	= static(ButtonStyleFactory.LOOP_RESET),
+				enabled	= canLoop
+			)
+	private val loopUIs:ISeq[UI]	=
+			loopSetUIs :+ loopResetUI
 	private val loopActions:Events[Option[LoopDef]]	= 
-			Events multiOrElse loopActionEvents
+			(Events multiOrElse loopSetActionEvents)	orElse
+			(loopResetUI.actions tag None)
 			
 	private val loopPanel:UI	=
-			new HBoxUI(loopUIs map BoxComponent.apply)
+			new HBoxUI(loopUIs map BoxComponent.apply intersperse BoxStrut(2))
 	
 	//------------------------------------------------------------------------------
-	//## components
+	//## playing components
 	
-	// private val	cueStopButton		= new ButtonUI(ButtonStyleFactory.size, static(ButtonStyleFactory.STOP),	trackLoaded)
+	private val playingIcon:Signal[ButtonStyle]	= 
+			playing map { _ cata (ButtonStyleFactory.PLAY, ButtonStyleFactory.PAUSE) }
+		
 	private val	playToggleButton	= new ButtonUI(ButtonStyleFactory.size, playingIcon,						canPlay)
+	
+	//------------------------------------------------------------------------------
+	//## other components
+	
 	private val	seekBackwardButton	= new ButtonUI(ButtonStyleFactory.size, static(ButtonStyleFactory.LEFT),	trackLoaded)
 	private val	seekForwardButton	= new ButtonUI(ButtonStyleFactory.size, static(ButtonStyleFactory.RIGHT),	trackLoaded)
 	private val	ejectButton			= new ButtonUI(ButtonStyleFactory.size, static(ButtonStyleFactory.EJECT),	trackLoaded)
 	private val	addCueButton		= new ButtonUI(ButtonStyleFactory.size, static(ButtonStyleFactory.RECORD),	canAddCuePoint)
 	private val	removeCueButton		= new ButtonUI(ButtonStyleFactory.size, static(ButtonStyleFactory.CROSS),	canRemoveCuePoint)
 	
+	// private val	cueStopButton		= new ButtonUI(ButtonStyleFactory.size, static(ButtonStyleFactory.STOP),	trackLoaded)
+	
 	private val panel	= 
 			HBoxUI(
 				// cueStopButton,
 				playToggleButton,
-				BoxStrut(4),
+				BoxStrut(4-2),
 				ejectButton,
 				BoxStrut(4),
 				seekBackwardButton,
@@ -142,8 +144,9 @@ final class TransportUI(trackLoaded:Signal[Boolean], playing:Signal[Boolean], af
 				seekForwardButton,
 				BoxStrut(4),
 				ejectButton,
-				BoxStrut(16),
+				BoxStrut(12),
 				loopPanel,
+				BoxStrut(12),
 				BoxGlue,
 				cuePointsPanel,
 				BoxStrut(4+2),

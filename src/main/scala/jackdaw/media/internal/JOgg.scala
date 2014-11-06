@@ -15,6 +15,7 @@ import scutil.math.ByteArrayUtil
 import scutil.log._
 
 import jackdaw.audio.Metadata
+import jackdaw.util.Checked
 
 object JOgg extends Inspector with Decoder with Logging {
 	def name	= "j-ogg"

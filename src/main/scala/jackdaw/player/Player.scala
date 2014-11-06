@@ -111,11 +111,11 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 				case PlayerAction.RunningOn								=> runningOn()
 				case PlayerAction.RunningOff							=> runningOff()
 				case PlayerAction.PitchAbsolute(pitch)					=> pitchAbsolute(pitch)
-				case x@PlayerAction.PhaseAbsolute(position)				=> fadeNowOrLater { syncPhaseTo(position)	}
-				case x@PlayerAction.PhaseRelative(offset)				=> fadeNowOrLater { movePhaseBy(offset)	}
+				case x@PlayerAction.PhaseAbsolute(position)				=> fadeNowOrLater { syncPhaseTo(position)			}
+				case x@PlayerAction.PhaseRelative(offset)				=> fadeNowOrLater { movePhaseBy(offset)				}
 				case x@PlayerAction.PositionAbsolute(frame)				=> fadeNowOrLater { positionAbsolute(frame)			}
 				case x@PlayerAction.PositionJump(frame, rhythmUnit)		=> fadeNowOrLater { positionJump(frame, rhythmUnit)	}
-				case x@PlayerAction.PositionSeek(offset)				=> fadeNowOrLater { positionSeek(offset)	}
+				case x@PlayerAction.PositionSeek(offset)				=> fadeNowOrLater { positionSeek(offset)			}
 				case PlayerAction.DragBegin								=> dragBegin()
 				case PlayerAction.DragEnd								=> dragEnd()
 				case PlayerAction.DragAbsolute(v)						=> dragAbsolute(v)
@@ -160,11 +160,11 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 				inputR	= new SampleChannel(sample, 1)
 		}
 		
-		rate		= sample.frameRate.toDouble
-		endFrame	= sample.frameCount + outputRate*Player.endDelay
+		rate	= sample.frameRate.toDouble
 		
 		loopDisable()
 		updateV()
+		updateEndFrame()
 		keepSpeedSynced()
 	}
 	
@@ -172,6 +172,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 		if (rhythm == this.rhythm)	return
 		this.rhythm	= rhythm
 		
+		updateEndFrame()
 		keepSpeedSynced()
 	}
 	
@@ -180,6 +181,14 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 		this.needSync	= needSync
 		
 		keepSpeedSynced()
+	}
+	
+	private def updateEndFrame() {
+		endFrame	=
+				rhythm cata (
+					sample.frameCount + outputRate*Player.endDelay,
+					_.measureRaster ceil sample.frameCount
+				)
 	}
 	
 	//------------------------------------------------------------------------------
@@ -325,7 +334,8 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 					val	raw		= x + (steps - offset) * raster.size
 					raster round raw
 				}
-		moveTo(position)
+		// loopAround(position)
+		startFade(position)
 	}
 	
 	//------------------------------------------------------------------------------
@@ -448,15 +458,15 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 				Span(raster floor frame, raster.size * size.steps)
 			}
 		
-	/** moves a loop we're in around the new position */
-	private def moveTo(position:Double) {
-		val offset	= position - x
+	/*
+	// moves a loop we're in around the new position
+	private def loopAround(position:Double) {
 		loopSpan	= loopSpan map { it =>
-			if (it contains x)	it copy (start = it.start + offset)
+			if (it contains x)	it move (position - x)
 			else				it
 		}
-		startFade(position)
 	}
+	*/
 	
 	private def moveInLoop(offset:Double) {
 		val rawX	= x + offset
@@ -473,8 +483,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 	}
 	
 	private def jumpBackAfterLoopEnd(oldX:Double) {
-		// TODO move playing check outwards?
-		if (mode == Playing && loopSpan.isDefined) {
+		if (loopSpan.isDefined) {
 			val loopGot	= loopSpan.get
 			val loopEnd	= loopGot.end
 			if (oldX < loopEnd && x >= loopEnd) {
@@ -607,7 +616,9 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 		x	+= move
 		xf	+= move
 		
-		jumpBackAfterLoopEnd(oldX)
+		if (mode == Playing) {
+			jumpBackAfterLoopEnd(oldX)
+		}
 
 		trim.step()
 		filter.step()

@@ -189,12 +189,15 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]]
 			signal {
 				dragging.current map { case (forward, fine) =>
 					running.current cata (
-							additive(
-									forward, zeroFrequency, 
-									Deck stopDragSpeed fine),
-							multiplicative(
-									forward, pitch.current, 
-									Deck playDragSpeed fine))
+						additive(
+							forward, zeroFrequency, 
+							Deck stopDragSpeed fine
+						),
+						multiplicative(
+							forward, pitch.current, 
+							Deck playDragSpeed fine
+						)
+					)
 				}
 			}
 	
@@ -233,6 +236,7 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]]
 	def ejectTrack() {
 		setRunning(false)
 		track set None
+		tone.resetAll()
 	}
 	
 	def syncToggle() {
@@ -258,8 +262,9 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]]
 	def addCue(fine:Boolean) {
 		changeTrack {
 			_ addCuePoint (
-					position.current,
-					fine cata (Measure, Beat))
+				position.current,
+				fine cata (Measure, Beat)
+			)
 		}
 	}
 	
@@ -276,10 +281,12 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]]
 	// TODO ugly
 	def changePitch(steps:Int, fine:Boolean) {
 		setPitch(
-				pitch.current * 
-				octave2frequency(
-						frequency2octave(Deck pitchFactor fine) * 
-						steps))
+			pitch.current * 
+			octave2frequency(
+				frequency2octave(Deck pitchFactor fine) * 
+				steps
+			)
+		)
 	}
 	
 	// private def pitchStep	=
@@ -293,7 +300,7 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]]
 	
 	def changeRhythmAnchor() {
 		changeTrack { 
-			_	setRhythmAnchor	position.current
+			_ setRhythmAnchor position.current
 		}
 	}
 	
@@ -306,26 +313,30 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]]
 	def moveRhythmBy(positive:Boolean, fine:Boolean) {
 		changeTrack { 
 			_ moveRhythmBy additive(
-					positive, 0,
-					Deck cursorRhythmFactor fine)
+				positive, 0,
+				Deck cursorRhythmFactor fine
+			)
 		}
 	}
 	
 	def resizeRhythmBy(positive:Boolean, fine:Boolean) {
 		changeTrack { 
 			_ resizeRhythmBy multiplicative(
-					positive, 1, 
-					Deck independentRhythmFactor fine)
+				positive, 1, 
+				Deck independentRhythmFactor fine
+			)
 		}
 	}
 	
 	def resizeRhythmAt(positive:Boolean, fine:Boolean) {
 		changeTrack { 
 			_ resizeRhythmAt (
-					position.current, 
-					additive(
-							positive, 0, 
-							Deck cursorRhythmFactor fine)) 
+				position.current, 
+				additive(
+					positive, 0, 
+					Deck cursorRhythmFactor fine
+				)
+			) 
 		}
 	}
 	
@@ -374,4 +385,9 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]]
 				).flatten guardBy { _.nonEmpty }
 			}
 	playerActions observe	notifyPlayer
+	
+	//------------------------------------------------------------------------------
+	//## wiring
+	
+	track observe { _ => tone.resetAll() }
 }

@@ -2,6 +2,8 @@ package jackdaw.media
 
 import java.io.File
 
+import jackdaw.util.Checked
+
 object Avconv extends Decoder {
 	def name	= "avconv"
 				

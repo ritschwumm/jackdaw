@@ -8,4 +8,7 @@ final case class Span(start:Double, size:Double) {
 		
 	def contains(frame:Double):Boolean	=
 			frame >= start && frame < end
+		
+	def move(offset:Double):Span	=
+			copy(start = start + offset)
 }

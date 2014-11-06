@@ -4,6 +4,8 @@ import java.io.File
 
 import scutil.lang._
 
+import jackdaw.util.Checked
+
 object Decoder {
 	val all:ISeq[Decoder]	=
 			Vector(
