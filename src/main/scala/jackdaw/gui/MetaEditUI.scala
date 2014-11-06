@@ -27,8 +27,10 @@ final class MetaEditUI(value:Signal[Option[String]], strong:Boolean) extends UI 
 	//## components
 	
 	private val field	= new JTextField
-	field setFont	(strong	cata (Style.meta.edit.weak.font,	Style.meta.edit.strong.font))
-	field setBorder	null
+	field	setFont			(strong	cata (Style.meta.edit.weak.font,	Style.meta.edit.strong.font))
+	field	setBorder		null
+	// file dropping should not focus this
+	field	setDropTarget	null
 	val component:JComponent	= field
 
 	//------------------------------------------------------------------------------

@@ -107,7 +107,8 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]]
 	val fileName:Signal[Option[String]]			= signal { track.current map	{ _.fileName			} }
 	val cuePoints:Signal[Option[ISeq[Double]]]	= signal { track.current map	{ _.cuePoints.current	} }
 	val annotation:Signal[Option[String]]		= signal { track.current map	{ _.annotation.current	} }
-	val loaded:Signal[Boolean]					= signal { track.current exists	{ _.loaded.current		} }
+	val dataLoaded:Signal[Boolean]				= signal { track.current exists	{ _.dataLoaded.current	} }
+	val fullyLoaded:Signal[Boolean]				= signal { track.current exists	{ _.fullyLoaded.current	} }
 	
 	val cuePointsFlat:Signal[ISeq[Double]]		= signal { cuePoints.current.flattenMany }
 	
@@ -221,22 +222,13 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]]
 			input.edge.filterOption map move
 
 	//------------------------------------------------------------------------------
-	//## autosync
+	//## autocue
 
-	// BETTER less ugly
-	private val trackGotLoaded:Events[Unit]	= {
-		// track goes to Some while loaded is true
-		val switchedToLoadedTrack:Events[Unit]	= (track.edge.filterOption snapshotOnly loaded).trueUnit
-		// loaded goes to true while track is Some
-		val currentTrackGotLoaded:Events[Unit]	= track flattenEvents { _ cata (never, _.loaded.edge.trueUnit) }
-		// loaded
-		switchedToLoadedTrack orElse currentTrackGotLoaded
-	}
-		
-	// TODO should be done as soon as the cue has been provided! 
 	private val gotoCueOnLoad:Events[PlayerAction.PositionAbsolute]	= {
-		val loadPoint:Signal[Double]	= cuePointsFlat map { _ lift 0 getOrElse 0.0 }
-		trackGotLoaded snapshotOnly loadPoint map PlayerAction.PositionAbsolute.apply
+		val switchedToLoadedTrack:Events[Unit]	= (track.edge.filterOption snapshotOnly dataLoaded).trueUnit
+		val existingTrackGotLoaded:Events[Unit]	= track flatMapEvents { _ cata (never, _.dataLoaded.edge.trueUnit) }
+		val jumpToCueNow:Events[Unit]			= switchedToLoadedTrack orElse existingTrackGotLoaded
+		jumpToCueNow snapshotOnly cuePointsFlat map { _ lift 0 getOrElse 0.0 into PlayerAction.PositionAbsolute.apply }
 	}
 	
 	//------------------------------------------------------------------------------

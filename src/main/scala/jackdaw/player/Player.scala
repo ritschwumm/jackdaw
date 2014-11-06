@@ -95,7 +95,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 				afterEnd		= afterEnd,
 				position		= x,
 				pitch			= pitch,
-				measureMatch	= measureMatch,
+				measureMatch	= phaseMatch(Measure),
 				beatRate		= beatRate,
 				needSync		= needSync,
 				hasSync			= hasSync,
@@ -272,17 +272,16 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 	/** change the phase by some offset measured in RasterUnits */
 	private def movePhaseBy(rhythmUnit:RhythmUnit, offset:Double) {
 		currentRhythmRaster(rhythmUnit) foreach { raster =>
-			// TODO ensure we don't leave a loop here
-			startFade(x + offset * raster.size)
+			moveInLoop(offset * raster.size)
 		}
 	}
 	
-	private def measureMatch:Option[Double]	=
-			if (running)	phaseMatch(Measure)
-			else			phaseStatic(Measure)
+	private def phaseMatch(rhythmUnit:RhythmUnit):Option[Double]	=
+			if (running)	phaseMetronome(rhythmUnit)
+			else			phaseStatic(rhythmUnit)
 		
 	/** how far we are from the rhythm of the Metronome in [-.5..+.5] rhythmUnits for late to early */
-	private def phaseMatch(rhythmUnit:RhythmUnit):Option[Double]	=
+	private def phaseMetronome(rhythmUnit:RhythmUnit):Option[Double]	=
 			currentRhythmPhase(rhythmUnit) map { here =>
 				val there	= metronome	phase rhythmUnit
 				moduloDouble(here - there + 0.5, 1) - 0.5
@@ -470,12 +469,27 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 		val offset	= position - x
 		loop	= loop map { it =>
 			if (it contains x)	it copy (start = it.start + offset)
-				else			it
+			else				it
 		}
 		startFade(position)
 	}
 	
-	private def keepInLoop(oldX:Double) {
+	private def moveInLoop(offset:Double) {
+		val rawX	= x + offset
+		val newX	= 
+				if (loop.isDefined) {
+					val loopGot	= loop.get
+					if (loopGot contains x) {
+						loopGot lock rawX
+					}
+					else rawX
+				}
+				else rawX
+		startFade(newX)
+	}
+	
+	private def jumpBackAfterLoopEnd(oldX:Double) {
+		// TODO move playing check outwards?
 		if (mode == Playing && loop.isDefined) {
 			val loopGot	= loop.get
 			val loopEnd	= loopGot.end
@@ -485,7 +499,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 				})
 			}
 		}
-	}	
+	}
 	
 	//------------------------------------------------------------------------------
 	//## generator
@@ -609,7 +623,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 		x	+= move
 		xf	+= move
 		
-		keepInLoop(oldX)
+		jumpBackAfterLoopEnd(oldX)
 
 		trim.step()
 		filter.step()

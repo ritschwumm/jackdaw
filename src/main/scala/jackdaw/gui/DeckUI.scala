@@ -72,7 +72,7 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 	private val phaseUI			= new PhaseUI(deck.measureMatch, deck.rhythm)
 	private val transportUI		= 
 			new TransportUI(
-				trackLoaded		= deck.loaded,
+				trackLoaded		= deck.fullyLoaded,
 				playing			= deck.running,
 				afterEnd		= deck.afterEnd,
 				looping			= looping,

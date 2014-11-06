@@ -57,13 +57,15 @@ final class Track(file:File) extends Observing with Logging {
 	private val sampleSet		= cell[Option[Sample]](None)
 	private val bandCurveSet	= cell[Option[BandCurve]](None)
 	private val dataSet			= cell[TrackData](TrackData.empty)
-	private val loadedSet		= cell[Boolean](false)
+	private val dataLoadedSet	= cell[Boolean](false)
+	private val fullyLoadedSet	= cell[Boolean](false)
 	
 	val wav:Signal[Option[File]]			= wavSet
 	val sample:Signal[Option[Sample]]		= sampleSet
 	val bandCurve:Signal[Option[BandCurve]]	= bandCurveSet
 	val data:Signal[TrackData]				= dataSet
-	val loaded:Signal[Boolean]				= loadedSet
+	val dataLoaded:Signal[Boolean]			= dataLoadedSet
+	val fullyLoaded:Signal[Boolean]			= fullyLoadedSet
 	
 	private def modifyData(func:Endo[TrackData]) {
 		val modified	= func(dataSet.current)
@@ -118,6 +120,9 @@ final class Track(file:File) extends Observing with Logging {
 					modifyData(
 						TrackData.L.metadata putter metadataVal
 					)
+				}
+				edtWait {
+					dataLoadedSet set true
 				}
 				
 				// provide wav
@@ -213,12 +218,12 @@ final class Track(file:File) extends Observing with Logging {
 				}
 				
 				INFO("track loaded")
-				// TODO replace with information about what i really need
-				edtWait { loadedSet set true }
+				edtWait { fullyLoadedSet set true }
 			}
 			catch { case e:Exception =>
 				ERROR("track could not be loaded", e)
-				edtWait { loadedSet set false }
+				edtWait { dataLoadedSet		set false }
+				edtWait { fullyLoadedSet	set false }
 			}
 		}
 	}
