@@ -9,6 +9,7 @@ import scutil.gui.CasterInstances._
 
 import screact._
 
+import jackdaw.model.LoopDef
 import jackdaw.gui.action._
 
 object TransportUI {
@@ -16,52 +17,58 @@ object TransportUI {
 }
 
 /** playback control */
-final class TransportUI(trackLoaded:Signal[Boolean], playing:Signal[Boolean], afterEnd:Signal[Boolean], looping:Signal[Boolean], rhythmic:Signal[Boolean], cuePointsCount:Signal[Int]) extends UI with Observing {
+final class TransportUI(trackLoaded:Signal[Boolean], playing:Signal[Boolean], afterEnd:Signal[Boolean], loopDef:Signal[Option[LoopDef]], rhythmic:Signal[Boolean], cuePointsCount:Signal[Int]) extends UI with Observing {
 	//------------------------------------------------------------------------------
 	//## input
 	
-	private val playingIcon	= 
-			playing map { _ cata (ButtonStyleFactory.PLAY, ButtonStyleFactory.PAUSE) } 
+	private val playingIcon:Signal[ButtonStyle]	= 
+			playing map { _ cata (ButtonStyleFactory.PLAY, ButtonStyleFactory.PAUSE) }
+		
+	// TODO ugly
 	
-	private val loopingIcon	= 
-			looping map { _ cata (ButtonStyleFactory.LOOP, ButtonStyleFactory.UNLOOP) } 
+	private def loopingAt(it:LoopDef):Signal[Boolean]	=
+			loopDef map { _ ==== (Some(it):Option[LoopDef]) }
+	
+	private def loopingIcon(it:LoopDef):Signal[ButtonStyle]	=
+			loopingAt(it) map {
+				_ cata (ButtonStyleFactory.LOOP _, ButtonStyleFactory.UNLOOP _) apply it.measures
+			} 
 	
 	//------------------------------------------------------------------------------
 	//## cue point components
 	
-	private val cuePointsPanel	= new JPanel
-	cuePointsPanel setLayout new BoxLayout(cuePointsPanel, BoxLayout.X_AXIS)
-	
-	private val (cuePointComponents,cuePointActionEvents)	= 
+	private val (cuePointUIs, cuePointActionEvents)	= 
 			(cuePointsCount map { count =>
 				decouple {
-					val (components, actions)	= 
+					val (uis, actions)	= 
 							(0 until count map { index =>
-								val image	= ButtonStyleFactory STOP_DIGIT index
-								val button	= new ButtonUI(
+								val image	= ButtonStyleFactory CUE index
+								val button	=
+										new ButtonUI(
 											ButtonStyleFactory.size,
 											static(image),
-											trackLoaded)
-								val actions		= button.actions tag index
-								val component	= button.component
-								// avoid GC for the ButtonUI as long as the Component is still alive
-								component putClientProperty ("SELF", button)
-								(component, actions)
+											trackLoaded
+										)
+								val actions	= button.actions tag index
+								(button, actions)
 							})
 							.unzip
-					(components, actions)
+					(uis, actions)
 				}
 			})
 			.unzip
+	// cuePointUIs:Signal[ISeq[UI]]
+	// cuePointActionEvents:Signal[ISeq[Events[Int]]]
+			
 	private val cuePointActions:Events[Int]	= 
 			(cuePointActionEvents map Events.multiOrElse).flattenEvents
-	
-	cuePointComponents observeNow { components =>
-		cuePointsPanel.removeAll()
-		components foreach cuePointsPanel.add
-		cuePointsPanel.revalidate()
-		cuePointsPanel.repaint()
-	}
+		
+	private val cuePointsPanel:UI	=
+			new SwitchUI(
+				cuePointUIs map { items =>
+					new HBoxUI(items map BoxComponent.apply)
+				}
+			)
 	
 	private val canPlay:Signal[Boolean]	= 
 			signal {
@@ -86,6 +93,31 @@ final class TransportUI(trackLoaded:Signal[Boolean], playing:Signal[Boolean], af
 				cuePointsCount.current != 0 &&
 				trackLoaded.current
 			}
+			
+	//------------------------------------------------------------------------------
+	//## loop components
+	
+	val (loopUIs, loopActionEvents)	=
+			(	LoopDef.all map { loopDef =>
+					val button	=
+							new ButtonUI(
+								size	= ButtonStyleFactory.size,
+								style	= loopingIcon(loopDef),
+								enabled	= canLoop
+							)
+					val action	=
+							button.actions snapshotOnly loopingAt(loopDef) map { _ prevent loopDef }
+					(button, action)
+				}
+			).unzip
+	// loopUIs:ISeq[UI]
+	// loopActionEvents:ISeq[Events[Option[LoopDef]]]
+			
+	private val loopActions:Events[Option[LoopDef]]	= 
+			Events multiOrElse loopActionEvents
+			
+	private val loopPanel:UI	=
+			new HBoxUI(loopUIs map BoxComponent.apply)
 	
 	//------------------------------------------------------------------------------
 	//## components
@@ -95,7 +127,6 @@ final class TransportUI(trackLoaded:Signal[Boolean], playing:Signal[Boolean], af
 	private val	seekBackwardButton	= new ButtonUI(ButtonStyleFactory.size, static(ButtonStyleFactory.LEFT),	trackLoaded)
 	private val	seekForwardButton	= new ButtonUI(ButtonStyleFactory.size, static(ButtonStyleFactory.RIGHT),	trackLoaded)
 	private val	ejectButton			= new ButtonUI(ButtonStyleFactory.size, static(ButtonStyleFactory.EJECT),	trackLoaded)
-	private val	loopToggleButton	= new ButtonUI(ButtonStyleFactory.size, loopingIcon,						canLoop)
 	private val	addCueButton		= new ButtonUI(ButtonStyleFactory.size, static(ButtonStyleFactory.RECORD),	canAddCuePoint)
 	private val	removeCueButton		= new ButtonUI(ButtonStyleFactory.size, static(ButtonStyleFactory.CROSS),	canRemoveCuePoint)
 	
@@ -112,9 +143,9 @@ final class TransportUI(trackLoaded:Signal[Boolean], playing:Signal[Boolean], af
 				BoxStrut(4),
 				ejectButton,
 				BoxStrut(16),
-				loopToggleButton,
+				loopPanel,
 				BoxGlue,
-				cuePointsPanel:UI,
+				cuePointsPanel,
 				BoxStrut(4+2),
 				removeCueButton,
 				BoxStrut(2),
@@ -127,14 +158,14 @@ final class TransportUI(trackLoaded:Signal[Boolean], playing:Signal[Boolean], af
 	
 	import ActionUtil._
 	
-	val playToggle:Events[Unit]	= playToggleButton.actions
-	val loopToggle:Events[Unit]	= loopToggleButton.actions
-	val eject:Events[Unit]		= ejectButton.actions
-	val jumpCue:Events[Int]		= cuePointActions
-	val addCue:Events[Unit]		= addCueButton.actions
-	val removeCue:Events[Unit]	= removeCueButton.actions
+	val playToggle:Events[Unit]			= playToggleButton.actions
+	val setLoop:Events[Option[LoopDef]]	= loopActions
+	val eject:Events[Unit]				= ejectButton.actions
+	val jumpCue:Events[Int]				= cuePointActions
+	val addCue:Events[Unit]				= addCueButton.actions
+	val removeCue:Events[Unit]			= removeCueButton.actions
 	
-	val seeking:Signal[Option[Boolean]]		=
+	val seeking:Signal[Option[Boolean]]	=
 			seekForwardButton.pressed	upDown
 			seekBackwardButton.pressed
 }

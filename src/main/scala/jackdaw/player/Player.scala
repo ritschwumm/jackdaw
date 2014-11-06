@@ -82,7 +82,8 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 	private var fade		= fadeMax
 	private var fadeLater:Option[Task]	= None
 	
-	private var loop:Option[Span]	= None
+	private var loopSpan:Option[Span]	= None
+	private var loopDef:Option[LoopDef]	= None
 	
 	//------------------------------------------------------------------------------
 	//## engine api
@@ -101,33 +102,20 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 				hasSync			= hasSync,
 				// NOTE this resets the peak detector
 				masterPeak		= peakDetector.decay,
-				loop			= loop
+				loopSpan		= loopSpan,
+				loopDef			= loopDef
 			)
 			
 	private[player] def react(actions:ISeq[PlayerAction]):Unit	=
-			actions foreach reactDelaying
-			
-	private def reactDelaying(action:PlayerAction):Unit	=
-			action match {
-				// TODO might be better
-				//case x:PlayerAction.NeedsFading if isFading		=> 
-				//	fadeLater	= Some(thunk { reactImmediately(x) })
-				case x:PlayerAction.NeedsFading =>
-					fadeNowOrLater(thunk { reactImmediately(x)  })
-				case x	=>
-					reactImmediately(x)
-			}
-			
-	private def reactImmediately(action:PlayerAction):Unit	=
-			action match {
+			actions foreach {
 				case PlayerAction.RunningOn								=> runningOn()
 				case PlayerAction.RunningOff							=> runningOff()
 				case PlayerAction.PitchAbsolute(pitch)					=> pitchAbsolute(pitch)
-				case x@PlayerAction.PhaseAbsolute(rhythmUnit, offset)	=> syncPhaseTo(rhythmUnit, offset)
-				case x@PlayerAction.PhaseRelative(rhythmUnit, offset)	=> movePhaseBy(rhythmUnit, offset)
-				case x@PlayerAction.PositionAbsolute(frame)				=> positionAbsolute(frame)
-				case x@PlayerAction.PositionJump(frame, rhythmUnit)		=> positionJump(frame, rhythmUnit)
-				case x@PlayerAction.PositionSeek(steps, rhythmUnit)		=> positionSeek(steps, rhythmUnit)
+				case x@PlayerAction.PhaseAbsolute(position)				=> fadeNowOrLater { syncPhaseTo(position)	}
+				case x@PlayerAction.PhaseRelative(offset)				=> fadeNowOrLater { movePhaseBy(offset)	}
+				case x@PlayerAction.PositionAbsolute(frame)				=> fadeNowOrLater { positionAbsolute(frame)			}
+				case x@PlayerAction.PositionJump(frame, rhythmUnit)		=> fadeNowOrLater { positionJump(frame, rhythmUnit)	}
+				case x@PlayerAction.PositionSeek(offset)				=> fadeNowOrLater { positionSeek(offset)	}
 				case PlayerAction.DragBegin								=> dragBegin()
 				case PlayerAction.DragEnd								=> dragEnd()
 				case PlayerAction.DragAbsolute(v)						=> dragAbsolute(v)
@@ -135,11 +123,10 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 				case PlayerAction.ScratchEnd							=> scratchEnd()
 				case PlayerAction.ScratchRelative(frames)				=> scratchRelative(frames)
 				case PlayerAction.SetNeedSync(needSync)					=> setNeedSync(needSync)
-				case PlayerAction.LoopEnable(steps, rhythmUnit)			=> loopEnable(steps, rhythmUnit)
+				case PlayerAction.LoopEnable(size)						=> loopEnable(size)
 				case PlayerAction.LoopDisable							=> loopDisable()
 				case c@PlayerAction.ChangeControl(_,_,_,_,_,_,_,_,_)	=> changeControl(c)
 			}
-	
 	//------------------------------------------------------------------------------
 	//## common control
 	
@@ -175,8 +162,8 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 		
 		rate		= sample.frameRate.toDouble
 		endFrame	= sample.frameCount + outputRate*Player.endDelay
-		loop		= None
-			
+		
+		loopDisable()
 		updateV()
 		keepSpeedSynced()
 	}
@@ -212,7 +199,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 		
 		// autosync on start
 		if (needSync && canSync && running && mode == Playing) {
-			syncPhaseTo(Measure, 0)
+			syncPhaseTo(RhythmValue zero Measure)
 		}
 		
 		stopFade()
@@ -263,16 +250,16 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 	}
 	
 	/** set the phase to an absolute value measured in RasterUnits */
-	private def syncPhaseTo(rhythmUnit:RhythmUnit, offset:Double) {
-		phaseMatch(rhythmUnit) foreach { phaseGot =>
-			movePhaseBy(rhythmUnit, offset - phaseGot)
+	private def syncPhaseTo(position:RhythmValue) {
+		phaseMatch(position.unit) foreach { phaseGot =>
+			movePhaseBy(position move -phaseGot)
 		}
 	}
 			
 	/** change the phase by some offset measured in RasterUnits */
-	private def movePhaseBy(rhythmUnit:RhythmUnit, offset:Double) {
-		currentRhythmRaster(rhythmUnit) foreach { raster =>
-			moveInLoop(offset * raster.size)
+	private def movePhaseBy(offset:RhythmValue) {
+		currentRhythmRaster(offset.unit) foreach { raster =>
+			moveInLoop(offset.steps * raster.size)
 		}
 	}
 	
@@ -309,11 +296,8 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 	/** jump to a given position without while staying in sync  */
 	private def positionJump(frame:Double, rhythmUnit:RhythmUnit) {
 		rhythm match {
-			case Some(rhythm)	=>
-					val	raster	= rhythm raster rhythmUnit
-					positionJumpWithRaster(frame, raster)
-			case None			=>
-					positionAbsolute(frame)
+			case Some(rhythm)	=> positionJumpWithRaster(frame, rhythm raster rhythmUnit)
+			case None			=> positionAbsolute(frame)
 		}
 	}
 	
@@ -325,9 +309,9 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 	}
 	
 	/** jump for a given number of rhythm while staying in sync */
-	private def positionSeek(steps:Double, rhythmUnit:RhythmUnit) {
-		val raster	= rhythm getOrElse (Rhythm simple (0, rate)) raster rhythmUnit
-		positionSeekWithRaster(steps, raster)
+	private def positionSeek(offset:RhythmValue) {
+		val raster	= rhythm getOrElse (Rhythm simple (0, rate)) raster offset.unit
+		positionSeekWithRaster(offset.steps, raster)
 	}
 	
 	/** jump for a given number of rhythm while staying in sync */
@@ -393,9 +377,9 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 	@inline
 	private def isFading	= fade < fadeMax
 	
-	private def fadeNowOrLater(task:Task) {
-		if (isFading)	fadeLater	= Some(task)
-		else			task()
+	private def fadeNowOrLater(block: =>Unit) {
+		if (isFading)	fadeLater	= Some(thunk { block })
+		else			block
 	}
 	
 	private def startFade(newX:Double) {
@@ -448,26 +432,26 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 	//------------------------------------------------------------------------------
 	//## loop calculation
 	
-	private def loopEnable(steps:Double, rhythmUnit:RhythmUnit) {
-		loop	= mkLoop(x, steps, rhythmUnit)
+	private def loopEnable(preset:LoopDef) {
+		loopSpan	= mkLoop(x, preset.size)
+		loopDef		= loopSpan.isDefined guard preset
 	}
 	
 	private def loopDisable() {
-		loop	= None
+		loopSpan	= None
+		loopDef		= None
 	}
 	
-	private def mkLoop(frame:Double, steps:Double, rhythmUnit:RhythmUnit):Option[Span]	=
-			currentRhythmRaster(rhythmUnit) map { raster1 =>
-				// NOTE rastering the start to a scaled raster might not make sense
-				val raster	= raster1	scale steps
-				val start	= raster	floor frame
-				Span(raster floor frame, raster.size)
+	// start is rastered by size.unit only. not scaled
+	private def mkLoop(frame:Double, size:RhythmValue):Option[Span]	=
+			currentRhythmRaster(size.unit) map { raster =>
+				Span(raster floor frame, raster.size * size.steps)
 			}
 		
 	/** moves a loop we're in around the new position */
 	private def moveTo(position:Double) {
 		val offset	= position - x
-		loop	= loop map { it =>
+		loopSpan	= loopSpan map { it =>
 			if (it contains x)	it copy (start = it.start + offset)
 			else				it
 		}
@@ -477,8 +461,8 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 	private def moveInLoop(offset:Double) {
 		val rawX	= x + offset
 		val newX	= 
-				if (loop.isDefined) {
-					val loopGot	= loop.get
+				if (loopSpan.isDefined) {
+					val loopGot	= loopSpan.get
 					if (loopGot contains x) {
 						loopGot lock rawX
 					}
@@ -490,13 +474,13 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 	
 	private def jumpBackAfterLoopEnd(oldX:Double) {
 		// TODO move playing check outwards?
-		if (mode == Playing && loop.isDefined) {
-			val loopGot	= loop.get
+		if (mode == Playing && loopSpan.isDefined) {
+			val loopGot	= loopSpan.get
 			val loopEnd	= loopGot.end
 			if (oldX < loopEnd && x >= loopEnd) {
-				fadeNowOrLater(thunk {
+				fadeNowOrLater { 
 					startFade(x - loopGot.size)
-				})
+				}
 			}
 		}
 	}

@@ -43,21 +43,15 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]]
 	//------------------------------------------------------------------------------
 	//## internal emitters
 	
-	private val runningEmitter	= emitter[PlayerAction.Running]
-	private val pitchEmitter	= emitter[PlayerAction.PitchAbsolute]
-	private val gotoEmitter		= emitter[PlayerAction.PositionAbsolute]
-	private val jumpEmitter		= emitter[PlayerAction.PositionJump]
-	private val seekEmitter		= emitter[PlayerAction.PositionSeek]
-	private val phaseEmitter	= emitter[PlayerAction.Phase]
-	private val needSyncEmitter	= emitter[PlayerAction.SetNeedSync]
-	private val loopingEmitter	= emitter[PlayerAction.Looping]
+	private val runningEmitter	= emitter[PlayerAction]
+	private val otherEmitter	= emitter[PlayerAction]
 	
 	private def setRunning(running:Boolean) {
 		runningEmitter emit (running cata (PlayerAction.RunningOff, PlayerAction.RunningOn))
 	}
 	
 	def setPitch(pitch:Double) {
-		pitchEmitter emit PlayerAction.PitchAbsolute(pitch)
+		otherEmitter emit PlayerAction.PitchAbsolute(pitch)
 	}
 	def setPitchOctave(octave:Double) {
 		setPitch(octave2frequency(octave))
@@ -65,34 +59,30 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]]
 	
 	def jumpFrame(frame:Double, fine:Boolean) {
 		val rhythmUnit	= fine cata (Measure, Beat)
-		jumpEmitter emit PlayerAction.PositionJump(frame, rhythmUnit)
+		otherEmitter emit PlayerAction.PositionJump(frame, rhythmUnit)
 	}
 	
 	def seek(steps:Int, fine:Boolean) {
-		val rhythmUnit	= fine cata (Measure, Beat)
-		seekEmitter emit PlayerAction.PositionSeek(steps, rhythmUnit)
+		val offset	= RhythmValue(steps, fine cata (Measure, Beat))
+		otherEmitter emit PlayerAction.PositionSeek(offset)
 	}
 	
-	def syncPhaseManually(rhythmUnit:RhythmUnit, offset:Double) {
-		phaseEmitter emit PlayerAction.PhaseAbsolute(rhythmUnit, offset)
+	def syncPhaseManually(position:RhythmValue) {
+		otherEmitter emit PlayerAction.PhaseAbsolute(position)
 	}
 	
-	def movePhase(rhythmUnit:RhythmUnit, steps:Double, fine:Boolean) {
-		val offset	= (Deck phaseMoveOffset fine) * steps
-		phaseEmitter emit PlayerAction.PhaseRelative(rhythmUnit, offset)
+	def movePhase(offset:RhythmValue, fine:Boolean) {
+		val scaled	= offset scale (Deck phaseMoveOffset fine)
+		otherEmitter emit PlayerAction.PhaseRelative(scaled)
  	}
  	
  	private def emitSetNeedSync(needSync:Boolean) {
- 		needSyncEmitter	emit PlayerAction.SetNeedSync(needSync)
+ 		otherEmitter	emit PlayerAction.SetNeedSync(needSync)
  	}
  	
- 	private def emitLooping(enable:Boolean) {
- 		loopingEmitter	emit (
- 			enable cata (
- 				PlayerAction.LoopDisable,
- 				// TODO loop hardcoded
- 				PlayerAction.LoopEnable(1, Measure)
- 			)
+ 	private def emitLooping(size:Option[LoopDef]) {
+ 		otherEmitter emit (
+ 			size cata (PlayerAction.LoopDisable, PlayerAction.LoopEnable)
  		)
  	}
  	
@@ -120,7 +110,8 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]]
 	val position		= playerFeedback map { _.position		} 
 	val measureMatch	= playerFeedback map { _.measureMatch	}
 	val beatRate		= playerFeedback map { _.beatRate		}
-	val loop			= playerFeedback map { _.loop			}
+	val loopSpan		= playerFeedback map { _.loopSpan		}
+	val loopDef			= playerFeedback map { _.loopDef		}
 	
 	val synced:Signal[Option[Boolean]]	=
 			signal {
@@ -236,7 +227,7 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]]
 	
 	def loadTrack(file:File) {
 		setRunning(false)
-		track set (Track load file )
+		track set (Track load file)
 	}
 	
 	def ejectTrack() {
@@ -252,8 +243,8 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]]
 		setRunning(!running.current)
 	}
 	
-	def loopToggle() {
-		emitLooping(!playerFeedback.current.loop.isDefined)
+	def setLoop(preset:Option[LoopDef]) {
+		emitLooping(preset)
 	}
 	
 	def jumpCue(index:Int, fine:Boolean) {
@@ -374,18 +365,12 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]]
 			events {
 				Vector(
 					runningEmitter.message,
-					pitchEmitter.message,		
-					phaseEmitter.message,
-					gotoEmitter.message,	  
-					jumpEmitter.message, 
-					seekEmitter.message,
+					otherEmitter.message,
 					scratchingState.message,
 					scratchingRelative.message,
-					draggingState.message,		
+					draggingState.message,
 					draggingAbsolute.message,
-					gotoCueOnLoad.message,
-					needSyncEmitter.message,
-					loopingEmitter.message
+					gotoCueOnLoad.message
 				).flatten guardBy { _.nonEmpty }
 			}
 	playerActions observe	notifyPlayer

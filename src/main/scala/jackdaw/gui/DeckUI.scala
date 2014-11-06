@@ -37,9 +37,6 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 	private val cuePointsCount:Signal[Int]	= 
 			cuePoints map { _.size }
 		
-	private val looping:Signal[Boolean]	=
-			deck.loop map { _.isDefined }
-
 	private val rhythmic:Signal[Boolean]	=
 			deck.rhythm map { _.isDefined }
 	
@@ -54,7 +51,7 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 				playerPosition	= deck.position,
 				cuePoints		= cuePoints,
 				rhythmLines		= rhythmLines,
-				loop			= deck.loop,
+				loop			= deck.loopSpan,
 				widthOrigin		= 0.5,
 				shrink			= false
 			)
@@ -65,7 +62,7 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 				playerPosition	= deck.position,
 				cuePoints		= cuePoints,
 				rhythmLines		= anchorLines,
-				loop			= static(None),	// deck.loop,
+				loop			= deck.loopSpan,
 				widthOrigin		= 0.0,
 				shrink			= true
 			)
@@ -75,7 +72,7 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 				trackLoaded		= deck.fullyLoaded,
 				playing			= deck.running,
 				afterEnd		= deck.afterEnd,
-				looping			= looping,
+				loopDef			= deck.loopDef,
 				rhythmic		= rhythmic,
 				cuePointsCount	= cuePointsCount
 			)
@@ -129,8 +126,9 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 	
 	overviewUI.jump.withFine	trigger	deck.jumpFrame
 	
-	phaseUI.jump				observe	(deck syncPhaseManually	(Measure, _))
-	phaseUI.mouseWheel.withFine	trigger	(deck movePhase			(Measure, _:Int, _:Boolean))
+	// TODO hardcoded Measure
+	phaseUI.jump				observe	{ phase 		=> deck syncPhaseManually	RhythmValue(phase, Measure) 		}
+	phaseUI.mouseWheel.withFine	trigger	{ (steps, fine)	=> deck movePhase			(RhythmValue(steps, Measure), fine)	}
 
 	private val ejectTrackKey:Events[Unit]	=
 			Key(VK_LESS ,	KEY_LOCATION_STANDARD).asAction
@@ -151,12 +149,21 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 			transportUI.playToggle	
 	playToggle	trigger	deck.playToggle
 	
-	private val loopToggleKey:Events[Unit]	=
-			Key(VK_NUMBER_SIGN,	KEY_LOCATION_STANDARD).asAction
-	private val loopToggle:Events[Unit]	=
-			loopToggleKey		orElse
-			transportUI.loopToggle	
-	loopToggle	trigger	deck.loopToggle
+	private val setLoopKeyActions:Events[Option[LoopDef]]	=
+			Events multiOrElse (
+				ISeq(VK_U, VK_I, VK_O, VK_P)
+				.zip	(LoopDef.all)
+				.map	{ case (k, preset)	=>
+					Key(k,	KEY_LOCATION_STANDARD).asAction tag Some(preset)
+				}
+			)
+	private val resetLoopKeyAction:Events[Option[LoopDef]]	=
+			Key(VK_NUMBER_SIGN,	KEY_LOCATION_STANDARD).asAction tag None
+	private val setLoop:Events[Option[LoopDef]]	=
+			setLoopKeyActions	orElse
+			resetLoopKeyAction	orElse
+			transportUI.setLoop
+	setLoop observe	deck.setLoop
 	
 	private val syncToggleKey:Events[Unit]	=
 			Key(VK_INSERT,		KEY_LOCATION_STANDARD).asAction

@@ -40,19 +40,19 @@ object ButtonStyleFactory {
 	val PLAY	= outlineButtonStyle(poly(
 		draft(	a1,	g4,	a7, a1	)
 	))
-	val STOP	= outlineButtonStyle(poly(
-		draft(	a1,	g1,	g7,	a7, a1	)
+	val PAUSE	= outlineButtonStyle(poly(
+		draft(	b1,	b7	),
+		draft(	f1,	f7	)
 	))
-	val LOOP	= outlineButtonStyle(poly(
-		draft(	f1, g2, g6, f7, b7, a6, a2, b1	)
-	))
-	val UNLOOP	= outlineButtonStyle(poly(
-		draft(	e1, f1, g2, g6, f7, b7, a6, a2, b1, c1	)
-	))
+	// val STOP	= outlineButtonStyle(poly(
+	// 	draft(	a1,	g1,	g7,	a7, a1	)
+	// ))
+	
 	val EJECT	= outlineButtonStyle(poly(
 		draft(	a7,	g7	),
 		draft(	b4,	d1,	f4, b4	)
 	))
+	
 	val LEFT	= outlineButtonStyle(poly(
 		draft(	g1,	d4,	g7	),
 		draft(	d1,	a4,	d7	)
@@ -69,6 +69,7 @@ object ButtonStyleFactory {
 		draft(	a1,	d4,	g1	),
 		draft(	a4,	d7,	g4	)
 	))
+	
 	val PLUS	= outlineButtonStyle(poly(
 		draft(	d1,	d7	),
 		draft(	a4,	g4	)
@@ -76,14 +77,27 @@ object ButtonStyleFactory {
 	val MINUS	= outlineButtonStyle(poly(
 		draft(	a4,	g4	)
 	))
-	val CROSS	= outlineButtonStyle(poly(
-		draft(	a1,	g7	),
-		draft(	a7,	g1	)
+	
+	/*
+	val LOOP	= outlineButtonStyle(poly(
+		draft(	f1, g2, g6, f7, b7, a6, a2, b1	)
 	))
-	val PAUSE	= outlineButtonStyle(poly(
-		draft(	b1,	b7	),
-		draft(	f1,	f7	)
-	))
+	*/
+	def LOOP(digit:Int):ButtonStyle	=
+			loopButtonStyle(
+				poly(
+					draft(	/*f1,g2*/g4, g6, f7, b7, a6, a4/*a2,b1*/	)
+				),
+				DIGITS lift digit
+			)
+	def UNLOOP(digit:Int):ButtonStyle	=
+			loopButtonStyle(
+				poly(
+					draft(	e1, f1, g2, g6, f7, b7, a6, a2, b1, c1	)
+				),
+				DIGITS lift digit
+			)
+			
 	val RECORD	= outlineButtonStyle(poly(
 		draft(	
 			c1,	a3,	a5,	
@@ -91,17 +105,17 @@ object ButtonStyleFactory {
 			g3,	e1,	c1
 		)
 	))
+	val CROSS	= outlineButtonStyle(poly(
+		draft(	a1,	g7	),
+		draft(	a7,	g1	)
+	))
 	
-	def STOP_DIGIT(digit:Int):ButtonStyle	=
-			(DIGITS lift digit)
-			.cata (
-				outlineButtonStyle _,
-				digitButtonStyle _
-			)
-			.apply (
+	def CUE(digit:Int):ButtonStyle	=
+			cueButtonStyle(
 				poly(
 					draft(	a1,	g1,	g7,	a7,	a1	)
-				)
+				),
+				DIGITS lift digit
 			)
 	
 	def TRIAL(state:Option[Boolean]):ButtonStyle	=
@@ -139,14 +153,29 @@ object ButtonStyleFactory {
 			}
 	*/
 	
-	private def digitButtonStyle(digit:Shape)(base:Poly):ButtonStyle	=
+	// just puts a digit on top
+	private def loopButtonStyle(base:Poly, digit:Option[Shape]):ButtonStyle	=
+			buttonStyle { (shapePaint, shapeStroke) =>
+				val shape	= polyShape(base)
+				Vector(
+					StrokeShape(shape, shapePaint, shapeStroke)
+				) ++
+				(digit map { it =>
+					StrokeShape(it, shapePaint, Style.button.label.stroke)
+				})
+			}
+	
+	// fills the inner part
+	private def cueButtonStyle(base:Poly, digit:Option[Shape]):ButtonStyle	=
 			buttonStyle { (shapePaint, shapeStroke) =>
 				val shape	= polyShape(base)
 				Vector(
 					FillShape(shape, shapePaint),
-					StrokeShape(shape, shapePaint, shapeStroke),
-					StrokeShape(digit, Style.button.label.color, Style.button.label.stroke)	
-				)
+					StrokeShape(shape, shapePaint, shapeStroke)
+				) ++
+				(digit map { it =>
+					StrokeShape(it, Style.button.label.color, Style.button.label.stroke)
+				})
 			}
 	
 	private def trialButtonStyle(base:Poly, state:Option[Boolean]):ButtonStyle	=

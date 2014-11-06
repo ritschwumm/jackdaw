@@ -2,7 +2,7 @@ name			:= "jackdaw"
 
 organization	:= "de.djini"
 
-version			:= "1.7.1"
+version			:= "1.8.0"
 
 scalaVersion	:= "2.11.4"
 
