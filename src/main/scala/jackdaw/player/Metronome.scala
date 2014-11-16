@@ -1,9 +1,5 @@
 package jackdaw.player
 
-import scutil.lang._
-
-import screact._
-
 import jackdaw.model._
 
 trait MetronomeContext {

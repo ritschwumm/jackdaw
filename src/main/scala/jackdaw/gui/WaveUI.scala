@@ -1,7 +1,6 @@
 package jackdaw.gui
 
 import java.awt.{ List=>AwtList, _ }
-import java.awt.event._
 import java.awt.geom._
 import java.awt.image.BufferedImage
 

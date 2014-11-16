@@ -1,7 +1,5 @@
 package jackdaw.gui
 
-import java.awt.{ List=>AwtList, Canvas=>JCanvas, _ }
-import java.awt.event._
 import javax.swing._
 
 import scala.math._

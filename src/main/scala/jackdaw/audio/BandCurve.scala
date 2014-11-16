@@ -1,7 +1,5 @@
 package jackdaw.audio
 
-import java.io._
-
 import scala.math._
 
 import scutil.math._

@@ -1,6 +1,5 @@
 package jackdaw.gui
 
-import java.awt.{ List=>AwtList, _ }
 import javax.swing._
 import java.awt.event._
 import java.util.Locale

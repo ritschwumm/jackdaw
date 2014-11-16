@@ -5,8 +5,6 @@ import java.nio.charset.Charset
 
 import scala.math._
 
-import scaudio.math._
-
 object MeasureDetector {
 	/*
 	def main(args:Array[String]) {

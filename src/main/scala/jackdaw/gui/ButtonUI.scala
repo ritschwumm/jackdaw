@@ -3,11 +3,9 @@ package jackdaw.gui
 import java.awt.{ List=>AwtList, Canvas=>AwtCanvas, _ }
 import javax.swing._
 
-import scutil.implicits._
 import scutil.gui.implicits._
 
 import screact._
-import scgeom._
 import sc2d._
 
 import jackdaw.gui.util._

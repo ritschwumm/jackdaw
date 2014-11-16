@@ -1,7 +1,6 @@
 package jackdaw.gui
 
 import java.io.File
-// import java.awt.{ List=>AwtList, _ }
 import java.awt.event._
 import javax.swing._
 
@@ -9,6 +8,7 @@ import scutil.lang._
 import scutil.implicits._
 import scutil.gui.implicits._
 import scutil.gui.DndFileImport
+import scutil.gui.DndFileExport
 import scutil.gui.GridBagDSL._
 import scutil.log._
 
@@ -281,5 +281,10 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 				.foreach	(deck.loadTrack)
 			}
 		}
+	)
+	
+	DndFileExport install (
+		component,
+		_ => deck.track.current map { it => Nes single it.file }
 	)
 }

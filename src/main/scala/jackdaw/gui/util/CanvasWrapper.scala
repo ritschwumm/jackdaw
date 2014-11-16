@@ -1,12 +1,10 @@
 package jackdaw.gui.util
 
 import java.awt.{ List=>AwtList, Canvas=>AwtCanvas, _ }
-import java.awt.event._
 
 import scutil.lang.ISeq
 
 import screact._
-import scgeom._
 import sc2d._
 
 final class CanvasWrapper(background:Option[Paint], hints:Hints) extends Observing {

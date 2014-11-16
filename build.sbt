@@ -2,7 +2,7 @@ name			:= "jackdaw"
 
 organization	:= "de.djini"
 
-version			:= "1.9.0"
+version			:= "1.10.0"
 
 scalaVersion	:= "2.11.4"
 
@@ -17,17 +17,20 @@ scalacOptions	++= Seq(
 	// "-language:postfixOps",
 	// "-language:experimental.macros"
 	"-feature",
-	"-optimize"
+	"-optimize",
+	"-Ywarn-unused-import"
+	// "-Yinline-warnings",
+	// "-Xfatal-warnings"
 )
 
 conflictManager	:= ConflictManager.strict
 
 libraryDependencies	++= Seq(
-	"de.djini"					%%	"scutil-core"	% "0.55.0"	% "compile",
-	"de.djini"					%%	"scutil-swing"	% "0.55.0"	% "compile",
-	"de.djini"					%%	"scaudio"		% "0.40.0"	% "compile",
-	"de.djini"					%%	"scjson"		% "0.60.0"	% "compile",
-	"de.djini"					%%	"screact"		% "0.61.0"	% "compile",
+	"de.djini"					%%	"scutil-core"	% "0.58.0"	% "compile",
+	"de.djini"					%%	"scutil-swing"	% "0.58.0"	% "compile",
+	"de.djini"					%%	"scaudio"		% "0.43.0"	% "compile",
+	"de.djini"					%%	"scjson"		% "0.63.0"	% "compile",
+	"de.djini"					%%	"screact"		% "0.64.0"	% "compile",
 	"de.djini"					%%	"scgeom"		% "0.25.0"	% "compile",
 	"de.djini"					%%	"sc2d"			% "0.19.0"	% "compile",
 	"org.simplericity.macify"	%	"macify"		% "1.6"		% "compile",

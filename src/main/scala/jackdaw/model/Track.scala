@@ -8,7 +8,6 @@ import scutil.gui.SwingUtil._
 import scutil.log._
 
 import scaudio.sample._
-import scaudio.math._
 
 import screact._
 
@@ -46,7 +45,7 @@ object Track extends Logging {
 	private val preferredChannelCount	= 2
 }
 
-final class Track(file:File) extends Observing with Logging {
+final class Track(val file:File) extends Observing with Logging {
 	val fileName	= file.getName
 	
 	private val files	= Library trackFilesFor file

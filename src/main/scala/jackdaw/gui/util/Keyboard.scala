@@ -5,7 +5,6 @@ import java.awt.event.KeyEvent
 import javax.swing.Timer
 
 import scutil.lang._
-import scutil.implicits._
 import scutil.gui.GlobalAWTEvent
 import scutil.gui.ListenerInstances._
 

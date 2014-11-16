@@ -14,7 +14,6 @@ import scaudio.math._
 import scaudio.dsp._
 
 import jackdaw._
-import jackdaw.audio._
 import jackdaw.model._
 
 object Player {

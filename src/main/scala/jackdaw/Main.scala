@@ -2,7 +2,6 @@ package jackdaw
 
 import java.io.File
 import java.awt._
-import java.awt.event._
 import javax.swing._
 
 import org.simplericity.macify.eawt._

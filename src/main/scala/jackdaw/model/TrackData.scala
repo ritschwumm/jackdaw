@@ -4,7 +4,6 @@ import scala.math._
 
 import scutil.lang._
 import scutil.implicits._
-import scutil.time._
 
 import jackdaw.audio.Metadata
 

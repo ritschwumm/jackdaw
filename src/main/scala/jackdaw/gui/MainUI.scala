@@ -1,10 +1,7 @@
 package jackdaw.gui
 
-import java.awt.{ List=>AwtList, _ }
-import java.awt.event._
 import javax.swing._
 
-import scutil.implicits._
 import scutil.gui.GridBagDSL._
 import scutil.gui.GlobalKeyEvent
 import scutil.gui.GlobalAWTEvent
@@ -12,7 +9,6 @@ import scutil.gui.GlobalAWTEvent
 import screact._
 
 import jackdaw.model._
-import jackdaw.gui.action._
 
 import GridBagItem.UI_is_GridBagItem
 

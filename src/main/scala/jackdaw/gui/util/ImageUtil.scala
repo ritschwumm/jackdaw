@@ -15,7 +15,7 @@ object ImageUtil {
 				defaultGraphicsConfiguration
 			)
 			
-	private def defaultGraphicsConfiguration	=
+	private def defaultGraphicsConfiguration:GraphicsConfiguration	=
 			GraphicsEnvironment.getLocalGraphicsEnvironment.getDefaultScreenDevice.getDefaultConfiguration
 }
 

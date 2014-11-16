@@ -1,10 +1,8 @@
 package jackdaw.gui
 
 import java.awt.{ List=>AwtList, Canvas=>AwtCanvas, _ }
-import java.awt.geom._
 
 import scutil.lang.ISeq
-import scutil.implicits._
 
 import scgeom._
 

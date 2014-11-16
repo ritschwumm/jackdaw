@@ -1,11 +1,5 @@
 package jackdaw.gui
 
-import java.awt.{ List=>AwtList, _ }
-import javax.swing._
-
-import scutil.implicits._
-import scutil.gui.GridBagDSL._
-
 import screact._
 
 import jackdaw.gui.action._

@@ -1,15 +1,10 @@
 package jackdaw.gui
 
 import java.awt.{ List=>AwtList, Canvas=>JCanvas, _ }
-import java.awt.event._
-import java.awt.geom._
 import javax.swing._
-import javax.swing.event._
 
 import scutil.lang._
 import scutil.implicits._
-import scutil.math._
-import scutil.gui.CasterInstances._
 
 import screact._
 import scgeom._

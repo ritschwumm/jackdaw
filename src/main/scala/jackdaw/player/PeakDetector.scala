@@ -1,7 +1,5 @@
 package jackdaw.player
 
-import screact._
-
 /** detects peaks from put values, resetting after a read and turn peaks into a decaying value */
 final class PeakDetector {
 	private val decayMul	= 0.002f	// 0.015f	for 50ms

@@ -6,13 +6,11 @@ import scala.math._
 
 import scutil.lang._
 import scutil.implicits._
-import scutil.math._
 
 import screact._
 
 import jackdaw.audio._
 import jackdaw.audio.PitchMath._
-import jackdaw.player._
 import jackdaw.model.persistence._
 import jackdaw.model.persistence.JSONProtocol._
 

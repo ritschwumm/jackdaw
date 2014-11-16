@@ -4,12 +4,9 @@ import java.awt.event.KeyEvent
 
 import scutil.lang._
 import scutil.implicits._
-import scutil.time._
 
 import screact._
 import screact.swing.SwingClock
-
-import jackdaw.gui.util._
 
 object ActionUtil {
 	//------------------------------------------------------------------------------

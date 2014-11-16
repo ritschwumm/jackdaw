@@ -1,11 +1,9 @@
 package jackdaw.gui
 
-import java.awt.{ List=>AwtList, _ }
 import javax.swing._
 
 import scutil.lang._
 import scutil.implicits._
-import scutil.gui.CasterInstances._
 
 import screact._
 

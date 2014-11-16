@@ -2,8 +2,6 @@ package jackdaw.model
 
 import java.io.File
 
-import scala.math._
-
 import scutil.lang._
 import scutil.implicits._
 import scutil.log.Logging
@@ -16,7 +14,6 @@ import screact.extra._
 	
 import jackdaw.Config
 import jackdaw.audio._
-import jackdaw.model._
 import jackdaw.player._
 
 import jackdaw.player.PlayerAction
@@ -389,5 +386,12 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]]
 	//------------------------------------------------------------------------------
 	//## wiring
 	
-	track observe { _ => tone.resetAll() }
+	private val autoPitchReset:Events[Unit]	=
+			(track.edge snapshotOnly synced map { _.isEmpty }).trueUnit
+		
+	private val autoToneReset:Events[Unit]	=
+			track.edge tag (())
+		
+	autoPitchReset	observe { _ => setPitch(unitFrequency) }
+	autoToneReset	observe { _ => tone.resetAll()  }
 }

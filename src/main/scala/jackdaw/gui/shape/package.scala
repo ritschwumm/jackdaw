@@ -24,11 +24,14 @@ package object shape {
 	}
 	
 	private def draftAppend(out:Path2D.Double)(draft:Draft) {
+		val closed	= draft.points.head == draft.points.last
+		val last	= draft.points.size - 1
 		draft.points.zipWithIndex foreach {
-			case (SgPoint(x,y), 0)	=> out moveTo (x,y)
-			case (SgPoint(x,y), _)	=> out lineTo (x,y)
-		} 
-		if (draft.points.head == draft.points.tail) {
+			case (SgPoint(x,y), 0)								=> out moveTo (x,y)
+			case (SgPoint(x,y), i)	if !(closed && i == last)	=> out lineTo (x,y)
+			case _												=>
+		}
+		if (closed) {
 			out.closePath()
 		}
 	}

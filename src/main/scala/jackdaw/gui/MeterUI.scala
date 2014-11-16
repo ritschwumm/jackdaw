@@ -8,7 +8,6 @@ import scala.math._
 
 import scutil.lang._
 import scutil.implicits._
-import scutil.math._
 import scutil.geom._
 
 import screact._
