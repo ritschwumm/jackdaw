@@ -9,6 +9,7 @@ import jackdaw.util.Checked
 object Decoder {
 	val all:ISeq[Decoder]	=
 			Vector(
+				Symlink,
 				Madplay,
 				Mpg123,
 				Faad, 
@@ -21,7 +22,7 @@ object Decoder {
 			)
 	
 	def convertToWav(input:File, output:File, preferredFrameRate:Int, preferredChannelCount:Int):Boolean	=
-		MediaUtil
+			MediaUtil
 			.worker[Decoder,Unit](
 				all,
 				_.name,

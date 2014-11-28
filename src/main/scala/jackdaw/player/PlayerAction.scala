@@ -38,7 +38,7 @@ object PlayerAction {
 	case object LoopDisable					extends Looping
 	
 	sealed abstract class Control	extends PlayerAction
-	case class SetNeedSync(needSync:Boolean)					extends Control
+	case class SetNeedSync(needSync:Boolean)	extends Control
 	case class ChangeControl(
 		trim:Double,
 		filter:Double,

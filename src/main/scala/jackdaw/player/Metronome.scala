@@ -13,7 +13,7 @@ object Metronome {
 
 /** 
 something a Player can be synced to
-public methods must never be called outside the engine thread
+methods must never be called outside the engine thread
 */
 final class Metronome(outputRate:Double, ctx:MetronomeContext) {
 	private var bRate		= 1.0

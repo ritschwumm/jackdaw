@@ -125,9 +125,11 @@ final class Track(val file:File) extends Observing with Logging {
 				}
 				
 				// provide wav
+				// NOTE symlinks have the same last modified date as the link target,
+				// otherwise it would make more sense to only check for a newer file
 				val wavFresh:Boolean	= 
 						files.wav.exists && 
-						files.wav.lastModifiedMilliInstant > file.lastModifiedMilliInstant
+						files.wav.lastModifiedMilliInstant >= file.lastModifiedMilliInstant
 				val wavVal:Option[File]	=
 						(wavFresh guard files.wav)
 						.someEffect { _ =>

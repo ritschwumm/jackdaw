@@ -22,14 +22,7 @@ object JLayer extends Decoder with Logging {
 				_ 	<-
 					input withInputStream { ist =>
 						DEBUG(s"decoding with ${name}")
-						val pl:ConverterProgressListener	 = new ConverterProgressListener {
-							def converterUpdate(updateID:Int, param1:Int, param2:Int):Unit	= {}
-							def parsedFrame(frameNo:Int, header:Header):Unit				= {}
-							def readFrame(frameNo:Int, header:Header):Unit					= {}
-							def decodedFrame(frameNo:Int, header:Header, o:Obuffer):Unit	= {}
-							def converterException(t:Throwable):Boolean	= false
-						}
-						val dp:DecoderParams	= null
+						
 						try {
 							new Converter convert (ist, output.getAbsolutePath, pl, null)
 							Win(())
@@ -41,6 +34,15 @@ object JLayer extends Decoder with Logging {
 					}
 			}
 			yield ()
+			
+	private val pl:ConverterProgressListener =
+			new ConverterProgressListener {
+				def converterUpdate(updateID:Int, param1:Int, param2:Int):Unit	= {}
+				def parsedFrame(frameNo:Int, header:Header):Unit				= {}
+				def readFrame(frameNo:Int, header:Header):Unit					= {}
+				def decodedFrame(frameNo:Int, header:Header, o:Obuffer):Unit	= {}
+				def converterException(t:Throwable):Boolean	= false
+			}
 			
 	private val recognizeFile:File=>Checked[Unit]	=
 			MediaUtil requireFileSuffixIn (".mp3")

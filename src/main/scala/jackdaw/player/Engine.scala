@@ -25,10 +25,13 @@ final class Engine extends Logging {
 	private val speaker	= DamperDouble forRates	(unitGain, Engine.dampRate, outputInfo.rate)
 	private val phone	= DamperDouble forRates	(unitGain, Engine.dampRate, outputInfo.rate)
 	
-	private val metronome	= new Metronome(outputInfo.rate, new MetronomeContext {
-		def beatRateChanged(beatRate:Double) { changeBeatRate() }
-		def running:Boolean	= playerRunning
-	})
+	private val metronome	=
+			new Metronome(outputInfo.rate, new MetronomeContext {
+				// TODO is this good for anything?
+				// it just forwards the argument to setBeatRate
+				def beatRateChanged(beatRate:Double) { changeBeatRate() }
+				def running:Boolean	= playerRunning
+			})
 	
 	private val peakDetector	= new PeakDetector
 	

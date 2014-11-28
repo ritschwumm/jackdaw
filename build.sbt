@@ -1,11 +1,8 @@
 name			:= "jackdaw"
-
 organization	:= "de.djini"
-
-version			:= "1.10.0"
+version			:= "1.11.0"
 
 scalaVersion	:= "2.11.4"
-
 scalacOptions	++= Seq(
 	"-deprecation",
 	"-unchecked",
@@ -24,13 +21,12 @@ scalacOptions	++= Seq(
 )
 
 conflictManager	:= ConflictManager.strict
-
 libraryDependencies	++= Seq(
-	"de.djini"					%%	"scutil-core"	% "0.58.0"	% "compile",
-	"de.djini"					%%	"scutil-swing"	% "0.58.0"	% "compile",
-	"de.djini"					%%	"scaudio"		% "0.43.0"	% "compile",
-	"de.djini"					%%	"scjson"		% "0.63.0"	% "compile",
-	"de.djini"					%%	"screact"		% "0.64.0"	% "compile",
+	"de.djini"					%%	"scutil-core"	% "0.59.0"	% "compile",
+	"de.djini"					%%	"scutil-swing"	% "0.59.0"	% "compile",
+	"de.djini"					%%	"scaudio"		% "0.44.0"	% "compile",
+	"de.djini"					%%	"scjson"		% "0.64.0"	% "compile",
+	"de.djini"					%%	"screact"		% "0.65.0"	% "compile",
 	"de.djini"					%%	"scgeom"		% "0.25.0"	% "compile",
 	"de.djini"					%%	"sc2d"			% "0.19.0"	% "compile",
 	"org.simplericity.macify"	%	"macify"		% "1.6"		% "compile",
@@ -44,100 +40,71 @@ enablePlugins(ScriptStartPlugin, OsxAppPlugin, CapsulePlugin)
 //------------------------------------------------------------------------------
 
 buildInfoSettings
-
 sourceGenerators in Compile	<+= buildInfo
-
 buildInfoKeys		:= Seq[BuildInfoKey](name, version)
-
 buildInfoPackage	:= "jackdaw"
 
 //--------------------------------------------------------------------------------
 
+
+val vmOptions	= Seq(
+	"-server",  
+	"-Xms48m",
+	"-Xmx128m",
+	// "-Xincgc",
+	// "-XX:+UnlockExperimentalVMOptions",
+	"-XX:+UseG1GC",
+	"-XX:MaxGCPauseMillis=48"
+	// "-XX:+PrintGCDetails",
+)
+val systemProperties	= Map(
+	// java.lang.IllegalArgumentException: Comparison method violates its general contract!
+	// 	at java.util.TimSort.mergeHi(TimSort.java:868)
+	//	...
+	//	at sun.awt.datatransfer.DataTransferer.setToSortedDataFlavorArray(DataTransferer.java:2407)
+	// @see http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7193557
+	// @see http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7173464
+	"java.util.Arrays.useLegacyMergeSort"	-> "true",
+	
+	//	prevents memleaks for windows
+	"swing.bufferPerWindow"					-> "false"
+	
+	//	debug rendering
+	//		@see http://download.oracle.com/javase/1.5.0/docs/guide/2d/flags.html
+	//		"sun.java2d.trace"	-> "log"
+	
+	//	new xrender pipeline
+	//		"-Dsun.java2d.xrender=True"
+	
+	//	crashes on too many systems, fbobject=false helps
+	//		"-Dsun.java2d.opengl=True",
+	//		"-Dsun.java2d.opengl.fbobject=false"
+	
+	//	allows jvisualvm
+	//		"-Dcom.sun.management.jmxremote.local.only=false"
+)
+
+// val mainClassX		= Keys.mainClass.value.get	// "jackdaw.Boot"
+	
 scriptstartConfigs	:= Seq(ScriptConfig(
-	scriptName	= "jackdaw",
-	mainClass	= "jackdaw.Boot",
-	vmOptions	= Seq(
-		"-server",  
-		"-Xms48m",
-		"-Xmx128m",
-		"-Xincgc"
-		// "-XX:+UnlockExperimentalVMOptions",
-		// "-XX:+UseG1GC"
-		// "-XX:+PrintGCDetails",
-	),
-	systemProperties	= Map(
-		// java.lang.IllegalArgumentException: Comparison method violates its general contract!
-		// 	at java.util.TimSort.mergeHi(TimSort.java:868)
-		//	...
-		//	at sun.awt.datatransfer.DataTransferer.setToSortedDataFlavorArray(DataTransferer.java:2407)
-		// @see http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7193557
-		// @see http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7173464
-		"java.util.Arrays.useLegacyMergeSort"	-> "true",
-		//	prevents memleaks for windows
-		"swing.bufferPerWindow"					-> "false"
-		//
-		// @see http://download.oracle.com/javase/1.5.0/docs/guide/2d/flags.html
-		// "sun.java2d.trace"	-> "log"
-		//
-		//	new xrender pipeline
-		//	"-Dsun.java2d.xrender=True"
-		//
-		// crashes on too many systems, fbobject=false helps
-		//	"-Dsun.java2d.opengl=True",
-		//	"-Dsun.java2d.opengl.fbobject=false"
-		//
-		// allows jvisualvm
-		//	"-Dcom.sun.management.jmxremote.local.only=false"
-	)
+	scriptName			= name.value,
+	mainClass			= (mainClass in Runtime).value.get,
+	vmOptions			= vmOptions,
+	systemProperties	= systemProperties
 ))
 
-//------------------------------------------------------------------------------
+// osxappBundleName		:= name.value
+osxappBundleIcons		:= baseDirectory.value / "src/main/osxapp/default.icns"
+osxappVm				:= OracleJava7()
+osxappMainClass			:= (mainClass in Runtime).value
+osxappVmOptions			:= vmOptions
+osxappSystemProperties	:= systemProperties
 
-osxappBundleName	:= "jackdaw"
-
-osxappBundleIcons	:= baseDirectory.value / "src/main/osxapp/default.icns"
-
-osxappVm			:= OracleJava7()
-
-osxappMainClass		:= Some("jackdaw.Boot")
-
-osxappVmOptions		:= Seq(
-	"-server",
-	"-Xms48m",
-	"-Xmx128m",
-	"-Xincgc"
-)
-
-osxappSystemProperties	:= Map(
-	// fix dnd exception
-	"java.util.Arrays.useLegacyMergeSort"	-> "true",
-	//	prevents memleaks for windows
-	"swing.bufferPerWindow"					-> "false"
-)
-
-//------------------------------------------------------------------------------
-
-capsuleMainClass			:= Some("jackdaw.Boot")
-
-capsuleVmOptions			:= Seq(
-	"-server",
-	"-Xms48m",
-	"-Xmx128m",
-	"-Xincgc"
-)
-
-capsuleSystemProperties		:= Map(
-	// fix dnd exception
-	"java.util.Arrays.useLegacyMergeSort"	-> "true",
-	//	prevents memleaks for windows
-	"swing.bufferPerWindow"					-> "false"
-)
-
-capsuleMinJavaVersion		:= Some("1.7.0")
-
-capsuleMakeExecutable		:= true
-
-//------------------------------------------------------------------------------
+capsuleMainClass		:= (mainClass in Runtime).value
+capsuleVmOptions		:= vmOptions
+capsuleSystemProperties	:= systemProperties
+capsuleMinJavaVersion	:= Some("1.7.0")
+capsuleMakeExecutable	:= true
 
 TaskKey[Seq[File]]("bundle")	:= Seq(
 	scriptstartZip.value,
