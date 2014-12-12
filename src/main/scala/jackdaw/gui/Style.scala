@@ -71,7 +71,8 @@ object Style {
 	
 	private val FOCUS_COLOR			= Color.RED
 	
-	private def focusBorder(top:Boolean, left:Boolean, bottom:Boolean, right:Boolean, outer:Int, inner:Int)(on:Boolean):Border	= {
+	/** focus off, focus on */
+	private def focusBorders(top:Boolean, left:Boolean, bottom:Boolean, right:Boolean, outer:Int, inner:Int):(Border,Border)	= {
 		def make(size:Int, factory:(Int,Int,Int,Int)=>Border):Border	=
 				factory(
 					top		cata (0, size),
@@ -79,15 +80,13 @@ object Style {
 					bottom	cata (0, size),
 					right	cata (0, size)
 				)
-		if (on)	{
-			BorderFactory createCompoundBorder (
-				make(outer, BorderFactory createMatteBorder (_,_,_,_,FOCUS_COLOR)),
-				make(inner, BorderFactory.createEmptyBorder)
-			)
-		}
-		else {
-			make(inner+outer, BorderFactory.createEmptyBorder)
-		}
+		val off	= make(inner+outer, BorderFactory.createEmptyBorder)
+		val on	=
+				BorderFactory createCompoundBorder (
+					make(outer, BorderFactory createMatteBorder (_,_,_,_,FOCUS_COLOR)),
+					make(inner, BorderFactory.createEmptyBorder)
+				)
+		(off, on)
 	}
 	
 	//------------------------------------------------------------------------------
@@ -99,7 +98,7 @@ object Style {
 	object window {
 		val title	= s"${BuildInfo.name} ${BuildInfo.version}"
 		val icon	= bufferedImage("/logo.png") // imageIcon("/logo.png").getImage
-		val size	= new Dimension(678, 640)
+		val size	= new Dimension(682, 640)
 	}
 	
 	//------------------------------------------------------------------------------
@@ -296,17 +295,13 @@ object Style {
 	
 	object deck {
 		object border {
-			private val mkBorder	= focusBorder(false, true, false, false, 4, 6) _
-			val inFocus	= mkBorder(true)
-			val noFocus	= mkBorder(false)
+			val (noFocus, inFocus)	= focusBorders(false, true, false, false, 4, 6)
 		}
 	}
 	
 	object channel {
 		object border {
-			private val mkBorder	= focusBorder(true, false, false, false, 4, 6) _
-			val inFocus	= mkBorder(true)
-			val noFocus	= mkBorder(false)
+			val (noFocus, inFocus)	= focusBorders(true, false, false, false, 4, 6)
 		}
 	}
 	
@@ -314,9 +309,7 @@ object Style {
 		val width	= 44
 		
 		object border {
-			private val mkBorder	= focusBorder(false, false, true, false, 4, 6) _
-			val inFocus	= mkBorder(true)
-			val noFocus	= mkBorder(false)
+			val (noFocus, inFocus)	= focusBorders(false, false, true, false, 4, 6)
 		}
 		object display {
 			val font	= STRONG_FONT

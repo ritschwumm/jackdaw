@@ -40,9 +40,9 @@ final class Model extends Observing {
 	private val playerFeedback3	= engineFeedback map { _.player3 }
 	
 	val mix		= new Mix
-	val deck1	= new Deck(mix.strip1, mix.tone1, engine reactPlayer 1, playerFeedback1)
-	val deck2	= new Deck(mix.strip2, mix.tone2, engine reactPlayer 2, playerFeedback2)
-	val deck3	= new Deck(mix.strip3, mix.tone3, engine reactPlayer 3, playerFeedback3)
+	val deck1	= new Deck(mix.strip1, mix.tone1, engine playerHandle 1, playerFeedback1)
+	val deck2	= new Deck(mix.strip2, mix.tone2, engine playerHandle 2, playerFeedback2)
+	val deck3	= new Deck(mix.strip3, mix.tone3, engine playerHandle 3, playerFeedback3)
 	val speed	= new Speed
 	
 	//------------------------------------------------------------------------------
@@ -59,7 +59,7 @@ final class Model extends Observing {
 	private val changeSpeed	= signal {
 		EngineAction.SetBeatRate(speed.beatRate.current)
 	}
-	changeSpeed observeNow engine.react
+	changeSpeed observeNow engine.handle
 	
 	private val changeControl	= signal {
 		EngineAction.ChangeControl(
@@ -67,7 +67,7 @@ final class Model extends Observing {
 			phone	= mix.master.phoneGain.current
 		)
 	}
-	changeControl observeNow engine.react
+	changeControl observeNow engine.handle
 	
 	//------------------------------------------------------------------------------
 	

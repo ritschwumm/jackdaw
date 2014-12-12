@@ -1,6 +1,6 @@
 package jackdaw.player
 
-import scutil.lang.ISeq
+import scutil.lang._
 
 /** changes to an Engine's state */
 object EngineAction {
@@ -11,8 +11,8 @@ object EngineAction {
 	extends EngineAction
 	
 	case class SetBeatRate(beatRate:Double) 							extends EngineAction
-	
 	case class ControlPlayer(player:Int, actions:ISeq[PlayerAction])	extends EngineAction
+	case class Execute(task:Task)										extends EngineAction
 }
 
 sealed abstract class EngineAction

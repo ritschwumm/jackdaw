@@ -17,7 +17,7 @@ import jackdaw._
 import jackdaw.model._
 
 object Player {
-	val dampRate	= 0.1	// 0..1 range in 1/10 of a second
+	val dampTime	= 0.1	// 0..1 range in 1/10 of a second
 	val fadeTime	= 0.02	// 20 ms
 	val endDelay	= 0.1	// 100 ms
 	val noEnd		= -1d
@@ -28,47 +28,52 @@ object Player {
 	private val filterHP	= +1
 	
 	// ignore small aberrations
-	private val	positionEpsilon	= 1.0E-4
+	private val	positionEpsilon		= 1.0E-4
 	
-	private val filterEpsilon	= 1.0E-5
+	private val filterEpsilon		= 1.0E-5
+	
+	private	val springPitchLimit	= 100
+	
+	private val interpolation	= Config.sincEnabled cata (Linear, Sinc)
+	
+	// in frames
+	val maxDistance	= interpolation overshot springPitchLimit
 }
 
 /** 
 one audio line outputting audio data for one Deck using a MixHalf
 public methods must never be called outside the engine thread
 */
-final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean) {
-	private val interpolation	= Config.sincEnabled cata (Linear, Sinc)
-	
+final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean, loaderHandle:Effect[LoaderAction]) {
 	private val equalizerL	= new Equalizer(Config.lowEq, Config.highEq, outputRate)
 	private val equalizerR	= new Equalizer(Config.lowEq, Config.highEq, outputRate)
 	
 	private val filterL		= new BiQuad
 	private val filterR		= new BiQuad
 	
-	private var sample:Sample			= EmptySample
+	private var sample:Sample			= Sample.empty
 	private var rhythm:Option[Rhythm]	= None
 	private var rate:Double				= zeroFrequency
-	private var inputL:Channel			= EmptyChannel
-	private var inputR:Channel			= EmptyChannel
+	private var inputL:Channel			= Channel.empty
+	private var inputR:Channel			= Channel.empty
 	
 	// 0..1 range
-	private val trim		= DamperDouble forRates (unitGain,	Player.dampRate, outputRate)
+	private val trim		= DamperDouble forRates (unitGain,	Player.dampTime, outputRate)
 	// -1..+1
-	private val filter		= DamperDouble forRates (0.0,		Player.dampRate, outputRate)
+	private val filter		= DamperDouble forRates (0.0,		Player.dampTime, outputRate)
 	// 0..1 range
-	private val low			= DamperDouble forRates (unitGain,	Player.dampRate, outputRate)
-	private val middle		= DamperDouble forRates (unitGain,	Player.dampRate, outputRate)
-	private val high		= DamperDouble forRates (unitGain,	Player.dampRate, outputRate)
+	private val low			= DamperDouble forRates (unitGain,	Player.dampTime, outputRate)
+	private val middle		= DamperDouble forRates (unitGain,	Player.dampTime, outputRate)
+	private val high		= DamperDouble forRates (unitGain,	Player.dampTime, outputRate)
 	// 0..1 range
-	private val speaker		= DamperDouble forRates (unitGain,	Player.dampRate, outputRate)
-	private val phone		= DamperDouble forRates (unitGain,	Player.dampRate, outputRate)
+	private val speaker		= DamperDouble forRates (unitGain,	Player.dampTime, outputRate)
+	private val phone		= DamperDouble forRates (unitGain,	Player.dampTime, outputRate)
 	
 	private val peakDetector	= new PeakDetector
 	
 	private var mode:PlayerMode		= Playing
 	private var scratchBase			= 0.0
-	private val springSpeedLimit	= outputRate*100
+	private val springSpeedLimit	= Player.springPitchLimit * outputRate
 	private var endFrame			= Player.noEnd
 	
 	private var running		= false
@@ -89,7 +94,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 	
 	private[player] def isRunning:Boolean	= running
 	
-	private[player]def feedback:PlayerFeedback	= 
+	private[player] def feedback:PlayerFeedback	= 
 			PlayerFeedback(
 				running			= running,
 				afterEnd		= afterEnd,
@@ -110,11 +115,24 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 				case PlayerAction.RunningOn								=> runningOn()
 				case PlayerAction.RunningOff							=> runningOff()
 				case PlayerAction.PitchAbsolute(pitch)					=> pitchAbsolute(pitch)
-				case x@PlayerAction.PhaseAbsolute(position)				=> fadeNowOrLater { syncPhaseTo(position)			}
-				case x@PlayerAction.PhaseRelative(offset)				=> fadeNowOrLater { movePhaseBy(offset)				}
-				case x@PlayerAction.PositionAbsolute(frame)				=> fadeNowOrLater { positionAbsolute(frame)			}
-				case x@PlayerAction.PositionJump(frame, rhythmUnit)		=> fadeNowOrLater { positionJump(frame, rhythmUnit)	}
-				case x@PlayerAction.PositionSeek(offset)				=> fadeNowOrLater { positionSeek(offset)			}
+				case PlayerAction.PhaseAbsolute(position)				=> fadeNowOrLater { syncPhaseTo(position)			}
+				case PlayerAction.PhaseRelative(offset)				=> fadeNowOrLater { movePhaseBy(offset)				}
+				case PlayerAction.PositionAbsolute(frame)				=>
+					loaderPreload(frame)
+					loaderNotifyEngine(thunk {
+						fadeNowOrLater { positionAbsolute(frame)	}
+					})
+				case PlayerAction.PositionJump(frame, rhythmUnit)		=>
+					loaderPreload(frame)
+					loaderNotifyEngine(thunk {
+						fadeNowOrLater { positionJump(frame, rhythmUnit)	}
+					})
+				case PlayerAction.PositionSeek(offset)				=>
+					// TODO loader questionable
+					loaderPreload(x + offset.steps * jumpRaster(offset).size)
+					loaderNotifyEngine(thunk {
+						fadeNowOrLater { positionSeek(offset)	}
+					})
 				case PlayerAction.DragBegin								=> dragBegin()
 				case PlayerAction.DragEnd								=> dragEnd()
 				case PlayerAction.DragAbsolute(v)						=> dragAbsolute(v)
@@ -126,6 +144,25 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 				case PlayerAction.LoopDisable							=> loopDisable()
 				case c@PlayerAction.ChangeControl(_,_,_,_,_,_,_,_,_)	=> changeControl(c)
 			}
+			
+	//------------------------------------------------------------------------------
+	//## loader interaction
+			
+	private[player] def preloadCurrent() {
+		loaderPreload(x)
+		if (isFading) {
+			loaderPreload(xf)
+		}
+	}
+	
+	private def loaderPreload(frame:Double) {
+		loaderHandle(LoaderAction.Preload(sample, x.toInt))
+	}
+	
+	private def loaderNotifyEngine(task:Task) {
+		loaderHandle(LoaderAction.NotifyEngine(task))
+	}
+	
 	//------------------------------------------------------------------------------
 	//## common control
 	
@@ -141,24 +178,13 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 		setRhythm(control.rhythm)
 	}
 
-	private def setSample(sample1:Option[Sample]) {
-		val sample	= sample1 getOrElse EmptySample
+	private def setSample(sampleOpt:Option[Sample]) {
+		val sample	= sampleOpt getOrElse Sample.empty
 		if (sample == this.sample)	return
 		this.sample	= sample
 		
-		sample.channelCount match {
-			case 0	=>
-				inputL	= EmptyChannel
-				inputR	= EmptyChannel
-			case 1	=>
-				val mono	= new SampleChannel(sample, 0)
-				inputL	= mono
-				inputR	= mono
-			case _	=>
-				inputL	= new SampleChannel(sample, 0)
-				inputR	= new SampleChannel(sample, 1)
-		}
-		
+		inputL	= sample channelOrEmpty 0
+		inputR	= sample channelOrEmpty 1
 		rate	= sample.frameRate.toDouble
 		
 		loopDisable()
@@ -245,7 +271,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 			needSync && canSync
 		
 	private def canSync:Boolean	=
-			sample != EmptySample &&
+			sample != Sample.empty	&&
 			rhythm.isDefined
 	
 	// depends on metronome.beatRate, beatRate (sample&rhythm) and needSync
@@ -318,8 +344,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 	
 	/** jump for a given number of rhythm while staying in sync */
 	private def positionSeek(offset:RhythmValue) {
-		val raster	= rhythm getOrElse (Rhythm simple (0, rate)) raster offset.unit
-		positionSeekWithRaster(offset.steps, raster)
+		positionSeekWithRaster(offset.steps, jumpRaster(offset))
 	}
 	
 	/** jump for a given number of rhythm while staying in sync */
@@ -336,6 +361,9 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 		// loopAround(position)
 		startFade(position)
 	}
+	
+	private def jumpRaster(offset:RhythmValue):Raster	=
+			rhythm getOrElse (Rhythm simple (0, rate)) raster offset.unit
 	
 	//------------------------------------------------------------------------------
 	//## motor scratch
@@ -525,16 +553,16 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean)
 		
 		// current head
 		val headSpeed	= abs(v)*dt
-		val fadeinL		= interpolation interpolate (inputL, x, headSpeed)
-		val fadeinR		= interpolation interpolate (inputR, x, headSpeed)
+		val fadeinL		= Player.interpolation interpolate (inputL, x, headSpeed)
+		val fadeinR		= Player.interpolation interpolate (inputR, x, headSpeed)
 		
 		// optionally fade out pre-jump head
 		var audioL	= 0d
 		var audioR	= 0d
 		// stopFade sets fade to fadeMax
 		if (isFading) {
-			val fadeoutL	= interpolation interpolate (inputL, xf, headSpeed)
-			val fadeoutR	= interpolation interpolate (inputR, xf, headSpeed)
+			val fadeoutL	= Player.interpolation interpolate (inputL, xf, headSpeed)
+			val fadeoutR	= Player.interpolation interpolate (inputR, xf, headSpeed)
 			audioL	= fadeinL * fade + fadeoutL * (1-fade)
 			audioR	= fadeinR * fade + fadeoutR * (1-fade)
 			doFade()

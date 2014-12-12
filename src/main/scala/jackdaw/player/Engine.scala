@@ -12,7 +12,8 @@ import scaudio.math._
 import jackdaw._
 
 object Engine {
-	private val dampRate	= 0.1 
+	// 0..1 range in 1/10 of a second
+	private val dampTime	= 0.1
 }
 
 /** generates audio data using audio Player objects and a Metronome */
@@ -22,8 +23,11 @@ final class Engine extends Logging {
 	val phoneEnabled	= outputInfo.headphone
 	DEBUG("phone enabled", phoneEnabled)
 	
-	private val speaker	= DamperDouble forRates	(unitGain, Engine.dampRate, outputInfo.rate)
-	private val phone	= DamperDouble forRates	(unitGain, Engine.dampRate, outputInfo.rate)
+	private val speaker	= DamperDouble forRates	(unitGain, Engine.dampTime, outputInfo.rate)
+	private val phone	= DamperDouble forRates	(unitGain, Engine.dampTime, outputInfo.rate)
+	
+	private val loader	=
+			new Loader(outputInfo.rate, handleExecute _)
 	
 	private val metronome	=
 			new Metronome(outputInfo.rate, new MetronomeContext {
@@ -32,21 +36,24 @@ final class Engine extends Logging {
 				def beatRateChanged(beatRate:Double) { changeBeatRate() }
 				def running:Boolean	= playerRunning
 			})
-	
+			
 	private val peakDetector	= new PeakDetector
 	
 	private val player1	= new Player(
-			metronome, 
-			outputInfo.rate, 
-			outputInfo.headphone)
+			metronome,
+			outputInfo.rate,
+			outputInfo.headphone,
+			loader.handle _)
 	private val player2	= new Player(
-			metronome, 
+			metronome,
 			outputInfo.rate,
-			outputInfo.headphone)
+			outputInfo.headphone,
+			loader.handle _)
 	private val player3	= new Player(
-			metronome, 
+			metronome,
 			outputInfo.rate,
-			outputInfo.headphone)
+			outputInfo.headphone,
+			loader.handle _)
 	
 	private def playerRunning:Boolean	=
 			player1.isRunning	||
@@ -63,11 +70,13 @@ final class Engine extends Logging {
 	//## public api
 	
 	def start() {
+		loader.start()
 		output.start()
 	}
 	
 	def dispose() {
 		output.dispose()
+		loader.dispose()
 	}
 	
 	// output rate adapted to nanoTime jitter
@@ -99,12 +108,16 @@ final class Engine extends Logging {
 		old
 	}
 	
-	def react(action:EngineAction) {
+	def handle(action:EngineAction) {
 		incoming send action
 	}
 	
-	def reactPlayer(player:Int)(actions:ISeq[PlayerAction]) {
-		react(EngineAction.ControlPlayer(player, actions))
+	def playerHandle(player:Int)(actions:ISeq[PlayerAction]) {
+		handle(EngineAction.ControlPlayer(player, actions))
+	}
+	
+	private def handleExecute(task:Task) {
+		handle(EngineAction.Execute(task))
 	}
 	
 	//------------------------------------------------------------------------------
@@ -115,7 +128,7 @@ final class Engine extends Logging {
 	private val incoming	= new TransferQueue[EngineAction]
 	private val outgoing	= new TransferQueue[EngineFeedback]
 	
-	private def receiveControl() {
+	private def receiveAndReact() {
 		incoming.receiveWith {
 			case EngineAction.SetBeatRate(beatRate)		=> metronome setBeatRate beatRate
 			case c@EngineAction.ChangeControl(_, _)		=> changeControl(c)
@@ -123,6 +136,7 @@ final class Engine extends Logging {
 			case EngineAction.ControlPlayer(2, actions)	=> player2 react actions
 			case EngineAction.ControlPlayer(3, actions)	=> player3 react actions
 			case EngineAction.ControlPlayer(x, _)		=> ERROR("unexpected player", x)
+			case EngineAction.Execute(task)				=> task()
 		}
 	}
 	
@@ -151,7 +165,10 @@ final class Engine extends Logging {
 			val communicate	= frame % Config.controlFrames == 0
 			
 			if (communicate) {
-				receiveControl()
+				receiveAndReact()
+				player1.preloadCurrent()
+				player2.preloadCurrent()
+				player3.preloadCurrent()
 			}
 			
 			player1 generate (speakerBuffer,	phoneBuffer)

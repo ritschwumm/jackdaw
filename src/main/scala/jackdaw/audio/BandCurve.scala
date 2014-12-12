@@ -29,11 +29,11 @@ object BandCurve {
 		while (frame < sample.frameCount) {
 			var	channel	= 0
 			var mono	= 0.0
-			while (channel < sample.channelCount) {
-				mono	+= sample get (frame, channel)
+			while (channel < sample.channels.size) {
+				mono	+= sample channels channel get frame
 				channel	+= 1
 			}
-			mono	/= sample.channelCount
+			mono	/= sample.channels.size
 			
 			// val (valueLow, valueMiddle, valueHigh)	= equalizer nextBands mono
 			equalizer step mono

@@ -1,6 +1,6 @@
 name			:= "jackdaw"
 organization	:= "de.djini"
-version			:= "1.11.0"
+version			:= "1.12.0"
 
 scalaVersion	:= "2.11.4"
 scalacOptions	++= Seq(
@@ -22,11 +22,11 @@ scalacOptions	++= Seq(
 
 conflictManager	:= ConflictManager.strict
 libraryDependencies	++= Seq(
-	"de.djini"					%%	"scutil-core"	% "0.59.0"	% "compile",
-	"de.djini"					%%	"scutil-swing"	% "0.59.0"	% "compile",
-	"de.djini"					%%	"scaudio"		% "0.44.0"	% "compile",
-	"de.djini"					%%	"scjson"		% "0.64.0"	% "compile",
-	"de.djini"					%%	"screact"		% "0.65.0"	% "compile",
+	"de.djini"					%%	"scutil-core"	% "0.60.0"	% "compile",
+	"de.djini"					%%	"scutil-swing"	% "0.60.0"	% "compile",
+	"de.djini"					%%	"scaudio"		% "0.47.0"	% "compile",
+	"de.djini"					%%	"scjson"		% "0.65.0"	% "compile",
+	"de.djini"					%%	"screact"		% "0.66.0"	% "compile",
 	"de.djini"					%%	"scgeom"		% "0.25.0"	% "compile",
 	"de.djini"					%%	"sc2d"			% "0.19.0"	% "compile",
 	"org.simplericity.macify"	%	"macify"		% "1.6"		% "compile",
@@ -54,7 +54,8 @@ val vmOptions	= Seq(
 	// "-Xincgc",
 	// "-XX:+UnlockExperimentalVMOptions",
 	"-XX:+UseG1GC",
-	"-XX:MaxGCPauseMillis=48"
+	"-XX:MaxGCPauseMillis=10"
+	// "-XX:+PrintGCApplicationStoppedTime",
 	// "-XX:+PrintGCDetails",
 )
 val systemProperties	= Map(
