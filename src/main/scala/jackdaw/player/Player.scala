@@ -228,17 +228,27 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	}
 	
 	private def changeRunning(running:Boolean) {
+		val oldPhase	= phase(Measure)
+		
 		this.running	= running
 		updateV()
 		
-		// autosync on start
+		// keep phase stable over start/stop
+		if (needSync && canSync && mode == Playing) {
+			oldPhase foreach syncPhaseTo
+		}
+		
+		/*
+		// simple autosync on start
 		if (needSync && canSync && running && mode == Playing) {
 			syncPhaseTo(RhythmValue zero Measure)
 		}
+		*/
 		
+			
 		stopFade()
 	}
-	
+		
 	//------------------------------------------------------------------------------
 	//## beat rate
 	
@@ -297,6 +307,9 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		}
 	}
 	
+	private def phase(rhythmUnit:RhythmUnit):Option[RhythmValue]	=
+			phaseMatch(rhythmUnit) map { RhythmValue(_, rhythmUnit) }
+		
 	private def phaseMatch(rhythmUnit:RhythmUnit):Option[Double]	=
 			if (running)	phaseMetronome(rhythmUnit)
 			else			phaseStatic(rhythmUnit)

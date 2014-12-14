@@ -129,7 +129,7 @@ final class Engine extends Logging {
 	private val outgoing	= new TransferQueue[EngineFeedback]
 	
 	private def receiveAndReact() {
-		incoming.receiveWith {
+		incoming receiveWith {
 			case EngineAction.SetBeatRate(beatRate)		=> metronome setBeatRate beatRate
 			case c@EngineAction.ChangeControl(_, _)		=> changeControl(c)
 			case EngineAction.ControlPlayer(1, actions)	=> player1 react actions

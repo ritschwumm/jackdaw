@@ -3,25 +3,27 @@ package jackdaw.player
 import scala.math._
 
 import scutil.lang._
+import scutil.implicits._
+import scutil.time._
 
 import scaudio.sample.Sample
 import scaudio.interpolation.Sinc
 
+import jackdaw.Config
+
+object Loader {
+	// TODO loader stupid
+	private val cycleDelay:MilliDuration	= 5.millis
+}
+
 final class Loader(outputRate:Double, engineExecute:Effect[Task]) {
-	// TODO hardcoded
-	private val blockBytes		= 4096
-	private val bufferSeconds	= 1	// TODO should depend on BPM and loop size
-	private val cycleDelay		= 5	// millis
-	
-	//------------------------------------------------------------------------------
-	
 	private val incoming	= new TransferQueue[LoaderAction]
 	
 	private object thread extends Thread {
 		@volatile 
 		var keepAlive	= true
 		
-		setName("Loader")
+		setName("sample preloader")
 		setPriority((Thread.NORM_PRIORITY+Thread.MAX_PRIORITY)/2)
 		
 		override def run() {
@@ -48,10 +50,10 @@ final class Loader(outputRate:Double, engineExecute:Effect[Task]) {
 	
 	//------------------------------------------------------------------------------
 	
-	private val bufferFrames:Int	= ceil(bufferSeconds * outputRate + Player.maxDistance).toInt
+	private val bufferFrames:Int	= ceil(Config.preloadTime.millis * outputRate / 1000 + Player.maxDistance).toInt
 	
 	private def receiveAndReact() {
-		incoming.receiveWith {
+		incoming receiveWith {
 			case LoaderAction.Preload(sample, frame)	=>
 				preload(sample, frame)
 			case LoaderAction.NotifyEngine(task)	=>
@@ -59,16 +61,16 @@ final class Loader(outputRate:Double, engineExecute:Effect[Task]) {
 		}
 		// TODO loader broken
 		// incoming wait cycleDelay
-		Thread sleep cycleDelay
+		Thread sleep Loader.cycleDelay.millis
 	}
 	
 	private def preload(sample:Sample, frame:Int) {
 		// Sample.empty has zero
 		if (sample.frameBytes != 0) {
-			val blockFrames:Int		= blockBytes / sample.frameBytes
-			frame - bufferFrames to frame + bufferFrames by blockFrames foreach { frame =>
+			val blockFrames:Int	= Config.diskBlockSize / sample.frameBytes
+			(frame - bufferFrames) to (frame + bufferFrames) by blockFrames foreach { load	=>
 				sample.channels foreach { channel =>
-					channel get frame 
+					channel get load 
 				}
 			}
 		}

@@ -243,9 +243,10 @@ final class WaveUI(
 			val middle	= top + size/2
 			val bottom	= top + size
 			new Polygon(
-					Array[Int](pixel,	left,	pixel),
-					Array[Int](top,		middle,	bottom),
-					3)
+				Array[Int](pixel,	left,	pixel),
+				Array[Int](top,		middle,	bottom),
+				3
+			)
 		}
 	}
 	
@@ -253,10 +254,11 @@ final class WaveUI(
 		import coords._
 		frame2pixelGuarded(frame) map { pixel => 
 			new Rectangle(
-					pixel - Style.wave.marker.rectangle.width,
-					topY,
-					Style.wave.marker.rectangle.width,
-					Style.wave.marker.rectangle.height)
+				pixel - Style.wave.marker.rectangle.width,
+				topY,
+				Style.wave.marker.rectangle.width,
+				Style.wave.marker.rectangle.height
+			)
 		}
 	}
 	

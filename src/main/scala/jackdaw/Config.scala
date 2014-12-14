@@ -11,13 +11,19 @@ import jackdaw.audio.PitchMath._
 object Config {
 	val updateTick		= 40.millis 
 	
-	val outputConfig	= OutputConfig(ISeq.empty, 44100, 256, 4, true)
+	val outputConfig	= OutputConfig(ISeq.empty, 44100, 512, 8, true)
 	
 	// (output.rate * Config.updateTick.millis / 1000).toInt / 4
 	val controlFrames	= 256
 	
 	// how much more block should be in the engine feed back queue after update
 	val queueOvershot	= 10
+	
+	// assumed size of a block on disk
+	val diskBlockSize	= 4096
+	
+	// TODO should depend on BPM and loop size
+	val preloadTime		= 2.seconds
 	
 	// correction factor for the feedback rate 
 	val rateFactor		= 1.005	// 0.5%

@@ -1,6 +1,6 @@
 name			:= "jackdaw"
 organization	:= "de.djini"
-version			:= "1.12.0"
+version			:= "1.13.0"
 
 scalaVersion	:= "2.11.4"
 scalacOptions	++= Seq(
@@ -50,12 +50,13 @@ buildInfoPackage	:= "jackdaw"
 val vmOptions	= Seq(
 	"-server",  
 	"-Xms48m",
-	"-Xmx128m",
-	// "-Xincgc",
+	"-Xmx96m",
+	"-Xincgc"
+	// full (mixed?) collections in G1 take far too long
 	// "-XX:+UnlockExperimentalVMOptions",
-	"-XX:+UseG1GC",
-	"-XX:MaxGCPauseMillis=10"
-	// "-XX:+PrintGCApplicationStoppedTime",
+	// "-XX:+UseG1GC",
+	// "-XX:MaxGCPauseMillis=10"
+	// "-XX:+PrintGCApplicationStoppedTime"
 	// "-XX:+PrintGCDetails",
 )
 val systemProperties	= Map(
