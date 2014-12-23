@@ -14,21 +14,15 @@ final class Model extends Observing {
 	val phoneEnabled	= engine.phoneEnabled
 	
 	//------------------------------------------------------------------------------
+	//## receive feedback from engine
 	
 	// TODO lock ugly
 	private val clock	= SwingClock(Config.updateTick)
 	
-	private val nanoChange	= {
-		var last	= System.nanoTime
-		events { 
-			clock.message map { _ =>
-				val cur	= System.nanoTime
-				val	out	= cur - last
-				last	= cur
-				out
+	private val nanoChange:Events[Long]	=
+			((clock tag System.nanoTime) stateful System.nanoTime) { (old,cur) =>
+				(cur, cur - old)
 			}
-		}
-	}
 	
 	private val timedFeedback	= nanoChange map engine.feedbackTimed 
 	
@@ -39,14 +33,8 @@ final class Model extends Observing {
 	private val playerFeedback2	= engineFeedback map { _.player2 }
 	private val playerFeedback3	= engineFeedback map { _.player3 }
 	
-	val mix		= new Mix
-	val deck1	= new Deck(mix.strip1, mix.tone1, engine playerHandle 1, playerFeedback1)
-	val deck2	= new Deck(mix.strip2, mix.tone2, engine playerHandle 2, playerFeedback2)
-	val deck3	= new Deck(mix.strip3, mix.tone3, engine playerHandle 3, playerFeedback3)
-	val speed	= new Speed
-	
 	//------------------------------------------------------------------------------
-	//## outgoing
+	//## forward outgoing events from engine
 	
 	val masterPeak	= engineFeedback	map { _.masterPeak }
 	val masterPeak1	= playerFeedback1	map { _.masterPeak }
@@ -54,22 +42,34 @@ final class Model extends Observing {
 	val masterPeak3	= playerFeedback3	map { _.masterPeak }
 	
 	//------------------------------------------------------------------------------
-	//## incoming
+	//## child models
 	
-	private val changeSpeed	= signal {
-		EngineAction.SetBeatRate(speed.beatRate.current)
-	}
-	changeSpeed observeNow engine.handle
-	
-	private val changeControl	= signal {
-		EngineAction.ChangeControl(
-			speaker	= mix.master.speakerGain.current,
-			phone	= mix.master.phoneGain.current
-		)
-	}
-	changeControl observeNow engine.handle
+	val mix		= new Mix
+	val deck1	= new Deck(mix.strip1, mix.tone1, enqueuePlayerAction(1), playerFeedback1)
+	val deck2	= new Deck(mix.strip2, mix.tone2, enqueuePlayerAction(2), playerFeedback2)
+	val deck3	= new Deck(mix.strip3, mix.tone3, enqueuePlayerAction(3), playerFeedback3)
+	val speed	= new Speed
 	
 	//------------------------------------------------------------------------------
+	//## send incoming events to engine
+	
+	private def enqueuePlayerAction(playerId:Int)(action:PlayerAction) {
+		engine enqueueAction EngineControlPlayer(playerId, action)
+	}
+	
+	speed.beatRate	map EngineSetBeatRate.apply	observeNow engine.enqueueAction
+	
+	private val changeControl:Signal[EngineChangeControl]	=
+			signal {
+				EngineChangeControl(
+					speaker	= mix.master.speakerGain.current,
+					phone	= mix.master.phoneGain.current
+				)
+			}
+	changeControl	observeNow engine.enqueueAction
+	
+	//------------------------------------------------------------------------------
+	//## life cycle
 	
 	def start() {
 		engine.start()

@@ -21,7 +21,8 @@ object Symlink extends Decoder with Logging {
 						DEBUG(s"decoding with ${name}")
 						val orig:Path	= input.toPath
 						val link:Path	= output.toPath
-						Files createSymbolicLink (link, orig)
+						Files deleteIfExists		link
+						Files createSymbolicLink	(link, orig)
 						Win(())
 					}
 					catch { case e:Exception =>

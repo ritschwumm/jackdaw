@@ -10,6 +10,7 @@ import scaudio.sample.Sample
 import scaudio.interpolation.Sinc
 
 import jackdaw.Config
+import jackdaw.util.TransferQueue
 
 object Loader {
 	// TODO loader stupid
@@ -17,7 +18,7 @@ object Loader {
 }
 
 final class Loader(outputRate:Double, engineExecute:Effect[Task]) {
-	private val incoming	= new TransferQueue[LoaderAction]
+	private val incomingActions	= new TransferQueue[LoaderAction]
 	
 	private object thread extends Thread {
 		@volatile 
@@ -28,7 +29,7 @@ final class Loader(outputRate:Double, engineExecute:Effect[Task]) {
 		
 		override def run() {
 			while (keepAlive) {
-				receiveAndReact()
+				receiveActions()
 			}
 		}
 	}
@@ -42,8 +43,8 @@ final class Loader(outputRate:Double, engineExecute:Effect[Task]) {
 		thread.join()
 	}
 	
-	def handle(action:LoaderAction) {
-		incoming send action
+	def enqueueAction(action:LoaderAction) {
+		incomingActions send action
 		// TODO loader broken
 		// incoming.notify
 	}
@@ -52,12 +53,10 @@ final class Loader(outputRate:Double, engineExecute:Effect[Task]) {
 	
 	private val bufferFrames:Int	= ceil(Config.preloadTime.millis * outputRate / 1000 + Player.maxDistance).toInt
 	
-	private def receiveAndReact() {
-		incoming receiveWith {
-			case LoaderAction.Preload(sample, frame)	=>
-				preload(sample, frame)
-			case LoaderAction.NotifyEngine(task)	=>
-				engineExecute(task)
+	private def receiveActions() {
+		incomingActions receiveWith {
+			case LoaderPreload(sample, frame)	=> preload(sample, frame)
+			case LoaderNotifyEngine(task)		=> engineExecute(task)
 		}
 		// TODO loader broken
 		// incoming wait cycleDelay

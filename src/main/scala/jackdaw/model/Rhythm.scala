@@ -1,7 +1,7 @@
 package jackdaw.model
 
 import scala.math._
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable
 
 import scutil.lang.ISeq
 import scutil.implicits._
@@ -89,7 +89,7 @@ case class Rhythm(anchor:Double, measure:Double, beatsPerMeasure:Int) {
 		val	firstValue	= beatRaster ceil start
 		val firstIndex	= rint((firstValue - anchor) / beat).toInt
 		
-		val out		= new ArrayBuffer[RhythmLine]
+		val out		= new mutable.ArrayBuffer[RhythmLine]
 		var index	= firstIndex
 		var value	= firstValue
 		while (value < end) {

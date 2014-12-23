@@ -1,6 +1,6 @@
 name			:= "jackdaw"
 organization	:= "de.djini"
-version			:= "1.13.0"
+version			:= "1.14.0"
 
 scalaVersion	:= "2.11.4"
 scalacOptions	++= Seq(
@@ -22,17 +22,17 @@ scalacOptions	++= Seq(
 
 conflictManager	:= ConflictManager.strict
 libraryDependencies	++= Seq(
-	"de.djini"					%%	"scutil-core"	% "0.60.0"	% "compile",
-	"de.djini"					%%	"scutil-swing"	% "0.60.0"	% "compile",
-	"de.djini"					%%	"scaudio"		% "0.47.0"	% "compile",
-	"de.djini"					%%	"scjson"		% "0.65.0"	% "compile",
-	"de.djini"					%%	"screact"		% "0.66.0"	% "compile",
-	"de.djini"					%%	"scgeom"		% "0.25.0"	% "compile",
-	"de.djini"					%%	"sc2d"			% "0.19.0"	% "compile",
-	"org.simplericity.macify"	%	"macify"		% "1.6"		% "compile",
-	"javazoom"					%	"jlayer"		% "1.0.1"	% "compile",
-	"com.mpatric"				%	"mp3agic"		% "0.8.2"	% "compile",
-	"de.jarnbjo"				%	"j-ogg-all"		% "1.0.0"	% "compile"
+	"de.djini"	%%	"scutil-core"	% "0.60.0"	% "compile",
+	"de.djini"	%%	"scutil-swing"	% "0.60.0"	% "compile",
+	"de.djini"	%%	"scaudio"		% "0.47.0"	% "compile",
+	"de.djini"	%%	"scjson"		% "0.65.0"	% "compile",
+	"de.djini"	%%	"screact"		% "0.67.0"	% "compile",
+	"de.djini"	%%	"scgeom"		% "0.25.0"	% "compile",
+	"de.djini"	%%	"sc2d"			% "0.19.0"	% "compile",
+	"org.simplericity.macify"	% "macify"		% "1.6"		% "compile",
+	"javazoom"					% "jlayer"		% "1.0.1"	% "compile",
+	"com.mpatric"				% "mp3agic"		% "0.8.2"	% "compile",
+	"de.jarnbjo"				% "j-ogg-all"	% "1.0.0"	% "compile"
 )
 
 enablePlugins(ScriptStartPlugin, OsxAppPlugin, CapsulePlugin)
@@ -45,7 +45,6 @@ buildInfoKeys		:= Seq[BuildInfoKey](name, version)
 buildInfoPackage	:= "jackdaw"
 
 //--------------------------------------------------------------------------------
-
 
 val vmOptions	= Seq(
 	"-server",  

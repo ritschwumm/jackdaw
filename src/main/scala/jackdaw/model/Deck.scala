@@ -4,7 +4,6 @@ import java.io.File
 
 import scutil.lang._
 import scutil.implicits._
-import scutil.log.Logging
 
 import scaudio.sample.Sample
 import scaudio.math._
@@ -31,7 +30,7 @@ object Deck {
 }
 
 /** model for a single deck */
-final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]], playerFeedback:Signal[PlayerFeedback]) extends Observing with Logging {
+final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], playerFeedback:Signal[PlayerFeedback]) extends Observing {
 	// NOTE these are set by the DeckUI
 	val track		= cell[Option[Track]](None)
 	val scratching	= cell[Option[Double]](None)
@@ -44,11 +43,11 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]]
 	private val otherEmitter	= emitter[PlayerAction]
 	
 	private def setRunning(running:Boolean) {
-		runningEmitter emit (running cata (PlayerAction.RunningOff, PlayerAction.RunningOn))
+		runningEmitter emit PlayerSetRunning(running)
 	}
 	
 	def setPitch(pitch:Double) {
-		otherEmitter emit PlayerAction.PitchAbsolute(pitch)
+		otherEmitter emit PlayerPitchAbsolute(pitch)
 	}
 	def setPitchOctave(octave:Double) {
 		setPitch(octave2frequency(octave))
@@ -56,30 +55,30 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]]
 	
 	def jumpFrame(frame:Double, fine:Boolean) {
 		val rhythmUnit	= fine cata (Measure, Beat)
-		otherEmitter emit PlayerAction.PositionJump(frame, rhythmUnit)
+		otherEmitter emit PlayerPositionJump(frame, rhythmUnit)
 	}
 	
 	def seek(steps:Int, fine:Boolean) {
 		val offset	= RhythmValue(steps, fine cata (Measure, Beat))
-		otherEmitter emit PlayerAction.PositionSeek(offset)
+		otherEmitter emit PlayerPositionSeek(offset)
 	}
 	
 	def syncPhaseManually(position:RhythmValue) {
-		otherEmitter emit PlayerAction.PhaseAbsolute(position)
+		otherEmitter emit PlayerPhaseAbsolute(position)
 	}
 	
 	def movePhase(offset:RhythmValue, fine:Boolean) {
 		val scaled	= offset scale (Deck phaseMoveOffset fine)
-		otherEmitter emit PlayerAction.PhaseRelative(scaled)
+		otherEmitter emit PlayerPhaseRelative(scaled)
  	}
  	
  	private def emitSetNeedSync(needSync:Boolean) {
- 		otherEmitter	emit PlayerAction.SetNeedSync(needSync)
+ 		otherEmitter	emit PlayerSetNeedSync(needSync)
  	}
  	
  	private def emitLooping(size:Option[LoopDef]) {
  		otherEmitter emit (
- 			size cata (PlayerAction.LoopDisable, PlayerAction.LoopEnable)
+ 			size cata (PlayerLoopDisable, PlayerLoopEnable)
  		)
  	}
  	
@@ -200,26 +199,21 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]]
 	
 	// make start/move/end from continuous option
 			
-	private val draggingState		= state(dragSpeed,	PlayerAction.DragBegin,		PlayerAction.DragEnd)
-	private val scratchingState		= state(scratching,	PlayerAction.ScratchBegin,	PlayerAction.ScratchEnd)
+	private val dragMode	= state(dragSpeed,	PlayerDragAbsolute,		PlayerDragEnd)
+	private val scratchMode	= state(scratching,	PlayerScratchRelative,	PlayerScratchEnd)
 	
-	private def state[T](input:Signal[Option[_]], begin:T, end:T):Events[T]	=
-			(input map { _.isDefined cata (end, begin) }).edge
-	
-	private val draggingAbsolute	= move(dragSpeed,	PlayerAction.DragAbsolute.apply)
-	private val scratchingRelative	= move(scratching,	PlayerAction.ScratchRelative.apply)
-
-	private def move[S,T](input:Signal[Option[S]], move:S=>T):Events[T]	=
-			input.edge.filterOption map move
+	private def state[S,T](input:Signal[Option[S]], move:S=>T, end:T):Events[T]	=
+			(input.edge.filterOption map move)	orElse
+			(input.edge map { it => !it.isEmpty } tag end)
 
 	//------------------------------------------------------------------------------
 	//## autocue
 
-	private val gotoCueOnLoad:Events[PlayerAction.PositionAbsolute]	= {
+	private val gotoCueOnLoad:Events[PlayerPositionAbsolute]	= {
 		val switchedToLoadedTrack:Events[Unit]	= (track.edge.filterOption snapshotOnly dataLoaded).trueUnit
 		val existingTrackGotLoaded:Events[Unit]	= track flatMapEvents { _ cata (never, _.dataLoaded.edge.trueUnit) }
 		val jumpToCueNow:Events[Unit]			= switchedToLoadedTrack orElse existingTrackGotLoaded
-		jumpToCueNow snapshotOnly cuePointsFlat map { _ lift 0 getOrElse 0.0 into PlayerAction.PositionAbsolute.apply }
+		jumpToCueNow snapshotOnly cuePointsFlat map { _ lift 0 getOrElse 0.0 into PlayerPositionAbsolute.apply }
 	}
 	
 	//------------------------------------------------------------------------------
@@ -353,34 +347,31 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[ISeq[PlayerAction]]
 	//------------------------------------------------------------------------------
 	//## player control
 	
-	private val changeControl	=
+	private val changeControl:Signal[PlayerAction]	=
 			signal {
-				Vector(PlayerAction.ChangeControl(
+				PlayerChangeControl(
 					trim		= tone.trimGain.current,
 					filter		= tone.filterValue.current,
 					low			= tone.lowGain.current,
 					middle		= tone.middleGain.current,
 					high		= tone.highGain.current,
 					speaker		= strip.speakerGain.current,
-					phone		= strip.phoneGain.current,
-					sample		= sample.current,
-					rhythm		= rhythm.current
-				))
+					phone		= strip.phoneGain.current
+				)
 			}
 	changeControl observeNow notifyPlayer
-
-	private val playerActions:Events[ISeq[PlayerAction]]	=
-			events {
-				Vector(
-					runningEmitter.message,
-					otherEmitter.message,
-					scratchingState.message,
-					scratchingRelative.message,
-					draggingState.message,
-					draggingAbsolute.message,
-					gotoCueOnLoad.message
-				).flatten guardBy { _.nonEmpty }
-			}
+	
+	sample	map PlayerSetSample.apply	observeNow	notifyPlayer
+	rhythm	map PlayerSetRhythm.apply	observeNow	notifyPlayer
+	
+	private val playerActions:Events[PlayerAction]	=
+			Events multiOrElse Vector(
+				runningEmitter,
+				otherEmitter,
+				dragMode,
+				scratchMode,
+				gotoCueOnLoad
+			)
 	playerActions observe	notifyPlayer
 	
 	//------------------------------------------------------------------------------

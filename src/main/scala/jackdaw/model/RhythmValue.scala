@@ -8,5 +8,4 @@ object RhythmValue {
 final case class RhythmValue(steps:Double, unit:RhythmUnit) {
 	def move(steps:Double):RhythmValue		= RhythmValue(this.steps + steps, unit)
 	def scale(factor:Double):RhythmValue	= RhythmValue(this.steps * factor, unit)
-	def invert:RhythmValue					= RhythmValue(-this.steps, unit)
 }

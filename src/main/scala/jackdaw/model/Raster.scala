@@ -11,7 +11,4 @@ case class Raster(size:Double, offset:Double) {
 	def denormalize(it:Double):Double	= it * size + offset
 	
 	def phase(it:Double):Double	= normalize(it) % 1.0
-	
-	def scale(factor:Double):Raster	=
-			copy(size = size*factor)
 }

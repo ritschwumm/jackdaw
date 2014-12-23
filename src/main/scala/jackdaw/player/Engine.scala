@@ -10,6 +10,7 @@ import scaudio.output._
 import scaudio.math._
 
 import jackdaw._
+import jackdaw.util.TransferQueue
 
 object Engine {
 	// 0..1 range in 1/10 of a second
@@ -20,17 +21,20 @@ object Engine {
 final class Engine extends Logging {
 	private val	output		= new Output(Config.outputConfig, producer)
 	private val outputInfo	= output.info
+	
+	val outputRate		= outputInfo.rate
 	val phoneEnabled	= outputInfo.headphone
+	DEBUG("output rate", outputRate)
 	DEBUG("phone enabled", phoneEnabled)
 	
-	private val speaker	= DamperDouble forRates	(unitGain, Engine.dampTime, outputInfo.rate)
-	private val phone	= DamperDouble forRates	(unitGain, Engine.dampTime, outputInfo.rate)
+	private val speaker	= DamperDouble forRates	(unitGain, Engine.dampTime, outputRate)
+	private val phone	= DamperDouble forRates	(unitGain, Engine.dampTime, outputRate)
 	
 	private val loader	=
-			new Loader(outputInfo.rate, handleExecute _)
+			new Loader(outputRate, enqueueLoading _)
 	
 	private val metronome	=
-			new Metronome(outputInfo.rate, new MetronomeContext {
+			new Metronome(outputRate, new MetronomeContext {
 				// TODO is this good for anything?
 				// it just forwards the argument to setBeatRate
 				def beatRateChanged(beatRate:Double) { changeBeatRate() }
@@ -41,19 +45,19 @@ final class Engine extends Logging {
 	
 	private val player1	= new Player(
 			metronome,
-			outputInfo.rate,
-			outputInfo.headphone,
-			loader.handle _)
+			outputRate,
+			phoneEnabled,
+			loader.enqueueAction _)
 	private val player2	= new Player(
 			metronome,
-			outputInfo.rate,
-			outputInfo.headphone,
-			loader.handle _)
+			outputRate,
+			phoneEnabled,
+			loader.enqueueAction _)
 	private val player3	= new Player(
 			metronome,
-			outputInfo.rate,
-			outputInfo.headphone,
-			loader.handle _)
+			outputRate,
+			phoneEnabled,
+			loader.enqueueAction _)
 	
 	private def playerRunning:Boolean	=
 			player1.isRunning	||
@@ -79,8 +83,51 @@ final class Engine extends Logging {
 		loader.dispose()
 	}
 	
+	//------------------------------------------------------------------------------
+	//## incoming loader communication
+	
+	private val loaderFeedbackQueue		= new TransferQueue[Task]
+	
+	private def enqueueLoading(task:Task) {
+		loaderFeedbackQueue send task
+	}
+	
+	private def receiveLoading() {
+		loaderFeedbackQueue receiveWith { _() }
+	}
+	
+	//------------------------------------------------------------------------------
+	//## incoming model communication
+	
+	private val incomingActionQueue		= new TransferQueue[EngineAction]
+	
+	def enqueueAction(action:EngineAction) {
+		incomingActionQueue send action
+	}
+	
+	private def receiveActions() {
+		incomingActionQueue receiveWith {
+			case c@EngineChangeControl(_,_)			=> changeControl(c)
+			case EngineSetBeatRate(beatRate)		=> metronome setBeatRate beatRate
+			case EngineControlPlayer(1, action)		=> player1 react action
+			case EngineControlPlayer(2, action)		=> player2 react action
+			case EngineControlPlayer(3, action)		=> player3 react action
+			case EngineControlPlayer(x, _)			=> ERROR("unexpected player", x)
+		}
+	}
+	
+	private def changeControl(control:EngineChangeControl) {
+		speaker	target	control.speaker
+		phone	target	control.phone
+	}
+	
+	//------------------------------------------------------------------------------
+	//## outgoing model communication
+	
+	private val outgoingFeedbackQueue	= new TransferQueue[EngineFeedback]
+	
 	// output rate adapted to nanoTime jitter
-	private var feedbackRate	= outputInfo.rate.toDouble
+	private var feedbackRate	= outputRate.toDouble
 	 
 	def feedbackTimed(deltaNanos:Long):Option[EngineFeedback]	= {
 		val frames	= deltaNanos.toDouble * feedbackRate / 1000000000D
@@ -89,7 +136,7 @@ final class Engine extends Logging {
 		// BETTER exponential smoothing of diff
 		
 		// smooth nanoTime jitter
-		val overshot	= outgoing.size - blocks
+		val overshot	= outgoingFeedbackQueue.size - blocks
 		val diff		= overshot - Config.queueOvershot
 		val shaped		= tanh(diff.toDouble / Config.queueOvershot)
 		val factor		= pow(Config.rateFactor, shaped)
@@ -98,7 +145,7 @@ final class Engine extends Logging {
 		var block	= 0
 		var old		= None:Option[EngineFeedback]
 		while (block < blocks) {
-			val cur	= outgoing.receive
+			val cur	= outgoingFeedbackQueue.receive
 			if (cur == None) {
 				return old
 			}
@@ -108,45 +155,8 @@ final class Engine extends Logging {
 		old
 	}
 	
-	def handle(action:EngineAction) {
-		incoming send action
-	}
-	
-	def playerHandle(player:Int)(actions:ISeq[PlayerAction]) {
-		handle(EngineAction.ControlPlayer(player, actions))
-	}
-	
-	private def handleExecute(task:Task) {
-		handle(EngineAction.Execute(task))
-	}
-	
-	//------------------------------------------------------------------------------
-	//## communication
-	
-	private var frame:Long	= 0
-	
-	private val incoming	= new TransferQueue[EngineAction]
-	private val outgoing	= new TransferQueue[EngineFeedback]
-	
-	private def receiveAndReact() {
-		incoming receiveWith {
-			case EngineAction.SetBeatRate(beatRate)		=> metronome setBeatRate beatRate
-			case c@EngineAction.ChangeControl(_, _)		=> changeControl(c)
-			case EngineAction.ControlPlayer(1, actions)	=> player1 react actions
-			case EngineAction.ControlPlayer(2, actions)	=> player2 react actions
-			case EngineAction.ControlPlayer(3, actions)	=> player3 react actions
-			case EngineAction.ControlPlayer(x, _)		=> ERROR("unexpected player", x)
-			case EngineAction.Execute(task)				=> task()
-		}
-	}
-	
-	private def changeControl(control:EngineAction.ChangeControl) {
-		speaker	target	control.speaker
-		phone	target	control.phone
-	}
-	
 	private def sendFeedback() {
-		outgoing send mkFeedback
+		outgoingFeedbackQueue send mkFeedback
 	}
 	
 	// NOTE this resets the peak detectors
@@ -157,15 +167,18 @@ final class Engine extends Logging {
 				player2		= player2.feedback,
 				player3		= player3.feedback
 			)
-			
+	
 	//------------------------------------------------------------------------------
+	
+	private var frame:Long	= 0
 	
 	private object producer extends FrameProducer {
 		def produce(speakerBuffer:FrameBuffer, phoneBuffer:FrameBuffer) {
 			val communicate	= frame % Config.controlFrames == 0
 			
 			if (communicate) {
-				receiveAndReact()
+				receiveActions()
+				receiveLoading()
 				player1.preloadCurrent()
 				player2.preloadCurrent()
 				player3.preloadCurrent()
@@ -178,7 +191,7 @@ final class Engine extends Logging {
 			val speakerScale	= speaker.current.toFloat
 			speakerBuffer mul (speakerScale, speakerScale)
 			
-			if (outputInfo.headphone) {
+			if (phoneEnabled) {
 				val phoneScale	= phone.current.toFloat
 				phoneBuffer	mul (phoneScale, phoneScale)
 			}

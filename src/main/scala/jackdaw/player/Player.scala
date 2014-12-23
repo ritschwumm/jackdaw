@@ -110,39 +110,47 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 				loopDef			= loopDef
 			)
 			
-	private[player] def react(actions:ISeq[PlayerAction]):Unit	=
-			actions foreach {
-				case PlayerAction.RunningOn								=> runningOn()
-				case PlayerAction.RunningOff							=> runningOff()
-				case PlayerAction.PitchAbsolute(pitch)					=> pitchAbsolute(pitch)
-				case PlayerAction.PhaseAbsolute(position)				=> fadeNowOrLater { syncPhaseTo(position)			}
-				case PlayerAction.PhaseRelative(offset)				=> fadeNowOrLater { movePhaseBy(offset)				}
-				case PlayerAction.PositionAbsolute(frame)				=>
+	private[player] def react(action:PlayerAction):Unit	=
+			action match {
+				case c@PlayerChangeControl(_,_,_,_,_,_,_)	=> changeControl(c)
+				
+				case PlayerSetNeedSync(needSync)			=> setNeedSync(needSync)
+				
+				case PlayerSetSample(sample)				=> setSample(sample)
+				case PlayerSetRhythm(rhythm)				=> setRhythm(rhythm)
+				
+				case PlayerSetRunning(running)				=> setRunning(running)
+				
+				case PlayerPitchAbsolute(pitch)				=> pitchAbsolute(pitch)
+				
+				case PlayerPhaseAbsolute(position)			=> fadeNowOrLater { syncPhaseTo(position)	}
+				case PlayerPhaseRelative(offset)			=> fadeNowOrLater { movePhaseBy(offset)		}
+				
+				case PlayerPositionAbsolute(frame)			=>
 					loaderPreload(frame)
 					loaderNotifyEngine(thunk {
 						fadeNowOrLater { positionAbsolute(frame)	}
 					})
-				case PlayerAction.PositionJump(frame, rhythmUnit)		=>
+				case PlayerPositionJump(frame, rhythmUnit)	=>
 					loaderPreload(frame)
 					loaderNotifyEngine(thunk {
 						fadeNowOrLater { positionJump(frame, rhythmUnit)	}
 					})
-				case PlayerAction.PositionSeek(offset)				=>
+				case PlayerPositionSeek(offset)				=>
 					// TODO loader questionable
 					loaderPreload(x + offset.steps * jumpRaster(offset).size)
 					loaderNotifyEngine(thunk {
 						fadeNowOrLater { positionSeek(offset)	}
 					})
-				case PlayerAction.DragBegin								=> dragBegin()
-				case PlayerAction.DragEnd								=> dragEnd()
-				case PlayerAction.DragAbsolute(v)						=> dragAbsolute(v)
-				case PlayerAction.ScratchBegin							=> scratchBegin()
-				case PlayerAction.ScratchEnd							=> scratchEnd()
-				case PlayerAction.ScratchRelative(frames)				=> scratchRelative(frames)
-				case PlayerAction.SetNeedSync(needSync)					=> setNeedSync(needSync)
-				case PlayerAction.LoopEnable(size)						=> loopEnable(size)
-				case PlayerAction.LoopDisable							=> loopDisable()
-				case c@PlayerAction.ChangeControl(_,_,_,_,_,_,_,_,_)	=> changeControl(c)
+				
+				case PlayerDragAbsolute(v)					=> dragAbsolute(v)
+				case PlayerDragEnd							=> dragEnd()
+				
+				case PlayerScratchRelative(frames)			=> scratchRelative(frames)
+				case PlayerScratchEnd						=> scratchEnd()
+				
+				case PlayerLoopEnable(size)					=> loopEnable(size)
+				case PlayerLoopDisable						=> loopDisable()
 			}
 			
 	//------------------------------------------------------------------------------
@@ -156,17 +164,17 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	}
 	
 	private def loaderPreload(frame:Double) {
-		loaderHandle(LoaderAction.Preload(sample, x.toInt))
+		loaderHandle(LoaderPreload(sample, x.toInt))
 	}
 	
 	private def loaderNotifyEngine(task:Task) {
-		loaderHandle(LoaderAction.NotifyEngine(task))
+		loaderHandle(LoaderNotifyEngine(task))
 	}
 	
 	//------------------------------------------------------------------------------
 	//## common control
 	
-	private def changeControl(control:PlayerAction.ChangeControl) {
+	private def changeControl(control:PlayerChangeControl) {
 		trim	target	control.trim
 		filter	target	control.filter
 		low		target	control.low
@@ -174,14 +182,10 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		high	target	control.high
 		speaker	target	control.speaker
 		phone	target	control.phone
-		setSample(control.sample)
-		setRhythm(control.rhythm)
 	}
 
 	private def setSample(sampleOpt:Option[Sample]) {
-		val sample	= sampleOpt getOrElse Sample.empty
-		if (sample == this.sample)	return
-		this.sample	= sample
+		sample	= sampleOpt getOrElse Sample.empty
 		
 		inputL	= sample channelOrEmpty 0
 		inputR	= sample channelOrEmpty 1
@@ -194,7 +198,6 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	}
 	
 	private def setRhythm(rhythm:Option[Rhythm]) {
-		if (rhythm == this.rhythm)	return
 		this.rhythm	= rhythm
 		
 		updateEndFrame()
@@ -219,15 +222,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	//------------------------------------------------------------------------------
 	//## motor running
 	
-	private def runningOn() {
-		changeRunning(true)
-	}
-	
-	private def runningOff() {
-		changeRunning(false)
-	}
-	
-	private def changeRunning(running:Boolean) {
+	private def setRunning(running:Boolean) {
 		val oldPhase	= phase(Measure)
 		
 		this.running	= running
@@ -237,14 +232,6 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		if (needSync && canSync && mode == Playing) {
 			oldPhase foreach syncPhaseTo
 		}
-		
-		/*
-		// simple autosync on start
-		if (needSync && canSync && running && mode == Playing) {
-			syncPhaseTo(RhythmValue zero Measure)
-		}
-		*/
-		
 			
 		stopFade()
 	}
@@ -392,7 +379,9 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	}
 	
 	private def scratchRelative(frames:Double) {
-		if (mode != Scratching)	throw new IllegalArgumentException("not in scratch mode??")
+		if (mode != Scratching)	{
+			scratchBegin()
+		}
 		o	= scratchBase - frames
 	}
 	
@@ -411,7 +400,9 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	}
 	
 	private def dragAbsolute(speed:Double) {
-		if (mode != Dragging)	throw new IllegalArgumentException("not in drag mode??")
+		if (mode != Dragging) {
+			dragBegin()
+		}
 		v	= speed * rate
 	}
 	
@@ -561,7 +552,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	def generate(speakerBuffer:FrameBuffer, phoneBuffer:FrameBuffer) {
 		// NOTE hack
 		if (running && mode == Playing && afterEnd) {
-			runningOff()
+			setRunning(false)
 		}
 		
 		// current head

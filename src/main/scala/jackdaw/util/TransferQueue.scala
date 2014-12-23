@@ -1,4 +1,4 @@
-package jackdaw.player
+package jackdaw.util
 
 import java.util.concurrent.ConcurrentLinkedQueue
 
