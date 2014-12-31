@@ -31,7 +31,8 @@ case class PlayerPhaseAbsolute(position:RhythmValue)	extends PlayerAction
 case class PlayerPhaseRelative(offset:RhythmValue)		extends PlayerAction
 
 case class PlayerPositionAbsolute(frame:Double)						extends PlayerAction
-// TODO raster should be a RhythmValue
+// TODO raster could be a RhythmValue - when there's no rhythm, use PlayerPositionAbsolute
+// TODO wrong: the RhythmValue here is used as a raster, but the current phase is kept stable.. untangle this.
 case class PlayerPositionJump(frame:Double, rhythmUnit:RhythmUnit)	extends PlayerAction
 case class PlayerPositionSeek(offset:RhythmValue)					extends PlayerAction
 	

@@ -20,7 +20,7 @@ object Config {
 	val queueOvershot	= 10
 	
 	// assumed size of a block on disk
-	val diskBlockSize	= 4096
+	val diskBlockSize	= 512	// HFS+, on linux we usually have 4096
 	
 	// TODO should depend on BPM and loop size
 	val preloadTime		= 2.seconds

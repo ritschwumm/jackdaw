@@ -93,7 +93,11 @@ final class Engine extends Logging {
 	}
 	
 	private def receiveLoading() {
-		loaderFeedbackQueue receiveWith { _() }
+		loaderFeedbackQueue receiveWith reactLoading
+	}
+	
+	private def reactLoading(message:Task) {
+		message()
 	}
 	
 	//------------------------------------------------------------------------------
@@ -106,7 +110,11 @@ final class Engine extends Logging {
 	}
 	
 	private def receiveActions() {
-		incomingActionQueue receiveWith {
+		incomingActionQueue receiveWith reactAction
+	}
+	
+	private def reactAction(message:EngineAction) {
+		message match {
 			case c@EngineChangeControl(_,_)			=> changeControl(c)
 			case EngineSetBeatRate(beatRate)		=> metronome setBeatRate beatRate
 			case EngineControlPlayer(1, action)		=> player1 react action

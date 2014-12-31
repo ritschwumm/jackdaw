@@ -20,10 +20,11 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 		val size	= target.size
 		val image	= provideFullImage(size)
 		g drawImage (
-				image,
-				target.x.start,
-				target.y.start,
-				null)
+			image,
+			target.x.start,
+			target.y.start,
+			null
+		)
 	}
 	
 	private def provideFullImage(size:IntPoint):BufferedImage	=
@@ -84,8 +85,8 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 	
 	private def provideTileImage(height:Int, index:Int):Option[BufferedImage]	=
 			index guardBy { it => it >= 0 && it < tileCount } map { index =>
-				// erstmal: dafür sorgen, daß die map da ist
-				// dann: dafür sorgen, daß die map die tiles beinhaltet
+				// first: provide the map
+				// second: provide tiles in the map
 				val lru:LRU[Int,BufferedImage]	=
 						tileImageCache 
 						.collect {
@@ -93,8 +94,9 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 						} 
 						.getOrElse {
 							new LRU(
-									tileCached,
-									renderTile(curve, height, _))
+								tileCached,
+								renderTile(curve, height, _)
+							)
 							
 						}
 				tileImageCache	= Some(height, lru)
@@ -227,19 +229,25 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 	//------------------------------------------------------------------------------
 	
 	private val blurOperation	= {
-    	val raw	= Array[Float](
-				0,  3, 0,
-				1,  7, 1,
-				2, 15, 2,
-				1,  7, 1,
-				0,  3, 0)
-		val kernel	= new Kernel(
-				3, 5,
-				raw map { _ / raw.sum })
-		val	operation	= new ConvolveOp(
-				kernel, 
-				ConvolveOp.EDGE_NO_OP, 
-				null)
+    	val raw	=
+				Array[Float](
+					0,  3, 0,
+					1,  7, 1,
+					2, 15, 2,
+					1,  7, 1,
+					0,  3, 0
+				)
+		val kernel	= 
+				new Kernel(
+					3, 5,
+					raw map { _ / raw.sum }
+				)
+		val	operation	=
+				new ConvolveOp(
+					kernel, 
+					ConvolveOp.EDGE_NO_OP, 
+					null
+				)
 		operation
     }
     

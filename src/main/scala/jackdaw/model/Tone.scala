@@ -13,7 +13,7 @@ object Tone {
 			_ cata (TrimRange.size/20, TrimRange.size/100)
 		
 	val filterStep:Boolean=>Double	=
-			_ cata (FilterRange.size/75, FilterRange.size/150)
+			_ cata (FilterRange.size/100, FilterRange.size/250)
 }
 
 final class Tone {

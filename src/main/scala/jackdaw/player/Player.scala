@@ -223,7 +223,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	//## motor running
 	
 	private def setRunning(running:Boolean) {
-		val oldPhase	= phase(Measure)
+		val oldPhase	= phaseValue(Measure)
 		
 		this.running	= running
 		updateV()
@@ -280,21 +280,24 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		}
 	}
 	
-	/** set the phase to an absolute value measured in RasterUnits */
+	//------------------------------------------------------------------------------
+	//## phase
+	
+	/** set the phase to an absolute value */
 	private def syncPhaseTo(position:RhythmValue) {
 		phaseMatch(position.unit) foreach { phaseGot =>
 			movePhaseBy(position move -phaseGot)
 		}
 	}
 			
-	/** change the phase by some offset measured in RasterUnits */
+	/** change the phase by some offset */
 	private def movePhaseBy(offset:RhythmValue) {
 		currentRhythmRaster(offset.unit) foreach { raster =>
 			moveInLoop(offset.steps * raster.size)
 		}
 	}
 	
-	private def phase(rhythmUnit:RhythmUnit):Option[RhythmValue]	=
+	private def phaseValue(rhythmUnit:RhythmUnit):Option[RhythmValue]	=
 			phaseMatch(rhythmUnit) map { RhythmValue(_, rhythmUnit) }
 		
 	private def phaseMatch(rhythmUnit:RhythmUnit):Option[Double]	=
@@ -363,7 +366,10 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	}
 	
 	private def jumpRaster(offset:RhythmValue):Raster	=
-			rhythm getOrElse (Rhythm simple (0, rate)) raster offset.unit
+			rhythm getOrElse fakeRhythm raster offset.unit
+		
+	// TODO raster ugly
+	private  def fakeRhythm	= Rhythm simple (0, rate)
 	
 	//------------------------------------------------------------------------------
 	//## motor scratch

@@ -54,13 +54,17 @@ final class Loader(outputRate:Double, engineExecute:Effect[Task]) {
 	private val bufferFrames:Int	= ceil(Config.preloadTime.millis * outputRate / 1000 + Player.maxDistance).toInt
 	
 	private def receiveActions() {
-		incomingActions receiveWith {
-			case LoaderPreload(sample, frame)	=> preload(sample, frame)
-			case LoaderNotifyEngine(task)		=> engineExecute(task)
-		}
+		incomingActions receiveWith reactAction
 		// TODO loader broken
 		// incoming wait cycleDelay
 		Thread sleep Loader.cycleDelay.millis
+	}
+	
+	private def reactAction(message:LoaderAction) {
+		message match {
+			case LoaderPreload(sample, frame)	=> preload(sample, frame)
+			case LoaderNotifyEngine(task)		=> engineExecute(task)
+		}
 	}
 	
 	private def preload(sample:Sample, frame:Int) {

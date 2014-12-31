@@ -306,23 +306,19 @@ final class Track(val file:File) extends Observing with Logging {
 	
 	/** does not modify if the rhythm would not be useful afterwards */
 	private def modifyRhythm(func:Rhythm=>Rhythm) {
-		def validate(rhythm:Rhythm):Boolean	= 
-				sample.current cata (false, validRhythm(_, rhythm))
-			
-		def safeFunc(rhythm:Rhythm):Rhythm	=
-				func(rhythm) guardBy validate getOrElse rhythm
-			
-		def optFunc(rhythm:Option[Rhythm]):Option[Rhythm]	=
-				rhythm map safeFunc
-			
-		def validRhythm(sample:Sample, rhythm:Rhythm):Boolean	=
-				validBeat(sample.frameRate, rhythm.beat)
-		
-		def validBeat(rate:Double, beat:Double):Boolean	=
-				beat >= rate / Config.rhythmBpsRange._2 &&
-				beat <= rate / Config.rhythmBpsRange._1
-		
-		modifyData (TrackData.L.raster modifier optFunc)
+		modifyData (TrackData.L.raster modifier { curr	=>
+			val valid	=
+					for {
+						rhythm	<- curr
+						sample	<- sample.current
+						rate	= sample.frameRate
+						beat	= rhythm.beat
+						if	beat >= rate / Config.rhythmBpsRange._2 &&
+							beat <= rate / Config.rhythmBpsRange._1
+					}
+					yield rhythm
+			valid orElse curr
+		})
 	}
 	
 	//------------------------------------------------------------------------------
