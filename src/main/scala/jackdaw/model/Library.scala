@@ -9,6 +9,7 @@ import scutil.log._
 import scutil.time._
 
 import jackdaw.Config
+import jackdaw.data._
 
 object Library extends Logging {
 	/*

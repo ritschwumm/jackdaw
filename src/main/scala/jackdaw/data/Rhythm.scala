@@ -1,4 +1,4 @@
-package jackdaw.model
+package jackdaw.data
 
 import scala.math._
 import scala.collection.mutable

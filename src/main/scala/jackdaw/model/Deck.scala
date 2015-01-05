@@ -13,6 +13,7 @@ import screact.extra._
 	
 import jackdaw.Config
 import jackdaw.audio._
+import jackdaw.data._
 import jackdaw.player._
 
 import jackdaw.player.PlayerAction
@@ -46,11 +47,16 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 		runningEmitter emit PlayerSetRunning(running)
 	}
 	
-	def setPitch(pitch:Double) {
-		otherEmitter emit PlayerPitchAbsolute(pitch)
+	// switches needSync off
+	private def setPitch(pitch:Double) {
+		otherEmitter emit PlayerPitchAbsolute(pitch, false)
 	}
 	def setPitchOctave(octave:Double) {
 		setPitch(octave2frequency(octave))
+	}
+	// keeps needSync as it is
+	private def unPitch() {
+		otherEmitter emit PlayerPitchAbsolute(unitFrequency, true)
 	}
 	
 	def jumpFrame(frame:Double, fine:Boolean) {
@@ -209,12 +215,14 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 	//------------------------------------------------------------------------------
 	//## autocue
 
-	private val gotoCueOnLoad:Events[PlayerPositionAbsolute]	= {
+	private val newTrack:Events[Unit]	= {
 		val switchedToLoadedTrack:Events[Unit]	= (track.edge.filterOption snapshotOnly dataLoaded).trueUnit
 		val existingTrackGotLoaded:Events[Unit]	= track flatMapEvents { _ cata (never, _.dataLoaded.edge.trueUnit) }
-		val jumpToCueNow:Events[Unit]			= switchedToLoadedTrack orElse existingTrackGotLoaded
-		jumpToCueNow snapshotOnly cuePointsFlat map { _ lift 0 getOrElse 0.0 into PlayerPositionAbsolute.apply }
+		switchedToLoadedTrack orElse existingTrackGotLoaded
 	}
+	
+	private val gotoCueOnLoad:Events[PlayerPositionAbsolute]	=
+			newTrack snapshotOnly cuePointsFlat map { _ lift 0 getOrElse 0.0 into PlayerPositionAbsolute.apply }
 	
 	//------------------------------------------------------------------------------
 	//## actions
@@ -378,11 +386,12 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 	//## wiring
 	
 	private val autoPitchReset:Events[Unit]	=
-			(track.edge snapshotOnly synced map { _.isEmpty }).trueUnit
-		
+			(track map { _.isDefined }).edge.falseUnit	orElse
+			(newTrack snapshotOnly rhythm map { _.isDefined }).falseUnit
+	
 	private val autoToneReset:Events[Unit]	=
 			track.edge tag (())
 		
-	autoPitchReset	observe { _ => setPitch(unitFrequency) }
+	autoPitchReset	observe { _ => unPitch() }
 	autoToneReset	observe { _ => tone.resetAll()  }
 }

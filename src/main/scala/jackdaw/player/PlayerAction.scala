@@ -2,7 +2,7 @@ package jackdaw.player
 
 import scaudio.sample.Sample
 
-import jackdaw.model._
+import jackdaw.data._
 
 /** changes to a Player's state */
 sealed abstract class PlayerAction
@@ -25,7 +25,7 @@ case class PlayerSetRhythm(rhythm:Option[Rhythm])	extends PlayerAction
 
 case class PlayerSetRunning(running:Boolean)	extends PlayerAction
 
-case class PlayerPitchAbsolute(pitch:Double)	extends PlayerAction
+case class PlayerPitchAbsolute(pitch:Double, keepSync:Boolean)	extends PlayerAction
 
 case class PlayerPhaseAbsolute(position:RhythmValue)	extends PlayerAction
 case class PlayerPhaseRelative(offset:RhythmValue)		extends PlayerAction

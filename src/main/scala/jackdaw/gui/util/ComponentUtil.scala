@@ -3,6 +3,7 @@ package jackdaw.gui.util
 import javax.swing.JComponent
 
 import scutil.lang._
+import scutil.implicits._
 import scutil.geom._
 import scutil.gui.implicits._
 import scutil.gui.CasterInstances._
@@ -16,9 +17,11 @@ import screact.swing._
 
 /** swing component utility functions */
 object ComponentUtil extends Logging {
-	private val componentUnderMouse	= new ComponentUnderMouse({
-		(message,exception)	=> ERROR(message, exception)
-	})
+	private val componentUnderMouse	=
+			new ComponentUnderMouse(
+				100.millis,
+				(message,exception)	=> ERROR(message, exception)
+			)
 	
 	def innerIntRectSignal(component:JComponent):Signal[IntRect]	=
 			SwingWidget signal (

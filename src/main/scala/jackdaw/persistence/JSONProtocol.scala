@@ -1,4 +1,4 @@
-package jackdaw.model.persistence
+package jackdaw.persistence
 
 import reflect.runtime.universe._
 
@@ -7,7 +7,7 @@ import scutil.time._
 import scjson.serialization._
 
 import jackdaw.audio.Metadata
-import jackdaw.model._
+import jackdaw.data._
 
 object JSONProtocol extends FullProtocol {
 	implicit lazy val MilliInstantF			= viaFormat(MilliInstant.newType)

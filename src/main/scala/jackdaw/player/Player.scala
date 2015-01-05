@@ -14,7 +14,7 @@ import scaudio.math._
 import scaudio.dsp._
 
 import jackdaw._
-import jackdaw.model._
+import jackdaw.data._
 
 object Player {
 	val dampTime	= 0.1	// 0..1 range in 1/10 of a second
@@ -121,7 +121,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 				
 				case PlayerSetRunning(running)				=> setRunning(running)
 				
-				case PlayerPitchAbsolute(pitch)				=> pitchAbsolute(pitch)
+				case PlayerPitchAbsolute(pitch, keepSync)	=> pitchAbsolute(pitch, keepSync)
 				
 				case PlayerPhaseAbsolute(position)			=> fadeNowOrLater { syncPhaseTo(position)	}
 				case PlayerPhaseRelative(offset)			=> fadeNowOrLater { movePhaseBy(offset)		}
@@ -253,12 +253,12 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	//------------------------------------------------------------------------------
 	//## motor speed
 	
-	private def pitchAbsolute(pitch:Double)  {
+	private def pitchAbsolute(pitch:Double, keepSync:Boolean)  {
 		if (this.pitch == pitch)	return	
 		this.pitch	= pitch
 		updateV()
 		
-		needSync	= false
+		needSync	&= keepSync
 	}
 			
 	//------------------------------------------------------------------------------

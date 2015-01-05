@@ -1,6 +1,6 @@
 package jackdaw.player
 
-import jackdaw.model._
+import jackdaw.data._
 
 object PlayerFeedback {
 	val empty	= PlayerFeedback(

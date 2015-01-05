@@ -14,6 +14,7 @@ import scutil.log._
 
 import screact._
 
+import jackdaw.data._
 import jackdaw.model._
 import jackdaw.gui.action._
 import jackdaw.gui.util._

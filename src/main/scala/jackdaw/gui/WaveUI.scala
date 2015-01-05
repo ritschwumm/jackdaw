@@ -16,7 +16,7 @@ import scgeom._
 
 import jackdaw.Config
 import jackdaw.audio.BandCurve
-import jackdaw.model._
+import jackdaw.data._
 import jackdaw.gui.util._
 
 object WaveUI {

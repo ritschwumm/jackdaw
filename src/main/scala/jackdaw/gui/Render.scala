@@ -8,7 +8,7 @@ import scutil.implicits._
 
 import scaudio.math._
 
-import jackdaw.model._
+import jackdaw.data._
 
 object Render {
 	def rhythmIndexOpt(it:Option[RhythmIndex]):String	=

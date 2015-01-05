@@ -1,4 +1,4 @@
-package jackdaw.model
+package jackdaw.data
 
 object RhythmValue {
 	def zero(unit:RhythmUnit):RhythmValue	= RhythmValue(0, unit)

@@ -13,9 +13,10 @@ import screact._
 
 import jackdaw.Config
 import jackdaw.audio._
+import jackdaw.data._
 import jackdaw.media._
-import jackdaw.model.persistence._
-import jackdaw.model.persistence.JSONProtocol._
+import jackdaw.persistence._
+import jackdaw.persistence.JSONProtocol._
 import jackdaw.util.LRU
 
 /** a loaded audio File with all its meta data */

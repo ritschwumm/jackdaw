@@ -1,4 +1,4 @@
-package jackdaw.model
+package jackdaw.data
 
 sealed abstract class RhythmLine {
 	val frame:Double

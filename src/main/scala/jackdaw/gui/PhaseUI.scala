@@ -11,7 +11,7 @@ import screact._
 import scgeom._
 import sc2d._
 
-import jackdaw.model._
+import jackdaw.data._
 import jackdaw.gui.util._
 
 object PhaseUI {

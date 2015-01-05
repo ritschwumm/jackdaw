@@ -7,7 +7,7 @@ import scutil.implicits._
 
 import screact._
 
-import jackdaw.model.LoopDef
+import jackdaw.data._
 import jackdaw.gui.action._
 
 object TransportUI {

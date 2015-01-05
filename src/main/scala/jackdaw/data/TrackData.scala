@@ -1,4 +1,4 @@
-package jackdaw.model
+package jackdaw.data
 
 import scala.math._
 
@@ -34,14 +34,14 @@ case class TrackData(
 		
 	def removeCuePoint(nearFrame:Double):TrackData	=
 			(	for {
-					index		<- nearestCuePoint(nearFrame)
+					index		<- nearestCuePointIndex(nearFrame)
 					cuePoints	<- cuePoints removeAt index
 				}
 				yield copy(cuePoints = cuePoints)
 			)
 			.getOrElse	(this)
-		
-	def nearestCuePoint(nearFrame:Double):Option[Int]	=
+			
+	private def nearestCuePointIndex(nearFrame:Double):Option[Int]	=
 			cuePoints
 			.map	{ frame => abs(frame - nearFrame) }
 			.zipWithIndex 

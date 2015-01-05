@@ -11,8 +11,9 @@ import screact._
 
 import jackdaw.audio._
 import jackdaw.audio.PitchMath._
-import jackdaw.model.persistence._
-import jackdaw.model.persistence.JSONProtocol._
+import jackdaw.data._
+import jackdaw.persistence._
+import jackdaw.persistence.JSONProtocol._
 
 object Speed {
 	private val step:Boolean=>Double	= _ cata (bpm(1),		bpm(0.05))

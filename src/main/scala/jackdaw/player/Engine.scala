@@ -10,7 +10,7 @@ import scaudio.output._
 import scaudio.math._
 
 import jackdaw._
-import jackdaw.util.TransferQueue
+import jackdaw.concurrent._
 
 object Engine {
 	// 0..1 range in 1/10 of a second
@@ -86,43 +86,41 @@ final class Engine extends Logging {
 	//------------------------------------------------------------------------------
 	//## incoming loader communication
 	
-	private val loaderFeedbackQueue		= new TransferQueue[Task]
+	private val loaderFeedbackQueue		= new Transfer[Task]
 	
 	private def enqueueLoading(task:Task) {
 		loaderFeedbackQueue send task
 	}
 	
 	private def receiveLoading() {
-		loaderFeedbackQueue receiveWith reactLoading
+		loaderFeedbackQueue receiveAll reactLoading
 	}
 	
-	private def reactLoading(message:Task) {
-		message()
-	}
+	private val reactLoading:Effect[Task]	=
+			_ apply ()
 	
 	//------------------------------------------------------------------------------
 	//## incoming model communication
 	
-	private val incomingActionQueue		= new TransferQueue[EngineAction]
+	private val incomingActionQueue		= new Transfer[EngineAction]
 	
 	def enqueueAction(action:EngineAction) {
 		incomingActionQueue send action
 	}
 	
 	private def receiveActions() {
-		incomingActionQueue receiveWith reactAction
+		incomingActionQueue receiveAll reactAction
 	}
 	
-	private def reactAction(message:EngineAction) {
-		message match {
-			case c@EngineChangeControl(_,_)			=> changeControl(c)
-			case EngineSetBeatRate(beatRate)		=> metronome setBeatRate beatRate
-			case EngineControlPlayer(1, action)		=> player1 react action
-			case EngineControlPlayer(2, action)		=> player2 react action
-			case EngineControlPlayer(3, action)		=> player3 react action
-			case EngineControlPlayer(x, _)			=> ERROR("unexpected player", x)
-		}
-	}
+	private val reactAction:Effect[EngineAction]	=
+			_ match {
+				case c@EngineChangeControl(_,_)			=> changeControl(c)
+				case EngineSetBeatRate(beatRate)		=> metronome setBeatRate beatRate
+				case EngineControlPlayer(1, action)		=> player1 react action
+				case EngineControlPlayer(2, action)		=> player2 react action
+				case EngineControlPlayer(3, action)		=> player3 react action
+				case EngineControlPlayer(x, _)			=> ERROR("unexpected player", x)
+			}
 	
 	private def changeControl(control:EngineChangeControl) {
 		speaker	target	control.speaker
@@ -132,7 +130,7 @@ final class Engine extends Logging {
 	//------------------------------------------------------------------------------
 	//## outgoing model communication
 	
-	private val outgoingFeedbackQueue	= new TransferQueue[EngineFeedback]
+	private val outgoingFeedbackQueue	= new Transfer[EngineFeedback]
 	
 	// output rate adapted to nanoTime jitter
 	private var feedbackRate	= outputRate.toDouble
@@ -144,7 +142,7 @@ final class Engine extends Logging {
 		// BETTER exponential smoothing of diff
 		
 		// smooth nanoTime jitter
-		val overshot	= outgoingFeedbackQueue.size - blocks
+		val overshot	= outgoingFeedbackQueue.available - blocks
 		val diff		= overshot - Config.queueOvershot
 		val shaped		= tanh(diff.toDouble / Config.queueOvershot)
 		val factor		= pow(Config.rateFactor, shaped)

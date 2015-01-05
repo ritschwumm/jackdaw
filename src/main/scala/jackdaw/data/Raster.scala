@@ -1,4 +1,4 @@
-package jackdaw.model
+package jackdaw.data
 
 import java.lang.{ Math=>JMath }
 

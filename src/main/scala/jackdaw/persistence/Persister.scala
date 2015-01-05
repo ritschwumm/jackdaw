@@ -1,4 +1,4 @@
-package jackdaw.model.persistence
+package jackdaw.persistence
 
 import java.io.File
 

@@ -1,4 +1,4 @@
-package jackdaw.model
+package jackdaw.data
 
 final case class Span(start:Double, size:Double) {
 	val end	= start + size
