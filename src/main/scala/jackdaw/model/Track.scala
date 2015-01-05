@@ -309,7 +309,8 @@ final class Track(val file:File) extends Observing with Logging {
 		modifyData (TrackData.L.raster modifier { curr	=>
 			val valid	=
 					for {
-						rhythm	<- curr
+						base	<- curr
+						rhythm	= func(base)
 						sample	<- sample.current
 						rate	= sample.frameRate
 						beat	= rhythm.beat
