@@ -23,12 +23,9 @@ object Config {
 	// how often to talk to the loader
 	val preloadIntervalFrames	= 1024
 	
-	val preloadSpread			= 2.seconds
+	val preloadSpread			= 1.seconds
 	
-	// assumed size of a block on disk
-	val preloadDiskBlockSize	= 512	// HFS+, on linux we usually have 4096
-	
-	val outputConfig	= OutputConfig(ISeq.empty, 44100, 512, 8, true)
+	val outputConfig	= OutputConfig(ISeq.empty, 44100, 512, 4, true)
 	
 	val sincEnabled		= true
 	

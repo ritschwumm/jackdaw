@@ -5,11 +5,11 @@ import screact.swing._
 
 import jackdaw.Config
 import jackdaw.player._
+import jackdaw.remote.EngineStub
 
 /** application model */
 final class Model extends Observing {
-	// TODO lock create this in the audio thread?
-	private val engine	= new Engine
+	private val engine	= new EngineStub
 	
 	val phoneEnabled	= engine.phoneEnabled
 	

@@ -1,5 +1,7 @@
 package jackdaw.player
 
+import java.io.File
+
 import scala.math._
 
 import scutil.lang._
@@ -33,12 +35,15 @@ object Player {
 	
 	private val filterEpsilon		= 1.0E-5
 	
-	private	val springPitchLimit	= 100
+	val springPitchLimit	= 16
 	
 	private val interpolation	= Config.sincEnabled cata (Linear, Sinc)
 	
 	// in frames
-	val maxDistance	= interpolation overshot springPitchLimit
+	 val maxDistance	= interpolation overshot springPitchLimit
+	 
+	 // x, xf, jump, loop
+	 val headCount		= 4
 }
 
 /** 
@@ -52,11 +57,11 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	private val filterL		= new BiQuad
 	private val filterR		= new BiQuad
 	
-	private var sample:Option[Sample]	= None
-	private var rhythm:Option[Rhythm]	= None
-	private var rate:Double				= zeroFrequency
-	private var inputL:Channel			= Channel.empty
-	private var inputR:Channel			= Channel.empty
+	private var sample:Option[CacheSample]	= None
+	private var rhythm:Option[Rhythm]		= None
+	private var rate:Double					= zeroFrequency
+	private var inputL:Channel				= Channel.empty
+	private var inputR:Channel				= Channel.empty
 	
 	// 0..1 range
 	private val trim		= DamperDouble forRates (unitGain,	Player.dampTime, outputRate)
@@ -117,7 +122,11 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 				
 				case PlayerSetNeedSync(needSync)			=> setNeedSync(needSync)
 				
-				case PlayerSetSample(sample)				=> setSample(sample)
+				case PlayerSetFile(file)					=>
+						file match {
+							case Some(file)	=> loaderDecode(file)
+							case None		=> setSample(None)
+						}
 				case PlayerSetRhythm(rhythm)				=> setRhythm(rhythm)
 				
 				case PlayerSetRunning(running)				=> setRunning(running)
@@ -167,13 +176,13 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		}
 	}
 	
-	// TODO should depend on BPM and loop size
-	private val bufferFrames:Int	=
-			ceil(Config.preloadSpread.millis * outputRate / 1000 + Player.maxDistance).toInt
-		
+	private def loaderDecode(file:File) {
+		loaderTarget send LoaderDecode(file, setSample)
+	}
+
 	private def loaderPreload(centerFrame:Double) {
 		if (sample.isDefined) {
-			loaderTarget send LoaderPreload(sample.get, centerFrame.toInt, bufferFrames)
+			loaderTarget send LoaderPreload(sample.get, centerFrame.toInt)
 		}
 	}
 	
@@ -194,7 +203,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		phone	target	control.phone
 	}
 
-	private def setSample(sample:Option[Sample]) {
+	private def setSample(sample:Option[CacheSample]) {
 		this.sample	= sample
 		
 		inputL	= sample cata (Channel.empty, _ channelOrEmpty 0)

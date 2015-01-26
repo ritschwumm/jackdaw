@@ -96,6 +96,7 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 	val bandCurve:Signal[Option[BandCurve]]		= (trackWrap flatMap { it => OptionSignal(it.bandCurve)	}).unwrap
 	val metadata:Signal[Option[Metadata]]		= (trackWrap flatMap { it => OptionSignal(it.metadata)	}).unwrap
 	val rhythm:Signal[Option[Rhythm]]			= (trackWrap flatMap { it => OptionSignal(it.rhythm)	}).unwrap
+	val wav:Signal[Option[File]]				= (trackWrap flatMap { it => OptionSignal(it.wav)		}).unwrap
 	val fileName:Signal[Option[String]]			= signal { track.current map	{ _.fileName			} }
 	val cuePoints:Signal[Option[ISeq[Double]]]	= signal { track.current map	{ _.cuePoints.current	} }
 	val annotation:Signal[Option[String]]		= signal { track.current map	{ _.annotation.current	} }
@@ -369,7 +370,8 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 			}
 	changeControl observeNow notifyPlayer
 	
-	sample	map PlayerSetSample.apply	observeNow	notifyPlayer
+	//sample	map PlayerSetSample.apply	observeNow	notifyPlayer
+	wav		map PlayerSetFile.apply		observeNow	notifyPlayer
 	rhythm	map PlayerSetRhythm.apply	observeNow	notifyPlayer
 	
 	private val playerActions:Events[PlayerAction]	=

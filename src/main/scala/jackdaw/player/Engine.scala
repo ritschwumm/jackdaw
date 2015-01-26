@@ -16,22 +16,12 @@ object Engine {
 }
 
 /** generates audio data using audio Player objects and a Metronome */
-final class Engine extends Logging {
+final class Engine(feedbackTarget:Target[EngineFeedback]) extends Logging {
 	private val	output		= new Output(Config.outputConfig, producer)
 	private val outputInfo	= output.info
 	
 	val outputRate		= outputInfo.rate
 	val phoneEnabled	= outputInfo.headphone
-	DEBUG("output rate", outputRate)
-	DEBUG("phone enabled", phoneEnabled)
-	
-	private val feedbackSmoothing	=
-			new FeedbackSmoothing[EngineFeedback](
-				initialFeedbackRate	= outputRate.toDouble / Config.controlIntervalFrames,
-				overshotTarget		= Config.guiQueueOvershot,
-				adaptFactor			= Config.guiQueuAdaptFactor
-			)
-	private val feedbackTarget		= feedbackSmoothing.asTarget
 	
 	private val incomingActionQueue		= new Transfer[EngineAction]
 	private val loaderFeedbackQueue		= new Transfer[LoaderFeedback]
@@ -137,9 +127,6 @@ final class Engine extends Logging {
 	
 	//------------------------------------------------------------------------------
 	//## outgoing model communication
-	
-	def feedbackTimed(deltaNanos:Long):Option[EngineFeedback]	=
-			feedbackSmoothing feedbackTimed deltaNanos
 	
 	private def sendFeedback() {
 		feedbackTarget send mkFeedback

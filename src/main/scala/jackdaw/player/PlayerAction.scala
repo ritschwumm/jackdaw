@@ -1,6 +1,6 @@
 package jackdaw.player
 
-import scaudio.sample.Sample
+import java.io.File
 
 import jackdaw.data._
 
@@ -20,7 +20,7 @@ extends PlayerAction
 
 case class PlayerSetNeedSync(needSync:Boolean)	extends PlayerAction
 
-case class PlayerSetSample(sample:Option[Sample])	extends PlayerAction
+case class PlayerSetFile(file:Option[File])			extends PlayerAction
 case class PlayerSetRhythm(rhythm:Option[Rhythm])	extends PlayerAction
 
 case class PlayerSetRunning(running:Boolean)	extends PlayerAction

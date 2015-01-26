@@ -1,15 +1,22 @@
 package jackdaw.player
 
-import scutil.lang.Task
+import java.io.File
 
-import scaudio.sample.Sample
+import scutil.lang._
+
+import scutil.lang._
 
 sealed trait LoaderAction
 
+case class LoaderDecode(
+	file:File,
+	done:Effect[Option[CacheSample]]
+)
+extends LoaderAction
+
 case class LoaderPreload(
-	sample:Sample,
-	centerFrame:Int,
-	bufferFrames:Int
+	sample:CacheSample,
+	centerFrame:Int
 )
 extends LoaderAction
 

@@ -5,11 +5,11 @@ import java.io.File
 import scutil.lang._
 import scutil.implicits._
 import scutil.time._
+import scutil.log._
 
-import scaudio.sample.Sample
+import scaudio.sample._
 import scaudio.interpolation.Sinc
 
-import jackdaw.Config
 import jackdaw.concurrent._
 
 object Loader {
@@ -17,7 +17,7 @@ object Loader {
 	private val cycleDelay:MilliDuration	= 10.millis
 }
 
-final class Loader(engineTarget:Target[LoaderFeedback]) {
+final class Loader(engineTarget:Target[LoaderFeedback]) extends Logging {
 	private val actor	=
 			Actor[LoaderAction](
 				"sample preloader",
@@ -42,26 +42,32 @@ final class Loader(engineTarget:Target[LoaderFeedback]) {
 	
 	private val reactAction:Effect[LoaderAction]	=
 			_ match {
-				case LoaderPreload(sample, frame, bufferFrames)	=> preload(sample, frame, bufferFrames)
-				case LoaderNotifyEngine(task)					=> doInEngine(task)
+				// BETTER don't close over the player, we already know it
+				case LoaderDecode(file, callback)		=> decode(file, callback)
+				case LoaderPreload(sample, centerFrame)	=> preload(sample, centerFrame)
+				case LoaderNotifyEngine(task)			=> doInEngine(task)
 			}
 	
-	private def preload(sample:Sample, centerFrame:Int, bufferFrames:Int) {
-		// Sample.empty has zero
-		if (sample.frameBytes != 0) {
-			val blockFrames:Int	= Config.preloadDiskBlockSize / sample.frameBytes
-			val first	= centerFrame - bufferFrames
-			val last	= centerFrame + bufferFrames
-			var curr	= first
-			while (curr <= last) {
-				val count	= sample.channels.size
-				var index	= 0
-				while (index < count) {
-					sample.channels apply index get curr
-					index	+= 1
-				}
-				curr	+= blockFrames
-			}
+	private def decode(file:File, callback:Effect[Option[CacheSample]]) {
+		DEBUG("loader loading", file)
+		val sample	=
+				(Wav load file)
+				.failEffect	{ it => ERROR("cannot load file", it) }
+				.toOption
+				.map { new CacheSample(_) }
+		doInEngine(thunk {
+			callback(sample)
+		})
+	}
+	
+	private def preload(sample:CacheSample, centerFrame:Int) {
+		val changed		= sample provide centerFrame
+		if (changed) {
+			sample.writeBarrier()
+			// BETTER don't close over the sample, we already know it
+			doInEngine(thunk {
+				sample.readBarrier()
+			})
 		}
 	}
 	

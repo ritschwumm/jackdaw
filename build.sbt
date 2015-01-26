@@ -1,6 +1,6 @@
 name			:= "jackdaw"
 organization	:= "de.djini"
-version			:= "1.17.1"
+version			:= "1.18.0"
 
 scalaVersion	:= "2.11.5"
 scalacOptions	++= Seq(
@@ -22,17 +22,23 @@ scalacOptions	++= Seq(
 
 conflictManager	:= ConflictManager.strict
 libraryDependencies	++= Seq(
-	"de.djini"	%%	"scutil-core"	% "0.62.0"	% "compile",
-	"de.djini"	%%	"scutil-swing"	% "0.62.0"	% "compile",
-	"de.djini"	%%	"scaudio"		% "0.49.0"	% "compile",
-	"de.djini"	%%	"scjson"		% "0.67.0"	% "compile",
-	"de.djini"	%%	"screact"		% "0.69.0"	% "compile",
-	"de.djini"	%%	"scgeom"		% "0.26.0"	% "compile",
-	"de.djini"	%%	"sc2d"			% "0.20.0"	% "compile",
+	"de.djini"		%%	"scutil-core"	% "0.63.0"	% "compile",
+	"de.djini"		%%	"scutil-swing"	% "0.63.0"	% "compile",
+	"de.djini"		%%	"scaudio"		% "0.50.0"	% "compile",
+	"de.djini"		%%	"scjson"		% "0.68.0"	% "compile",
+	"de.djini"		%%	"screact"		% "0.70.0"	% "compile",
+	"de.djini"		%%	"scgeom"		% "0.26.0"	% "compile",
+	"de.djini"		%%	"sc2d"			% "0.20.0"	% "compile",
+	"com.twitter"	%%	"chill"			% "0.5.1"	% "compile",
 	"org.simplericity.macify"	% "macify"		% "1.6"		% "compile",
 	"javazoom"					% "jlayer"		% "1.0.1"	% "compile",
 	"com.mpatric"				% "mp3agic"		% "0.8.2"	% "compile",
 	"de.jarnbjo"				% "j-ogg-all"	% "1.0.0"	% "compile"
+	// "com.esotericsoftware"		% "kryo"		% "3.0.0"	% "compile",
+)
+dependencyOverrides	++= Set(
+	"org.scala-lang"	% "scala-library"	% scalaVersion.value,
+	"org.scala-lang"	% "scala-reflect"	% scalaVersion.value
 )
 
 enablePlugins(ScriptStartPlugin, OsxAppPlugin, CapsulePlugin)
@@ -46,11 +52,13 @@ buildInfoPackage	:= "jackdaw"
 
 //--------------------------------------------------------------------------------
 
+val bootClass	= "jackdaw.Boot"
+
 val vmOptions	= Seq(
 	"-server",  
-	"-Xms48m",
-	"-Xmx96m",
-	"-Xincgc"
+	"-Xms64m",
+	"-Xmx64m"
+	// "-Xincgc"
 	// full (mixed?) collections in G1 take far too long
 	// "-XX:+UnlockExperimentalVMOptions",
 	// "-XX:+UseG1GC",
@@ -89,7 +97,7 @@ val systemProperties	= Map(
 	
 scriptstartConfigs	:= Seq(ScriptConfig(
 	scriptName			= name.value,
-	mainClass			= (mainClass in Runtime).value.get,
+	mainClass			= bootClass,
 	vmOptions			= vmOptions,
 	systemProperties	= systemProperties
 ))
@@ -97,11 +105,11 @@ scriptstartConfigs	:= Seq(ScriptConfig(
 // osxappBundleName		:= name.value
 osxappBundleIcons		:= baseDirectory.value / "src/main/osxapp/default.icns"
 osxappVm				:= OracleJava7()
-osxappMainClass			:= (mainClass in Runtime).value
+osxappMainClass			:= Some(bootClass)
 osxappVmOptions			:= vmOptions
 osxappSystemProperties	:= systemProperties
 
-capsuleMainClass		:= (mainClass in Runtime).value
+capsuleMainClass		:= Some(bootClass)
 capsuleVmOptions		:= vmOptions
 capsuleSystemProperties	:= systemProperties
 capsuleMinJavaVersion	:= Some("1.7.0")
