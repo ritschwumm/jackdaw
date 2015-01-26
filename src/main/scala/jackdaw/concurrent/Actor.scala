@@ -1,7 +1,7 @@
 package jackdaw.concurrent
 
-import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.locks.LockSupport
+import java.util.concurrent.LinkedTransferQueue
+import java.util.concurrent.TimeUnit
 
 import scutil.lang._
 import scutil.time._
@@ -22,8 +22,7 @@ private final class ActorThread[T](name:String, priority:Int, parking:MilliDurat
 	setName(name)
 	setPriority(priority)
 	
-	private val queue			= new ConcurrentLinkedQueue[T]
-	private val parkingNanos	= parking.nanos
+	private val queue	= new LinkedTransferQueue[T]
 	
 	@volatile 
 	private var keepAlive	= true
@@ -36,14 +35,12 @@ private final class ActorThread[T](name:String, priority:Int, parking:MilliDurat
 	
 	final def send(message:T) {
 		queue offer message
-		LockSupport unpark this
 	}
 	
 	override protected def run() {
 		try {
 			while (keepAlive) {
 				if (!drain())	return
-				if (keepAlive)	LockSupport parkNanos parkingNanos
 			}
 		}
 		catch { case e:InterruptedException =>
@@ -53,7 +50,7 @@ private final class ActorThread[T](name:String, priority:Int, parking:MilliDurat
 	
 	private def drain():Boolean	= {
 		while (true) {
-			val message	= queue.poll
+			val message	= queue poll (parking.millis, TimeUnit.MILLISECONDS)
 			if (message == null)	return true
 			if (!body(message))		return false
 		}
