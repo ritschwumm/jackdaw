@@ -1,7 +1,5 @@
 package jackdaw.player
 
-import scala.math._
-
 import scutil.lang._
 import scutil.log._
 
@@ -27,11 +25,20 @@ final class Engine extends Logging {
 	DEBUG("output rate", outputRate)
 	DEBUG("phone enabled", phoneEnabled)
 	
-	private val speaker	= DamperDouble forRates	(unitGain, Engine.dampTime, outputRate)
-	private val phone	= DamperDouble forRates	(unitGain, Engine.dampTime, outputRate)
+	private val feedbackSmoothing	=
+			new FeedbackSmoothing[EngineFeedback](
+				initialFeedbackRate	= outputRate.toDouble / Config.controlIntervalFrames,
+				overshotTarget		= Config.guiQueueOvershot,
+				adaptFactor			= Config.guiQueuAdaptFactor
+			)
+	private val feedbackTarget		= feedbackSmoothing.asTarget
 	
-	private val loader	=
-			new Loader(outputRate, enqueueLoading _)
+	private val incomingActionQueue		= new Transfer[EngineAction]
+	private val loaderFeedbackQueue		= new Transfer[LoaderFeedback]
+	
+	private val loader1	= new Loader(loaderFeedbackQueue.asTarget)
+	private val loader2	= new Loader(loaderFeedbackQueue.asTarget)
+	private val loader3	= new Loader(loaderFeedbackQueue.asTarget)
 	
 	private val metronome	=
 			new Metronome(outputRate, new MetronomeContext {
@@ -41,23 +48,26 @@ final class Engine extends Logging {
 				def running:Boolean	= playerRunning
 			})
 			
+	private val speaker	= DamperDouble forRates	(unitGain, Engine.dampTime, outputRate)
+	private val phone	= DamperDouble forRates	(unitGain, Engine.dampTime, outputRate)
+	
 	private val peakDetector	= new PeakDetector
 	
 	private val player1	= new Player(
 			metronome,
 			outputRate,
 			phoneEnabled,
-			loader.enqueueAction _)
+			loader1.target)
 	private val player2	= new Player(
 			metronome,
 			outputRate,
 			phoneEnabled,
-			loader.enqueueAction _)
+			loader2.target)
 	private val player3	= new Player(
 			metronome,
 			outputRate,
 			phoneEnabled,
-			loader.enqueueAction _)
+			loader3.target)
 	
 	private def playerRunning:Boolean	=
 			player1.isRunning	||
@@ -74,35 +84,33 @@ final class Engine extends Logging {
 	//## public api
 	
 	def start() {
-		loader.start()
+		loader1.start()
+		loader2.start()
+		loader3.start()
 		output.start()
 	}
 	
 	def dispose() {
 		output.dispose()
-		loader.dispose()
+		loader1.dispose()
+		loader2.dispose()
+		loader3.dispose()
 	}
 	
 	//------------------------------------------------------------------------------
 	//## incoming loader communication
 	
-	private val loaderFeedbackQueue		= new Transfer[Task]
-	
-	private def enqueueLoading(task:Task) {
-		loaderFeedbackQueue send task
-	}
-	
 	private def receiveLoading() {
 		loaderFeedbackQueue receiveAll reactLoading
 	}
 	
-	private val reactLoading:Effect[Task]	=
-			_ apply ()
+	private val reactLoading:Effect[LoaderFeedback]	=
+			_ match {
+				case LoaderExecute(task)	=> task()
+			}
 	
 	//------------------------------------------------------------------------------
 	//## incoming model communication
-	
-	private val incomingActionQueue		= new Transfer[EngineAction]
 	
 	def enqueueAction(action:EngineAction) {
 		incomingActionQueue send action
@@ -130,39 +138,11 @@ final class Engine extends Logging {
 	//------------------------------------------------------------------------------
 	//## outgoing model communication
 	
-	private val outgoingFeedbackQueue	= new Transfer[EngineFeedback]
-	
-	// output rate adapted to nanoTime jitter
-	private var feedbackRate	= outputRate.toDouble
-	 
-	def feedbackTimed(deltaNanos:Long):Option[EngineFeedback]	= {
-		val frames	= deltaNanos.toDouble * feedbackRate / 1000000000D
-		val blocks	= round(frames / Config.controlFrames).toInt
-		
-		// BETTER exponential smoothing of diff
-		
-		// smooth nanoTime jitter
-		val overshot	= outgoingFeedbackQueue.available - blocks
-		val diff		= overshot - Config.queueOvershot
-		val shaped		= tanh(diff.toDouble / Config.queueOvershot)
-		val factor		= pow(Config.rateFactor, shaped)
-		feedbackRate	= feedbackRate * factor
-		
-		var block	= 0
-		var old		= None:Option[EngineFeedback]
-		while (block < blocks) {
-			val cur	= outgoingFeedbackQueue.receive
-			if (cur == None) {
-				return old
-			}
-			old		= cur
-			block	+= 1
-		}
-		old
-	}
+	def feedbackTimed(deltaNanos:Long):Option[EngineFeedback]	=
+			feedbackSmoothing feedbackTimed deltaNanos
 	
 	private def sendFeedback() {
-		outgoingFeedbackQueue send mkFeedback
+		feedbackTarget send mkFeedback
 	}
 	
 	// NOTE this resets the peak detectors
@@ -180,10 +160,12 @@ final class Engine extends Logging {
 	
 	private object producer extends FrameProducer {
 		def produce(speakerBuffer:FrameBuffer, phoneBuffer:FrameBuffer) {
-			val communicate	= frame % Config.controlFrames == 0
-			
+			val communicate	= frame % Config.controlIntervalFrames == 0
 			if (communicate) {
 				receiveActions()
+			}
+			val preload	= frame % Config.preloadIntervalFrames == 0
+			if (preload) {
 				receiveLoading()
 				player1.preloadCurrent()
 				player2.preloadCurrent()

@@ -2,8 +2,6 @@ package jackdaw.player
 
 import java.io.File
 
-import scala.math._
-
 import scutil.lang._
 import scutil.implicits._
 import scutil.time._
@@ -19,7 +17,7 @@ object Loader {
 	private val cycleDelay:MilliDuration	= 10.millis
 }
 
-final class Loader(outputRate:Double, engineExecute:Effect[Task]) {
+final class Loader(engineTarget:Target[LoaderFeedback]) {
 	private val actor	=
 			Actor[LoaderAction](
 				"sample preloader",
@@ -30,6 +28,7 @@ final class Loader(outputRate:Double, engineExecute:Effect[Task]) {
 					true
 				}
 			)
+	val target	= actor.asTarget
 	
 	def start() {
 		actor.start()
@@ -39,26 +38,20 @@ final class Loader(outputRate:Double, engineExecute:Effect[Task]) {
 		actor.dispose()
 	}
 	
-	def enqueueAction(action:LoaderAction) {
-		actor send action
-	}
-	
 	//------------------------------------------------------------------------------
-	
-	private val bufferFrames:Int	= ceil(Config.preloadTime.millis * outputRate / 1000 + Player.maxDistance).toInt
 	
 	private val reactAction:Effect[LoaderAction]	=
 			_ match {
-				case LoaderPreload(sample, frame)	=> preload(sample, frame)
-				case LoaderNotifyEngine(task)		=> engineExecute(task)
+				case LoaderPreload(sample, frame, bufferFrames)	=> preload(sample, frame, bufferFrames)
+				case LoaderNotifyEngine(task)					=> doInEngine(task)
 			}
 	
-	private def preload(sample:Sample, frame:Int) {
+	private def preload(sample:Sample, centerFrame:Int, bufferFrames:Int) {
 		// Sample.empty has zero
 		if (sample.frameBytes != 0) {
-			val blockFrames:Int	= Config.diskBlockSize / sample.frameBytes
-			val first	= frame - bufferFrames
-			val last	= frame + bufferFrames
+			val blockFrames:Int	= Config.preloadDiskBlockSize / sample.frameBytes
+			val first	= centerFrame - bufferFrames
+			val last	= centerFrame + bufferFrames
 			var curr	= first
 			while (curr <= last) {
 				val count	= sample.channels.size
@@ -70,5 +63,10 @@ final class Loader(outputRate:Double, engineExecute:Effect[Task]) {
 				curr	+= blockFrames
 			}
 		}
+	}
+	
+	// TODO cleanup naming
+	private def doInEngine(task:Task) {
+		 engineTarget send LoaderExecute(task)
 	}
 }

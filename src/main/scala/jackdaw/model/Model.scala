@@ -17,7 +17,7 @@ final class Model extends Observing {
 	//## receive feedback from engine
 	
 	// TODO lock ugly
-	private val clock	= SwingClock(Config.updateTick)
+	private val clock	= SwingClock(Config.guiUpdateInterval)
 	
 	private val nanoChange:Events[Long]	=
 			((clock tag System.nanoTime) stateful System.nanoTime) { (old,cur) =>

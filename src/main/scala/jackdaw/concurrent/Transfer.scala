@@ -13,6 +13,8 @@ final class Transfer[T] extends Target[T] {
 		queue offer item
 	}
 	
+	def asTarget:Target[T]	= this
+	
 	def available:Int	= queue.size
 	
 	def receive():Option[T]	= Option(queue.poll)

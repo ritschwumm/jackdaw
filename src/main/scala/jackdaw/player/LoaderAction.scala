@@ -6,5 +6,14 @@ import scaudio.sample.Sample
 
 sealed trait LoaderAction
 
-case class LoaderPreload(sample:Sample, frame:Int)	extends LoaderAction
-case class LoaderNotifyEngine(done:Task) 			extends LoaderAction
+case class LoaderPreload(
+	sample:Sample,
+	centerFrame:Int,
+	bufferFrames:Int
+)
+extends LoaderAction
+
+case class LoaderNotifyEngine(
+	done:Task
+)
+extends LoaderAction

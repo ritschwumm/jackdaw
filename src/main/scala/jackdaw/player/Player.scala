@@ -15,6 +15,7 @@ import scaudio.dsp._
 
 import jackdaw._
 import jackdaw.data._
+import jackdaw.concurrent.Target
 
 object Player {
 	val dampTime	= 0.1	// 0..1 range in 1/10 of a second
@@ -44,14 +45,14 @@ object Player {
 one audio line outputting audio data for one Deck using a MixHalf
 public methods must never be called outside the engine thread
 */
-final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean, loaderHandle:Effect[LoaderAction]) {
+final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean, loaderTarget:Target[LoaderAction]) {
 	private val equalizerL	= new Equalizer(Config.lowEq, Config.highEq, outputRate)
 	private val equalizerR	= new Equalizer(Config.lowEq, Config.highEq, outputRate)
 	
 	private val filterL		= new BiQuad
 	private val filterR		= new BiQuad
 	
-	private var sample:Sample			= Sample.empty
+	private var sample:Option[Sample]	= None
 	private var rhythm:Option[Rhythm]	= None
 	private var rate:Double				= zeroFrequency
 	private var inputL:Channel			= Channel.empty
@@ -155,20 +156,29 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 			
 	//------------------------------------------------------------------------------
 	//## loader interaction
-			
+	
 	private[player] def preloadCurrent() {
 		loaderPreload(x)
 		if (isFading) {
 			loaderPreload(xf)
 		}
+		if (loopSpan.isDefined) {
+			loaderPreload(loopSpan.get.start)
+		}
 	}
 	
-	private def loaderPreload(frame:Double) {
-		loaderHandle(LoaderPreload(sample, x.toInt))
+	// TODO should depend on BPM and loop size
+	private val bufferFrames:Int	=
+			ceil(Config.preloadSpread.millis * outputRate / 1000 + Player.maxDistance).toInt
+		
+	private def loaderPreload(centerFrame:Double) {
+		if (sample.isDefined) {
+			loaderTarget send LoaderPreload(sample.get, centerFrame.toInt, bufferFrames)
+		}
 	}
 	
 	private def loaderNotifyEngine(task:Task) {
-		loaderHandle(LoaderNotifyEngine(task))
+		loaderTarget send LoaderNotifyEngine(task)
 	}
 	
 	//------------------------------------------------------------------------------
@@ -184,12 +194,12 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		phone	target	control.phone
 	}
 
-	private def setSample(sampleOpt:Option[Sample]) {
-		sample	= sampleOpt getOrElse Sample.empty
+	private def setSample(sample:Option[Sample]) {
+		this.sample	= sample
 		
-		inputL	= sample channelOrEmpty 0
-		inputR	= sample channelOrEmpty 1
-		rate	= sample.frameRate.toDouble
+		inputL	= sample cata (Channel.empty, _ channelOrEmpty 0)
+		inputR	= sample cata (Channel.empty, _ channelOrEmpty 1)
+		rate	= sample cata (1, _.frameRate.toDouble)
 		
 		loopDisable()
 		updateV()
@@ -212,10 +222,12 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	}
 	
 	private def updateEndFrame() {
+		val frameCount	=
+				sample cata (0, _.frameCount)
 		endFrame	=
 				rhythm cata (
-					sample.frameCount + outputRate*Player.endDelay,
-					_.measureRaster ceil sample.frameCount
+					frameCount + outputRate*Player.endDelay,
+					_.measureRaster ceil frameCount
 				)
 	}
 	
@@ -268,7 +280,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 			needSync && canSync
 		
 	private def canSync:Boolean	=
-			sample != Sample.empty	&&
+			sample.isDefined &&
 			rhythm.isDefined
 	
 	// depends on metronome.beatRate, beatRate (sample&rhythm) and needSync

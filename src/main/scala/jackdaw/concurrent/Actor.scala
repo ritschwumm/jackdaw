@@ -15,6 +15,7 @@ sealed trait Actor[T] extends Target[T] with Disposable {
 	def start():Unit
 	def dispose():Unit
 	def send(message:T):Unit
+	def asTarget:Target[T]	= this
 }
 
 private final class ActorThread[T](name:String, priority:Int, parking:MilliDuration, body:T=>Boolean) extends Thread with Actor[T] {

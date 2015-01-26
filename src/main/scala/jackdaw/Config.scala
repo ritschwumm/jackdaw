@@ -9,24 +9,26 @@ import scaudio.dsp.BiQuadCoeffs
 import jackdaw.audio.PitchMath._
 
 object Config {
-	val updateTick		= 40.millis 
-	
-	val outputConfig	= OutputConfig(ISeq.empty, 44100, 512, 8, true)
-	
-	// (output.rate * Config.updateTick.millis / 1000).toInt / 4
-	val controlFrames	= 256
+	val guiUpdateInterval		= 40.millis 
 	
 	// how much more block should be in the engine feed back queue after update
-	val queueOvershot	= 10
-	
-	// assumed size of a block on disk
-	val diskBlockSize	= 512	// HFS+, on linux we usually have 4096
-	
-	// TODO should depend on BPM and loop size
-	val preloadTime		= 2.seconds
+	val guiQueueOvershot		= 10
 	
 	// correction factor for the feedback rate 
-	val rateFactor		= 1.005	// 0.5%
+	val guiQueuAdaptFactor		= 1.005	// 0.5%
+	
+	// (output.rate * Config.updateTick.millis / 1000).toInt / 4
+	val controlIntervalFrames	= 256
+	
+	// how often to talk to the loader
+	val preloadIntervalFrames	= 1024
+	
+	val preloadSpread			= 2.seconds
+	
+	// assumed size of a block on disk
+	val preloadDiskBlockSize	= 512	// HFS+, on linux we usually have 4096
+	
+	val outputConfig	= OutputConfig(ISeq.empty, 44100, 512, 8, true)
 	
 	val sincEnabled		= true
 	
