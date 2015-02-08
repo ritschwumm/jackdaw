@@ -17,12 +17,6 @@ object Render {
 	def rhythmIndex(it:RhythmIndex):String	=
 			octal(it.measure) + "/" + octal(it.beat)
 		
-	def beatsOpt(it:Option[Int]):String	=
-			it cata ("-", beats)
-		
-	def beats(it:Int):String	=
-			octal(it)
-		
 	private def octal(it:Int)	= 
 			Integer toString (it, 8)
 	

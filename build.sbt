@@ -1,6 +1,6 @@
 name			:= "jackdaw"
 organization	:= "de.djini"
-version			:= "1.18.0"
+version			:= "1.19.0"
 
 scalaVersion	:= "2.11.5"
 scalacOptions	++= Seq(
@@ -26,7 +26,7 @@ libraryDependencies	++= Seq(
 	"de.djini"		%%	"scutil-swing"	% "0.63.0"	% "compile",
 	"de.djini"		%%	"scaudio"		% "0.50.0"	% "compile",
 	"de.djini"		%%	"scjson"		% "0.68.0"	% "compile",
-	"de.djini"		%%	"screact"		% "0.70.0"	% "compile",
+	"de.djini"		%%	"screact"		% "0.71.0"	% "compile",
 	"de.djini"		%%	"scgeom"		% "0.26.0"	% "compile",
 	"de.djini"		%%	"sc2d"			% "0.20.0"	% "compile",
 	"com.twitter"	%%	"chill"			% "0.5.1"	% "compile",

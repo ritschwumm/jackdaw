@@ -390,7 +390,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 			rhythm getOrElse fakeRhythm raster offset.unit
 		
 	// TODO raster ugly
-	private  def fakeRhythm	= Rhythm simple (0, rate)
+	private  def fakeRhythm	= Rhythm fake (0, rate)
 	
 	//------------------------------------------------------------------------------
 	//## motor scratch

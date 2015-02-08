@@ -35,6 +35,7 @@ object Main extends Observing {
 	
 	def start() {
 		Library.init()
+		model.start()
 		
 		val content	= frame.getContentPane
 		content setLayout new BorderLayout
@@ -44,7 +45,6 @@ object Main extends Observing {
 		frame setSize					Style.window.size
 		frame setDefaultCloseOperation	WindowConstants.DO_NOTHING_ON_CLOSE
 		frame onWindowClosing { _ => dispose() }
-		model.start()
 		frame setVisible true
 		
 		val macifyApplication	= new DefaultApplication

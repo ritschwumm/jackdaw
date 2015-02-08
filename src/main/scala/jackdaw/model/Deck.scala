@@ -69,13 +69,19 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 		otherEmitter emit PlayerPositionSeek(offset)
 	}
 	
-	def syncPhaseManually(position:RhythmValue) {
+	def syncPhase(scale:RhythmUnit, fraction:Double) {
+		val position	= RhythmValue(fraction, scale)
 		otherEmitter emit PlayerPhaseAbsolute(position)
 	}
 	
-	def movePhase(offset:RhythmValue, fine:Boolean) {
-		val scaled	= offset scale (Deck phaseMoveOffset fine)
-		otherEmitter emit PlayerPhaseRelative(scaled)
+	def movePhase(scale:RhythmUnit, steps:Double, fine:Boolean) {
+		val offset	= RhythmValue(steps * (Deck phaseMoveOffset fine), scale)
+		otherEmitter emit PlayerPhaseRelative(offset)
+ 	}
+ 	
+ 	def modifyPhase(scale:RhythmUnit, fraction:Double) {
+		val offset	= RhythmValue(fraction, scale)
+		otherEmitter emit PlayerPhaseRelative(offset)
  	}
  	
  	private def emitSetNeedSync(needSync:Boolean) {
@@ -97,11 +103,12 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 	val metadata:Signal[Option[Metadata]]		= (trackWrap flatMap { it => OptionSignal(it.metadata)	}).unwrap
 	val rhythm:Signal[Option[Rhythm]]			= (trackWrap flatMap { it => OptionSignal(it.rhythm)	}).unwrap
 	val wav:Signal[Option[File]]				= (trackWrap flatMap { it => OptionSignal(it.wav)		}).unwrap
-	val fileName:Signal[Option[String]]			= signal { track.current map	{ _.fileName			} }
-	val cuePoints:Signal[Option[ISeq[Double]]]	= signal { track.current map	{ _.cuePoints.current	} }
-	val annotation:Signal[Option[String]]		= signal { track.current map	{ _.annotation.current	} }
-	val dataLoaded:Signal[Boolean]				= signal { track.current exists	{ _.dataLoaded.current	} }
-	val fullyLoaded:Signal[Boolean]				= signal { track.current exists	{ _.fullyLoaded.current	} }
+	val fileName:Signal[Option[String]]			= signal { track.current map	{ _.fileName				} }
+	val cuePoints:Signal[Option[ISeq[Double]]]	= signal { track.current map	{ _.cuePoints.current		} }
+	val annotation:Signal[Option[String]]		= signal { track.current map	{ _.annotation.current		} }
+	val dataLoaded:Signal[Boolean]				= signal { track.current exists	{ _.dataLoaded.current		} }
+	val sampleLoaded:Signal[Boolean]			= signal { track.current exists	{ _.sampleLoaded.current	} }
+	// val fullyLoaded:Signal[Boolean]			= signal { track.current exists	{ _.fullyLoaded.current		} }
 	
 	val cuePointsFlat:Signal[ISeq[Double]]		= signal { cuePoints.current.flattenMany }
 	
@@ -161,24 +168,26 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 	/** player position (almost) floored to rhythm points */
 	val playerRhythmIndex:Signal[Option[RhythmIndex]]	=
 			signal {
+				val rhy	= rhythm.current
+				val pos	= position.current
 				for {
-					rhythm	<- rhythm.current
+					rhythm	<- rhy
 				}
-				yield rhythm index position.current
+				yield rhythm index pos
 			}
 			
 	/** how far it is from the player position to the next cue point */
-	val playerBeforeCuePoint:Signal[Option[Int]]	=
+	val playerBeforeCuePoint:Signal[Option[RhythmIndex]]	=
 			signal {
+				val rhy	= rhythm.current
+				val cpf	= cuePointsFlat.current
+				val pos	= position.current
 				for {
-					rhythm		<- rhythm.current
-					measures	<- calculateNextCuepoint(rhythm, cuePointsFlat.current, position.current)
+					rhythm		<- rhy
+					cuePoint	<- cpf find { _ > pos }
 				}
-				yield measures
+				yield rhythm withAnchor cuePoint index pos
 			}
-			
-	private def calculateNextCuepoint(rhythm:Rhythm, cuePoints:ISeq[Double], position:Double):Option[Int]	=
-			cuePoints map { _ - position } find { _ > 0 } map rhythm.measureDistance
 	
 	//------------------------------------------------------------------------------
 	//## gui derivates

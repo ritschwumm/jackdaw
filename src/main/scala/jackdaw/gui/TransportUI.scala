@@ -15,7 +15,7 @@ object TransportUI {
 }
 
 /** playback control */
-final class TransportUI(trackLoaded:Signal[Boolean], playing:Signal[Boolean], afterEnd:Signal[Boolean], loopChoices:ISeq[(LoopDef,Signal[Boolean])], rhythmic:Signal[Boolean], cuePointsCount:Signal[Int]) extends UI with Observing {
+final class TransportUI(cueable:Signal[Boolean], playable:Signal[Boolean], playing:Signal[Boolean], afterEnd:Signal[Boolean], loopChoices:ISeq[(LoopDef,Signal[Boolean])], rhythmic:Signal[Boolean], cuePointsCount:Signal[Int]) extends UI with Observing {
 	//------------------------------------------------------------------------------
 	//## cue point components
 	
@@ -29,7 +29,7 @@ final class TransportUI(trackLoaded:Signal[Boolean], playing:Signal[Boolean], af
 										new ButtonUI(
 											ButtonStyleFactory.size,
 											static(image),
-											trackLoaded
+											cueable
 										)
 								val actions	= button.actions tag index
 								(button, actions)
@@ -39,8 +39,8 @@ final class TransportUI(trackLoaded:Signal[Boolean], playing:Signal[Boolean], af
 				}
 			})
 			.unzip
-	// cuePointUIs:Signal[ISeq[UI]]
-	// cuePointActionEvents:Signal[ISeq[Events[Int]]]
+	typed[Signal[ISeq[UI]]](cuePointUIs)
+	typed[Signal[ISeq[Events[Int]]]](cuePointActionEvents)
 			
 	private val cuePointActions:Events[Int]	= 
 			(cuePointActionEvents map Events.multiOrElse).flattenEvents
@@ -55,7 +55,7 @@ final class TransportUI(trackLoaded:Signal[Boolean], playing:Signal[Boolean], af
 	private val canPlay:Signal[Boolean]	= 
 			signal {
 				!afterEnd.current &&
-				trackLoaded.current
+				playable.current
 			}
 			
 	private val canLoop:Signal[Boolean]	= 
@@ -67,13 +67,13 @@ final class TransportUI(trackLoaded:Signal[Boolean], playing:Signal[Boolean], af
 	private val canAddCuePoint:Signal[Boolean]	= 
 			signal {
 				cuePointsCount.current < TransportUI.maxCuePoints &&
-				trackLoaded.current
+				cueable.current
 			}
 	
 	private val canRemoveCuePoint:Signal[Boolean]	=
 			signal {
 				cuePointsCount.current != 0 &&
-				trackLoaded.current
+				cueable.current
 			}
 			
 	//------------------------------------------------------------------------------
@@ -122,13 +122,11 @@ final class TransportUI(trackLoaded:Signal[Boolean], playing:Signal[Boolean], af
 	//------------------------------------------------------------------------------
 	//## other components
 	
-	private val	seekBackwardButton	= new ButtonUI(ButtonStyleFactory.size, static(ButtonStyleFactory.LEFT),	trackLoaded)
-	private val	seekForwardButton	= new ButtonUI(ButtonStyleFactory.size, static(ButtonStyleFactory.RIGHT),	trackLoaded)
-	private val	ejectButton			= new ButtonUI(ButtonStyleFactory.size, static(ButtonStyleFactory.EJECT),	trackLoaded)
+	private val	seekBackwardButton	= new ButtonUI(ButtonStyleFactory.size, static(ButtonStyleFactory.LEFT),	playable)
+	private val	seekForwardButton	= new ButtonUI(ButtonStyleFactory.size, static(ButtonStyleFactory.RIGHT),	playable)
+	private val	ejectButton			= new ButtonUI(ButtonStyleFactory.size, static(ButtonStyleFactory.EJECT),	playable)
 	private val	addCueButton		= new ButtonUI(ButtonStyleFactory.size, static(ButtonStyleFactory.RECORD),	canAddCuePoint)
 	private val	removeCueButton		= new ButtonUI(ButtonStyleFactory.size, static(ButtonStyleFactory.CROSS),	canRemoveCuePoint)
-	
-	// private val	cueStopButton		= new ButtonUI(ButtonStyleFactory.size, static(ButtonStyleFactory.STOP),	trackLoaded)
 	
 	private val panel	= 
 			HBoxUI(

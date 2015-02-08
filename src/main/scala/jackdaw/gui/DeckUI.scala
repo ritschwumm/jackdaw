@@ -76,7 +76,8 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 	private val phaseUI			= new PhaseUI(deck.measureMatch, deck.rhythm)
 	private val transportUI		= 
 			new TransportUI(
-				trackLoaded		= deck.fullyLoaded,
+				cueable			= deck.dataLoaded,
+				playable		= deck.sampleLoaded,
 				playing			= deck.running,
 				afterEnd		= deck.afterEnd,
 				loopChoices		= loopChoices,
@@ -133,9 +134,32 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 	
 	overviewUI.jump.withFine	trigger	deck.jumpFrame
 	
-	// TODO hardcoded Measure
-	phaseUI.jump				observe	{ phase 		=> deck syncPhaseManually	RhythmValue(phase, Measure) 		}
-	phaseUI.mouseWheel.withFine	trigger	{ (steps, fine)	=> deck movePhase			(RhythmValue(steps, Measure), fine)	}
+	private val phaseSyncKey:Events[Double]	=
+			Key(VK_MINUS ,	KEY_LOCATION_STANDARD).asAction tag 0.0
+	private val phaseSync:Events[Double]	=
+			phaseSyncKey	orElse
+			phaseUI.jump 
+	phaseSync observe { phase =>
+		deck syncPhase (Measure, phase)
+	}
+		
+	// TODO crude hack
+	private val delaying16Key:Events[Double]	=
+			Key(VK_PERIOD,	KEY_LOCATION_STANDARD).asModifier
+			.edge map { _ cata (+1.0/4, -1.0/4) }
+	private val delaying8Key:Events[Double]	=
+			Key(VK_COMMA,	KEY_LOCATION_STANDARD).asModifier
+			.edge map { _ cata (+1.0/2, -1.0/2) }
+	private val delayingKey:Events[Double]	=
+			delaying16Key orElse
+			delaying8Key
+	delayingKey observe { fraction =>
+		deck modifyPhase (Beat, fraction)
+	}
+	
+	phaseUI.mouseWheel.withFine	trigger	{ (steps, fine)	=>
+		deck movePhase	(Measure, steps, fine)	
+	}
 
 	private val ejectTrackKey:Events[Unit]	=
 			Key(VK_LESS ,	KEY_LOCATION_STANDARD).asAction
@@ -156,20 +180,18 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 			transportUI.playToggle	
 	playToggle	trigger	deck.playToggle
 	
-	//private val loopChoices:ISeq[(LoopDef,Signal[Boolean])]	=
-	
-	private val setLoopKeyActions:Events[Option[LoopDef]]	=
+	private val setLoopKey:Events[Option[LoopDef]]	=
 			Events multiOrElse (
 				(loopChoices zip ISeq(VK_U, VK_I, VK_O, VK_P))
 				.map { case ((loopDef, active), key) =>
 					Key(key, KEY_LOCATION_STANDARD).asAction tag Some(loopDef)
 				}
 			)
-	private val resetLoopKeyAction:Events[Option[LoopDef]]	=
+	private val resetLoopKey:Events[Option[LoopDef]]	=
 			Key(VK_NUMBER_SIGN,	KEY_LOCATION_STANDARD).asAction tag None
 	private val setLoop:Events[Option[LoopDef]]	=
-			setLoopKeyActions	orElse
-			resetLoopKeyAction	orElse
+			setLoopKey		orElse
+			resetLoopKey	orElse
 			transportUI.setLoop
 	setLoop observe	deck.setLoop
 	
@@ -245,18 +267,25 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 	removeCue	trigger deck.removeCue
 	
 	private val jumpCueKey:Events[Int]	=
-			(Key(VK_0,			KEY_LOCATION_STANDARD).asAction tag 0)	orElse
-			(Key(VK_1,			KEY_LOCATION_STANDARD).asAction tag 1)	orElse
-			(Key(VK_2,			KEY_LOCATION_STANDARD).asAction tag 2)	orElse
-			(Key(VK_3,			KEY_LOCATION_STANDARD).asAction tag 3)	orElse
-			(Key(VK_4,			KEY_LOCATION_STANDARD).asAction tag 4)	orElse
-			(Key(VK_5,			KEY_LOCATION_STANDARD).asAction tag 5)	orElse
-			(Key(VK_6,			KEY_LOCATION_STANDARD).asAction tag 6)	orElse
-			(Key(VK_7,			KEY_LOCATION_STANDARD).asAction tag 7)	orElse
-			(Key(VK_8,			KEY_LOCATION_STANDARD).asAction tag 8)	orElse
-			(Key(VK_9,			KEY_LOCATION_STANDARD).asAction tag 9)	orElse
-			(Key(VK_CIRCUMFLEX,	KEY_LOCATION_STANDARD).asAction tag 0)	orElse
-			(Key(VK_BACK_QUOTE,	KEY_LOCATION_STANDARD).asAction tag 0)
+			Events multiOrElse (
+				Vector(
+					VK_0			-> 0,
+					VK_1			-> 1,
+					VK_2			-> 2,
+					VK_3			-> 3,
+					VK_4			-> 4,
+					VK_5			-> 5,
+					VK_6			-> 6,
+					VK_7			-> 7,
+					VK_8			-> 8,
+					VK_9			-> 9,
+					VK_CIRCUMFLEX	-> 0,
+					VK_BACK_QUOTE	-> 0
+				)
+				.map { case (k, i) =>
+					(Key(k,	KEY_LOCATION_STANDARD).asAction tag i)
+				}
+			)
 	private val jumpCue:Events[Int]	=
 			jumpCueKey	orElse
 			transportUI.jumpCue	

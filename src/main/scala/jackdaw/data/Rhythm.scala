@@ -12,23 +12,30 @@ import jackdaw.audio.PitchMath._
 object Rhythm {
 	// TODO hardcoded, look up references
 	val defaultBeatsPerMeasure	= 4
-	val defaultBeatsPerSecond	= bpm(120.0)
 	 
-	private val defaultMeasureRate	= defaultBeatsPerSecond / defaultBeatsPerMeasure
-	
-	def simple(anchor:Double, sampleRate:Double):Rhythm	=
+	def default(anchor:Double, measure:Double):Rhythm	=
 			Rhythm(
-					anchor,
-					defaultMeasure(sampleRate),
-					defaultBeatsPerMeasure)
+				anchor			= anchor,
+				measure			= measure,
+				beatsPerMeasure	= defaultBeatsPerMeasure
+			)
+			
+	val defaultBeatsPerSecond	= bpm(120.0)
 	
-	private def defaultMeasure(sampleRate:Double):Double	=
-			sampleRate/defaultMeasureRate
+	def fake(anchor:Double, sampleRate:Double):Rhythm	=
+			default(
+				anchor	= anchor,
+				measure	= sampleRate * defaultBeatsPerMeasure / defaultBeatsPerSecond
+			)
 }
 
 // BETTER use BigFraction here?
 case class Rhythm(anchor:Double, measure:Double, beatsPerMeasure:Int) {
 	val beat	= measure / beatsPerMeasure
+	
+	//------------------------------------------------------------------------------
+	
+	def withAnchor(anchor:Double):Rhythm	= copy(anchor = anchor)
 	
 	def moveBy(offset:Double):Rhythm	= copy(anchor	= anchor	+ offset)
 	def resizeBy(factor:Double):Rhythm	= copy(measure	= measure	* factor)
@@ -59,16 +66,11 @@ case class Rhythm(anchor:Double, measure:Double, beatsPerMeasure:Int) {
 	
 	//------------------------------------------------------------------------------
 	
-	def index(position:Double):RhythmIndex	= {
-		val rawBeat:Int		= fixFloor(beatRaster normalize position)
-		val outBeat:Int		= moduloInt(rawBeat, beatsPerMeasure)
-		val outMeasure:Int	= fixFloor(measureRaster normalize position)
-		RhythmIndex(outMeasure, outBeat)
-	}
-	
-	/** positive distance */
-	def measureDistance(offset:Double):Int	=
-			fixCeil(offset / measure)
+	def index(position:Double):RhythmIndex	=
+			RhythmIndex(
+				beat	= moduloInt(fixFloor(beatRaster		normalize position), beatsPerMeasure),
+				measure	=			fixFloor(measureRaster	normalize position)
+			)
 	
 	private val small	= {
 		val	epsilon	= 1.0/1000

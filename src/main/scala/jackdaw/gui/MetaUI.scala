@@ -19,7 +19,7 @@ final class MetaUI(deck:Deck) extends UI {
 	private val artist		= signal { deck.metadata.current flatMap { _.artist	} getOrElse "" }
 	
 	private val location	= deck.playerRhythmIndex	map Render.rhythmIndexOpt
-	private val remains		= deck.playerBeforeCuePoint	map Render.beatsOpt
+	private val remains		= deck.playerBeforeCuePoint	map Render.rhythmIndexOpt
 	/*
 	private val remains		= deck.playerRemainingSeconds	map Render.secondsOpt
 	*/
