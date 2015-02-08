@@ -46,7 +46,7 @@ object JOgg extends Inspector with Decoder with Logging {
 	def convertToWav(input:File, output:File, preferredFrameRate:Int, preferredChannelCount:Int):Checked[Unit] =
 			for {
 				_	<- recognizeFile(input)
-				_	<-                
+				_	<-
 					withVorbisStream(input) { vorbis =>
 						DEBUG(s"decoding with ${name}")
 						val header	= vorbis.getIdentificationHeader
@@ -55,7 +55,7 @@ object JOgg extends Inspector with Decoder with Logging {
 									writeWavChecked(output, header.getSampleRate, header.getChannels.toShort) { append:BufferWriter => 
 										copyPcm(vorbis, append)
 									} failEffect {
-										_ => output.delete() 
+										_ => output.delete()
 									}
 						}
 						yield (())
@@ -146,7 +146,7 @@ object JOgg extends Inspector with Decoder with Logging {
 				}
 				outFile seek endPos
 			}
-	   
+	
 			val WAVE_FORMAT_PCM			= 1.toShort
 			
 			val bitsPerSample:Short		= 16.toShort

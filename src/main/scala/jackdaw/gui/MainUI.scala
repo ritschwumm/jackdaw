@@ -65,7 +65,7 @@ final class MainUI(model:Model, windowActive:Signal[Boolean]) extends UI with Ob
 				deck3UI.grabsKeyboard.current
 			}
 			
-	private val keyboardEnabledFb	= 
+	private val keyboardEnabledFb	=
 			(windowActive zipWith grabsKeyboard) {
 				_ && !_
 			}

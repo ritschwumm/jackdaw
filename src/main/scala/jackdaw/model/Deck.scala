@@ -144,10 +144,18 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 	//------------------------------------------------------------------------------
 	//## position
 	
+	val rhythmAnchor:Signal[Option[Double]] =
+			signal {
+				for {
+					rhythm	<- rhythm.current
+				}
+				yield rhythm.anchor
+			}
+			
 	/** all rhythm lines to be displayed */
 	val rhythmLines:Signal[Option[ISeq[RhythmLine]]] =
 			signal {
-				for { 
+				for {
 					rhythm	<- rhythm.current
 					sample	<- sample.current
 				}

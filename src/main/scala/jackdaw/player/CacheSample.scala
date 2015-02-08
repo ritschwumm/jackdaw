@@ -68,7 +68,7 @@ final class CacheSample(peer:Sample) extends Sample {
 			
 	//------------------------------------------------------------------------------
 	
-	val channels:Seq[Channel]	= 
+	val channels:Seq[Channel]	=
 			(0 until channelCount)
 			.map { channelIndex =>
 				new CacheChannel(channelIndex)
@@ -167,7 +167,7 @@ final class CacheSample(peer:Sample) extends Sample {
 	def readBarrier() {
         barrier.get
     }
-    
+
 	@inline
 	def writeBarrier() {
         barrier lazySet false

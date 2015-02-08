@@ -19,10 +19,10 @@ final class TransportUI(cueable:Signal[Boolean], playable:Signal[Boolean], playi
 	//------------------------------------------------------------------------------
 	//## cue point components
 	
-	private val (cuePointUIs, cuePointActionEvents)	= 
+	private val (cuePointUIs, cuePointActionEvents)	=
 			(cuePointsCount map { count =>
 				decouple {
-					val (uis, actions)	= 
+					val (uis, actions)	=
 							(0 until count map { index =>
 								val image	= ButtonStyleFactory CUE index
 								val button	=
@@ -42,7 +42,7 @@ final class TransportUI(cueable:Signal[Boolean], playable:Signal[Boolean], playi
 	typed[Signal[ISeq[UI]]](cuePointUIs)
 	typed[Signal[ISeq[Events[Int]]]](cuePointActionEvents)
 			
-	private val cuePointActions:Events[Int]	= 
+	private val cuePointActions:Events[Int]	=
 			(cuePointActionEvents map Events.multiOrElse).flattenEvents
 		
 	private val cuePointsPanel:UI	=
@@ -52,19 +52,19 @@ final class TransportUI(cueable:Signal[Boolean], playable:Signal[Boolean], playi
 				}
 			)
 	
-	private val canPlay:Signal[Boolean]	= 
+	private val canPlay:Signal[Boolean]	=
 			signal {
 				!afterEnd.current &&
 				playable.current
 			}
 			
-	private val canLoop:Signal[Boolean]	= 
+	private val canLoop:Signal[Boolean]	=
 			signal {
 				canPlay.current &&
 				rhythmic.current
 			}
 	
-	private val canAddCuePoint:Signal[Boolean]	= 
+	private val canAddCuePoint:Signal[Boolean]	=
 			signal {
 				cuePointsCount.current < TransportUI.maxCuePoints &&
 				cueable.current
@@ -104,7 +104,7 @@ final class TransportUI(cueable:Signal[Boolean], playable:Signal[Boolean], playi
 			)
 	private val loopUIs:ISeq[UI]	=
 			loopSetUIs :+ loopResetUI
-	private val loopActions:Events[Option[LoopDef]]	= 
+	private val loopActions:Events[Option[LoopDef]]	=
 			(Events multiOrElse loopSetActionEvents)	orElse
 			(loopResetUI.actions tag None)
 			
@@ -114,7 +114,7 @@ final class TransportUI(cueable:Signal[Boolean], playable:Signal[Boolean], playi
 	//------------------------------------------------------------------------------
 	//## playing components
 	
-	private val playingIcon:Signal[ButtonStyle]	= 
+	private val playingIcon:Signal[ButtonStyle]	=
 			playing map { _ cata (ButtonStyleFactory.PLAY, ButtonStyleFactory.PAUSE) }
 		
 	private val	playToggleButton	= new ButtonUI(ButtonStyleFactory.size, playingIcon,						canPlay)
@@ -128,7 +128,7 @@ final class TransportUI(cueable:Signal[Boolean], playable:Signal[Boolean], playi
 	private val	addCueButton		= new ButtonUI(ButtonStyleFactory.size, static(ButtonStyleFactory.RECORD),	canAddCuePoint)
 	private val	removeCueButton		= new ButtonUI(ButtonStyleFactory.size, static(ButtonStyleFactory.CROSS),	canRemoveCuePoint)
 	
-	private val panel	= 
+	private val panel	=
 			HBoxUI(
 				// cueStopButton,
 				playToggleButton,

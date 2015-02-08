@@ -65,7 +65,7 @@ final class SpeedUI(speed:Speed, keyboardEnabled:Signal[Boolean]) extends UI wit
 	
 	import KeyEvent._
 	
-	private val focusInput	= 
+	private val focusInput	=
 			KeyInput focusInput (
 				enabled		= keyboardEnabled,
 				component	= component,
@@ -82,7 +82,7 @@ final class SpeedUI(speed:Speed, keyboardEnabled:Signal[Boolean]) extends UI wit
 			Key(VK_UP,		KEY_LOCATION_STANDARD).asModifier	upDown
 			Key(VK_DOWN,	KEY_LOCATION_STANDARD).asModifier
 	private val draggingButton:Signal[Option[Boolean]]	=
-			pushButton.pressed	upDown 
+			pushButton.pressed	upDown
 			pullButton.pressed
 	private val dragging:Signal[Option[Boolean]]	=
 			draggingKey	merge
@@ -91,7 +91,7 @@ final class SpeedUI(speed:Speed, keyboardEnabled:Signal[Boolean]) extends UI wit
 	
 	// actions
 	
-	private val pitchKey:Signal[Option[Boolean]]	= 
+	private val pitchKey:Signal[Option[Boolean]]	=
 			Key(VK_HOME,	KEY_LOCATION_STANDARD).asModifier	upDown
 			Key(VK_END,		KEY_LOCATION_STANDARD).asModifier
 	private val pitchButton:Signal[Option[Boolean]]	=

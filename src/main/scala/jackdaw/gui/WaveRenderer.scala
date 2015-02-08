@@ -175,8 +175,8 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 	// dispatcher
 	@inline
 	private def renderLine(
-		g:Graphics2D, 
-		x:Int, sizeY:Int, bottomY:Int, 
+		g:Graphics2D,
+		x:Int, sizeY:Int, bottomY:Int,
 		valueLow:Float, valueMiddle:Float, valueHigh:Float
 	) {
 		renderLineColoredSum(	g, x, sizeY, bottomY, valueLow, valueMiddle, valueHigh)
@@ -186,8 +186,8 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 	// colored energy variant
 	@inline
 	private def renderLineColoredSum(
-		g:Graphics2D, 
-		x:Int, sizeY:Int, bottomY:Int, 
+		g:Graphics2D,
+		x:Int, sizeY:Int, bottomY:Int,
 		valueLow:Float, valueMiddle:Float, valueHigh:Float
 	) {
 		val color		= sumColor(valueLow, valueMiddle, valueHigh)
@@ -201,7 +201,7 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 	private def sumColor(low:Float, middle:Float, high:Float):Color	= {
 		val max	= max3Float(low, middle, high)
 		new Color(
-			low		/ max, 
+			low		/ max,
 			middle	/ max,
 			high	/ max
 		)
@@ -210,8 +210,8 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 	// overwritten band energies variant
 	@inline
 	private def renderLineOverlapBands(
-		g:Graphics2D, 
-		x:Int, sizeY:Int, bottomY:Int, 
+		g:Graphics2D,
+		x:Int, sizeY:Int, bottomY:Int,
 		valueLow:Float, valueMiddle:Float, valueHigh:Float
 	) {
 		val yLow	= (valueLow		* sizeY).toInt
@@ -237,20 +237,20 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 					1,  7, 1,
 					0,  3, 0
 				)
-		val kernel	= 
+		val kernel	=
 				new Kernel(
 					3, 5,
 					raw map { _ / raw.sum }
 				)
 		val	operation	=
 				new ConvolveOp(
-					kernel, 
+					kernel,
 					ConvolveOp.EDGE_NO_OP, 
 					null
 				)
 		operation
     }
-    
+
     private def blur(src:BufferedImage):BufferedImage	=
 			blurOperation filter (src, null)
 }

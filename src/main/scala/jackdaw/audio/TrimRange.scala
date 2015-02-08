@@ -12,7 +12,7 @@ object TrimRange {
 	def clamp(it:Double):Double	=
 			clampDouble(
 				it,
-				min, 
+				min,
 				max
 			)
 }

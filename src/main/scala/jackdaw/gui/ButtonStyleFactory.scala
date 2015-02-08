@@ -191,7 +191,7 @@ object ButtonStyleFactory {
 				pressed		= factory(Style.button.shape.pressed.color,		Style.button.shape.pressed.stroke)
 			)
 	
-	private lazy val trialPaint:Option[Boolean]=>Paint	= 
+	private lazy val trialPaint:Option[Boolean]=>Paint	=
 			Map(
 				Some(true)	-> Style.button.trial.yes,
 				Some(false)	-> Style.button.trial.please,

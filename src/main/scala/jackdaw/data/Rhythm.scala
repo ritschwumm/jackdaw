@@ -10,14 +10,11 @@ import scutil.math._
 import jackdaw.audio.PitchMath._
 
 object Rhythm {
-	// TODO hardcoded, look up references
-	val defaultBeatsPerMeasure	= 4
-	 
 	def default(anchor:Double, measure:Double):Rhythm	=
 			Rhythm(
-				anchor			= anchor,
-				measure			= measure,
-				beatsPerMeasure	= defaultBeatsPerMeasure
+				anchor		= anchor,
+				measure		= measure,
+				schema		= Schema.default
 			)
 			
 	val defaultBeatsPerSecond	= bpm(120.0)
@@ -25,13 +22,14 @@ object Rhythm {
 	def fake(anchor:Double, sampleRate:Double):Rhythm	=
 			default(
 				anchor	= anchor,
-				measure	= sampleRate * defaultBeatsPerMeasure / defaultBeatsPerSecond
+				measure	= sampleRate * Schema.default.beatsPerMeasure / defaultBeatsPerSecond
 			)
 }
 
 // BETTER use BigFraction here?
-case class Rhythm(anchor:Double, measure:Double, beatsPerMeasure:Int) {
-	val beat	= measure / beatsPerMeasure
+case class Rhythm(anchor:Double, measure:Double, schema:Schema) {
+	val beat	= measure / schema.beatsPerMeasure
+	val phrase	= measure * schema.measuresPerPhrase
 	
 	//------------------------------------------------------------------------------
 	
@@ -57,10 +55,12 @@ case class Rhythm(anchor:Double, measure:Double, beatsPerMeasure:Int) {
 
 	def raster(rhythmUnit:RhythmUnit):Raster	=
 			rhythmUnit match {
+				case Phrase		=> phraseRaster
 				case Measure	=> measureRaster
 				case Beat		=> beatRaster
 			}
 	
+	lazy val phraseRaster:Raster	= Raster(phrase,	anchor)
 	lazy val measureRaster:Raster	= Raster(measure,	anchor)
 	lazy val beatRaster:Raster		= Raster(beat,		anchor)
 	
@@ -68,8 +68,9 @@ case class Rhythm(anchor:Double, measure:Double, beatsPerMeasure:Int) {
 	
 	def index(position:Double):RhythmIndex	=
 			RhythmIndex(
-				beat	= moduloInt(fixFloor(beatRaster		normalize position), beatsPerMeasure),
-				measure	=			fixFloor(measureRaster	normalize position)
+				beat	= moduloInt(fixFloor(beatRaster		normalize position),	schema.beatsPerMeasure),
+				measure	= moduloInt(fixFloor(measureRaster	normalize position),	schema.measuresPerPhrase),
+				phrase	= 			fixFloor(phraseRaster	normalize position)
 			)
 	
 	private val small	= {
@@ -81,10 +82,6 @@ case class Rhythm(anchor:Double, measure:Double, beatsPerMeasure:Int) {
 	private def fixFloor(value:Double):Int	=
 			floor(small round value).toInt
 		
-	/** ceil ignoring small errors */
-	private def fixCeil(value:Double):Int	=
-			ceil(small round value).toInt
-	
 	//------------------------------------------------------------------------------
 	
 	def lines(start:Double, end:Double):ISeq[RhythmLine] = {
@@ -96,9 +93,10 @@ case class Rhythm(anchor:Double, measure:Double, beatsPerMeasure:Int) {
 		var value	= firstValue
 		while (value < end) {
 			out		+= (
-					 if (index == 0)					AnchorLine(value)
-				else if (index % beatsPerMeasure == 0)	MeasureLine(value)
-				else									BeatLine(value)
+				// if (index == 0)	AnchorLine(value)
+				     if (index % schema.beatsPerPhrase  == 0)	RhythmLine(value, Phrase)
+				else if (index % schema.beatsPerMeasure == 0)	RhythmLine(value, Measure)
+				else											RhythmLine(value, Beat)
 			)
 			value	+= beat
 			index	+= 1

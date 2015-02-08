@@ -278,7 +278,12 @@ object Style {
 			val color	= WEAK_FOREGROUND
 			val stroke	= SIMPLE_STROKE
 			object triangle {
-				val size	= 8
+				val width	= 3
+				val height	= 6
+			}
+			object sixangle {
+				val width	= 5
+				val height	= 10
 			}
 			object rectangle {
 				val width	= 4

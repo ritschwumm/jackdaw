@@ -12,18 +12,18 @@ import jackdaw.data._
 
 object Render {
 	def rhythmIndexOpt(it:Option[RhythmIndex]):String	=
-			it cata ("-/-", rhythmIndex)
+			it cata ("-:-:-", rhythmIndex)
 		
 	def rhythmIndex(it:RhythmIndex):String	=
-			octal(it.measure) + "/" + octal(it.beat)
+			decimal(it.phrase) + ":" + decimal(it.measure) + ":" + decimal(it.beat)
 		
-	private def octal(it:Int)	= 
-			Integer toString (it, 8)
+	private def decimal(it:Int)	=
+			Integer toString (it, 10)
 	
 	def bpmOpt(hertz:Option[Double]):String =
 			hertz cata ("---.--", bpm)
 			
-	def bpm(hertz:Double):String	= 
+	def bpm(hertz:Double):String	=
 			"%.2f" formatLocal (Locale.US, hertz * secondsPerMinute)
 	
 	/*

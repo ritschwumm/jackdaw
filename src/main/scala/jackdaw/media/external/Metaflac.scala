@@ -22,8 +22,8 @@ object Metaflac extends Inspector {
 			yield {
 				val extract	= MediaUtil extractFrom result.out
 				Metadata(
-					title	= extract(""".*TITLE=(.*)""".r), 
-					artist	= extract(""".*ARTIST=(.*)""".r), 
+					title	= extract(""".*TITLE=(.*)""".r),
+					artist	= extract(""".*ARTIST=(.*)""".r),
 					album	= extract(""".*ALBUM=(.*)""".r)
 					// genre	= extract(""".*GENRE=(.*)""".r)
 				)

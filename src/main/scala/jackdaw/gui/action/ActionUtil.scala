@@ -76,7 +76,7 @@ object ActionUtil {
 			up cata (-1, +1)
 	
 	private def directionValue(up:Boolean, down:Boolean):Option[Boolean]	=
-			(up		guard true) orElse 
+			(up		guard true) orElse
 			(down	guard false)
 	
 	private def mergeDirections(a:Option[Boolean], b:Option[Boolean]):Option[Boolean]	=

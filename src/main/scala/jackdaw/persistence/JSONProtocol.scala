@@ -11,6 +11,7 @@ import jackdaw.data._
 
 object JSONProtocol extends FullProtocol {
 	implicit lazy val MilliInstantF			= viaFormat(MilliInstant.newType)
+	implicit lazy val SchemaF				= caseClassFormat2(Schema.apply,		Schema.unapply)
 	implicit lazy val RhythmF				= caseClassFormat3(Rhythm.apply,		Rhythm.unapply)
 	implicit lazy val MetadataF				= caseClassFormat3(Metadata.apply,		Metadata.unapply)
 	implicit def StampedF[T:TypeTag:Format]	= caseClassFormat2(Stamped.apply[T],	Stamped.unapply[T])

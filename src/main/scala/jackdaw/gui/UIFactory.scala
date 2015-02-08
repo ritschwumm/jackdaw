@@ -8,7 +8,7 @@ object UIFactory {
 	//------------------------------------------------------------------------------
 	//## rotary
 	
-	def filterRotary(value:Signal[Double])	= 
+	def filterRotary(value:Signal[Double])	=
 			new RotaryUI(
 				value	= value,
 				FilterRange.min,
@@ -16,7 +16,7 @@ object UIFactory {
 				FilterRange.neutral
 			)
 			
-	def trimRotary(value:Signal[Double])	= 
+	def trimRotary(value:Signal[Double])	=
 			new RotaryUI(
 				value	= value,
 				TrimRange.min,
@@ -24,7 +24,7 @@ object UIFactory {
 				TrimRange.neutral
 			)
 	
-	def volumeRotary(value:Signal[Double])	= 
+	def volumeRotary(value:Signal[Double])	=
 			new RotaryUI(
 				value	= value,
 				VolumeRange.min,

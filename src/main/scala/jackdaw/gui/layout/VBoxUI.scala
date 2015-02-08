@@ -14,7 +14,7 @@ final class VBoxUI(subs:ISeq[BoxItem]) extends UI {
 	panel setLayout new BoxLayout(panel, BoxLayout.Y_AXIS)
 	
 	private val items	=
-			subs map { 
+			subs map {
 				case BoxComponent(ui)	=> ui.component
 				case BoxGlue			=> Box.createVerticalGlue()
 				case BoxStrut(size)		=> Box createVerticalStrut size

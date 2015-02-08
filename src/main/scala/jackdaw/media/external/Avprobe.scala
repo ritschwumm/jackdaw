@@ -27,8 +27,8 @@ object Avprobe extends Inspector {
 			yield {
 				val extract	= MediaUtil extractFrom result.err
 				Metadata(
-					title	= extract("""    title\s*: (.*)""".r), 
-					artist	= extract("""    artist\s*: (.*)""".r), 
+					title	= extract("""    title\s*: (.*)""".r),
+					artist	= extract("""    artist\s*: (.*)""".r),
 					album	= extract("""    album\s*: (.*)""".r)
 					// genre	= extract("""    genre\s*: (.*)""".r)
 				)

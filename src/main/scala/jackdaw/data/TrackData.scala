@@ -12,7 +12,7 @@ object TrackData {
 			TrackData(
 				annotation	= "",
 				cuePoints	= ISeq.empty,
-				raster		= None,
+				rhythm		= None,
 				metadata	= None,
 				measure		= None
 			)
@@ -23,7 +23,7 @@ object TrackData {
 case class TrackData(
 	annotation:String,
 	cuePoints:ISeq[Double],
-	raster:Option[Rhythm],
+	rhythm:Option[Rhythm],
 	metadata:Option[Stamped[Metadata]],
 	measure:Option[Stamped[Double]]
 ) {
@@ -44,7 +44,7 @@ case class TrackData(
 	private def nearestCuePointIndex(nearFrame:Double):Option[Int]	=
 			cuePoints
 			.map	{ frame => abs(frame - nearFrame) }
-			.zipWithIndex 
+			.zipWithIndex
 			.sortBy	{ _._1 }
 			.headOption
 			.map	{ _._2 }

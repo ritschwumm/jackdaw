@@ -27,14 +27,16 @@ object Main extends Observing {
 	private val	frame	= new JFrame
 	
 	private val windowActiveFb:Events[Boolean]	=
-			SwingWidget 
+			SwingWidget
 			.events	((frame:WindowCaster).connect)
 			.map	{ _.getWindow.isActive }
 	
 	windowActiveFb observe windowActive.set
 	
 	def start() {
-		Library.init()
+		Library.cleanup()
+		Library.migrateAll()
+		
 		model.start()
 		
 		val content	= frame.getContentPane

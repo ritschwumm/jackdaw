@@ -14,15 +14,15 @@ object Opusinfo extends Inspector {
 				_		<- MediaUtil requireCommand "opusinfo"
 				result	<-
 						MediaUtil runCommand (
-							"opusinfo", 
+							"opusinfo",
 							input.getPath
 						)
 			}
 			yield {
 				val extract	= MediaUtil extractFrom result.out
 				Metadata(
-					title	= extract("""\ttitle=(.*)""".r), 
-					artist	= extract("""\tartist=(.*)""".r), 
+					title	= extract("""\ttitle=(.*)""".r),
+					artist	= extract("""\tartist=(.*)""".r),
 					album	= extract("""\talbum=(.*)""".r)
 					// genre	= extract("""\tgenre=(.*)""".r)
 				)

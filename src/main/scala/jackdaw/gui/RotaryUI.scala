@@ -34,8 +34,8 @@ final class RotaryUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 	// 90 degrees is top
 	// 180 degrees is left and
 	// 270 or -90 degrees is bottom
-	private val valueSpan		= minimum				spanTo	maximum
-	private val angleSpan		= Style.rotary.angle.min	spanTo Style.rotary.angle.max
+	private val valueSpan		= minimum					spanTo	maximum
+	private val angleSpan		= Style.rotary.angle.min	spanTo	Style.rotary.angle.max
 	private val valueToAngle	= valueSpan spanTransformTo angleSpan
 	
 	private val epsilon		= 1.0 / 10000000000D
@@ -97,7 +97,7 @@ final class RotaryUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 				BasicStroke.CAP_SQUARE,
 				BasicStroke.JOIN_ROUND)
 		val path	= new Arc2D.Double(
-				inset.toAwtRectangle2D, 
+				inset.toAwtRectangle2D,
 				span.start,
 				span.size,
 				Arc2D.OPEN)
@@ -106,7 +106,7 @@ final class RotaryUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 		/*
 		// subtract an ellipse from a big pie arc
 		val outer	= new Arc2D.Double(
-				bounds.toAwtRectangle2D, 
+				bounds.toAwtRectangle2D,
 				span.start,
 				span.size,
 				Arc2D.PIE)
@@ -140,7 +140,7 @@ final class RotaryUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 	
 	// mouse actions modify the value
 	private val mouseModify:Events[Double] =
-			mousePress orElse mouseDrag filterMap { ev => 
+			mousePress orElse mouseDrag filterMap { ev =>
 				calculateValue(ev.getPoint) combineWith (_ flatPrevent _)
 			}
 	
@@ -186,7 +186,7 @@ final class RotaryUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 					else				angle2
 	
 			// half opening overshot is allowed and limited
-			(angle3 >= Style.rotary.angle.max - Style.rotary.angle.opening/2) && 
+			(angle3 >= Style.rotary.angle.max - Style.rotary.angle.opening/2) &&
 			(angle3 <= Style.rotary.angle.min + Style.rotary.angle.opening/2) guard {
 				val angle	= clampDouble(angle3, Style.rotary.angle.max, Style.rotary.angle.min)
 				valueToAngle inverse angle
@@ -204,8 +204,8 @@ final class RotaryUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 	
 	val wheel:Events[Int]	= mouseWheel
 	
-	val changes:Events[Double]	= 
-			mouseModify	orElse 
+	val changes:Events[Double]	=
+			mouseModify	orElse
 			mouseReset	map
 			clampValueSpan
 }

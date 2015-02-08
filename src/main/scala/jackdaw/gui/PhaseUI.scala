@@ -15,7 +15,7 @@ import jackdaw.data._
 import jackdaw.gui.util._
 
 object PhaseUI {
-	private val subDivide	= Rhythm.defaultBeatsPerMeasure
+	private val subDivide	= Schema.default.beatsPerMeasure
 	
 	// TODO hardcoded insets
 	private val lineInsets	= SgSpanInsets(2, 3)
@@ -34,7 +34,7 @@ final class PhaseUI(value:Signal[Option[Double]], rhythm:Signal[Option[Rhythm]])
 	//------------------------------------------------------------------------------
 	//## input
 	
-	private val value2gui	= 
+	private val value2gui	=
 			canvas.bounds map { it =>
 				SgSpanTransform fromSpans (PhaseRange.span, it.x)
 			}
@@ -52,10 +52,10 @@ final class PhaseUI(value:Signal[Option[Double]], rhythm:Signal[Option[Rhythm]])
 				
 				val lineSpan		= trackBoundsCur.y inset PhaseUI.lineInsets
 				
-				val bar	= 
+				val bar	=
 						for {
 							value	<- valueCur
-							rect	= 
+							rect	=
 									// extreme values fill complete area
 									if (PhaseRange inside value) {
 										// NOTE hack to make it change less often
@@ -72,10 +72,10 @@ final class PhaseUI(value:Signal[Option[Double]], rhythm:Signal[Option[Rhythm]])
 							FillShape(shape, Style.phase.bar.color)
 						}
 				
-				val lines	= 
+				val lines	=
 						for {
 							rhythm		<- rhythmCur.toSeq
-							subRaster	= rhythm.beatsPerMeasure * PhaseUI.subDivide
+							subRaster	= rhythm.schema.beatsPerMeasure * PhaseUI.subDivide
 							max			= (subRaster - 1) / 2
 							index		<- -max to +max
 						}
@@ -98,18 +98,18 @@ final class PhaseUI(value:Signal[Option[Double]], rhythm:Signal[Option[Rhythm]])
 	//------------------------------------------------------------------------------
 	//## output
 	
-	val mouseWheel:Events[Int]	= 
+	val mouseWheel:Events[Int]	=
 			canvas.mouse.wheelRotation
 	
-	private val leftJump:Events[Double]	= 
-			canvas.mouse.leftPress							orElse 
-			canvas.mouse.leftDrag							map 
+	private val leftJump:Events[Double]	=
+			canvas.mouse.leftPress							orElse
+			canvas.mouse.leftDrag							map
 			{ _.getX }										snapshot
-			value2gui										map 
+			value2gui										map
 			{ case (x, value2gui) => value2gui inverse x }	map
 			PhaseRange.clamp
 	
-	private val middleReset:Events[Double]	= 
+	private val middleReset:Events[Double]	=
 			canvas.mouse.rightPress tag 0.0
 	
 	val jump:Events[Double]	=

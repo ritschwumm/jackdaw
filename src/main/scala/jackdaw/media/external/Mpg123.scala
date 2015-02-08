@@ -16,7 +16,7 @@ object Mpg123 extends Inspector with Decoder {
 				_		<- MediaUtil requireCommand "mpg123"
 				result	<-
 						MediaUtil runCommand (
-							"mpg123", 
+							"mpg123",
 							"-n",	"1",
 							// "--stdout",
 							"-w",	"-",
@@ -26,9 +26,9 @@ object Mpg123 extends Inspector with Decoder {
 			yield {
 				val extract	= MediaUtil extractFrom result.err
 				Metadata(
-					title	= extract("""Title:\s+(.*?)\s+Artist:\s+(?:.*)""".r), 
-					artist	= extract("""Title:\s+(?:.*?)\s+Artist:\s+(.*)""".r), 
-					album	= extract("""Album:\s+(.*)""".r) 
+					title	= extract("""Title:\s+(.*?)\s+Artist:\s+(?:.*)""".r),
+					artist	= extract("""Title:\s+(?:.*?)\s+Artist:\s+(.*)""".r),
+					album	= extract("""Album:\s+(.*)""".r)
 					// genre	= extract("""Genre:\s+(.*)""".r)
 					// MPEG 1.0 layer III, 192 kbit/s, 44100 Hz stereo
 				)
@@ -40,7 +40,7 @@ object Mpg123 extends Inspector with Decoder {
 				_	<- MediaUtil requireCommand "mpg123"
 				_	<-
 						MediaUtil runCommand (
-							"mpg123", 
+							"mpg123",
 							"-w",	output.getPath,	
 							// -8bit
 							"-r",	preferredFrameRate.toString,

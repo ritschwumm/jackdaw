@@ -41,7 +41,7 @@ object MeasureDetector {
 	}
 	
 	private def measureFrameCandidates(bpsRange:(Double,Double), measureBeats:Double, fragmentRate:Double):(Int,Int) = {
-		val fpm		= fragmentsPerMeasure(fragmentRate, measureBeats) _
+		val fpm	= fragmentsPerMeasure(fragmentRate, measureBeats) _
 		(
 			floor(fpm(bpsRange._2)).toInt,
 			ceil(fpm(bpsRange._1)).toInt

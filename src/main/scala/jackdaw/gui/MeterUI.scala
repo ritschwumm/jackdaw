@@ -43,7 +43,7 @@ final class MeterUI(value:Signal[Float], meterRange:MeterRange, vertical:Boolean
 	private val gradientColors	=
 			active map { case (_, color)	=> color }
 		
-	private val gradientFractions	= 
+	private val gradientFractions	=
 			active map { case (value, _)	=>
 				linear2fraction(value).toFloat
 			}
@@ -136,7 +136,7 @@ final class MeterUI(value:Signal[Float], meterRange:MeterRange, vertical:Boolean
 						FillShape(active) withPaint gradient,
 						*/
 						WithClip(
-								active, 	
+								active,
 								DrawImage(
 										activeImageCur,
 										componentBoundsCur.x.start.toInt,

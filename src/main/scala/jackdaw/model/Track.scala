@@ -28,12 +28,12 @@ object Track extends Logging {
 				_.load()
 			)
 			
-	def load(file:File):Option[Track]	= 
+	def load(file:File):Option[Track]	=
 			try {
 				// NOTE different Track objects for the same File would be fatal
 				Some(lru load file.getCanonicalFile)
 			}
-			catch { case e:Exception	=> 
+			catch { case e:Exception	=>
 				ERROR(e)
 				None
 			}
@@ -50,8 +50,6 @@ final class Track(val file:File) extends Observing with Logging {
 	val fileName	= file.getName
 	
 	private val trackFiles	= Library trackFilesFor file
-	Library insert trackFiles
-	Library cleanup ()
 	
 	private val dataCell			= cell[TrackData](TrackData.empty)
 	private val dataLoadedCell		= cell[Boolean](false)
@@ -83,6 +81,9 @@ final class Track(val file:File) extends Observing with Logging {
 	// NOTE using swing here is ugly
 	def load() {
 		worker {
+			Library touch trackFiles
+			Library cleanup ()
+			
 			try {
 				INFO("loading file", file)
 				
@@ -131,8 +132,8 @@ final class Track(val file:File) extends Observing with Logging {
 				// provide wav
 				// NOTE symlinks have the same last modified date as the link target,
 				// otherwise it would make more sense to only check for a newer file
-				val wavFresh:Boolean	= 
-						trackFiles.wav.exists && 
+				val wavFresh:Boolean	=
+						trackFiles.wav.exists &&
 						trackFiles.wav.lastModifiedMilliInstant >= fileModified
 				val wavVal:Option[File]	=
 						(wavFresh guard trackFiles.wav)
@@ -171,7 +172,7 @@ final class Track(val file:File) extends Observing with Logging {
 				edtWait { sampleLoadedCell set true }
 				
 				// provide curve
-				val curveFresh:Boolean	= 
+				val curveFresh:Boolean	=
 						trackFiles.curve.exists &&
 						trackFiles.curve.lastModifiedMilliInstant >= trackFiles.wav.lastModifiedMilliInstant
 				val curveVal:Option[BandCurve]	=
@@ -209,9 +210,9 @@ final class Track(val file:File) extends Observing with Logging {
 								INFO("detecting beat rate")
 								val out	=
 										MeasureDetector measureFrames (
-											curveVal, 
+											curveVal,
 											Config.detectBpsRange,
-											Rhythm.defaultBeatsPerMeasure
+											Schema.default.beatsPerMeasure
 										)
 								Stamped(fileModified, out)
 							}
@@ -240,7 +241,7 @@ final class Track(val file:File) extends Observing with Logging {
 	
 	val annotation	= data map { _.annotation	}
 	val cuePoints	= data map { _.cuePoints	}
-	val rhythm		= data map { _.raster		}
+	val rhythm		= data map { _.rhythm		}
 	val metadata	= data map { _.metadata	map { _.data	} }
 	val measure		= data map { _.measure	map { _.data	} }
 	
@@ -268,7 +269,7 @@ final class Track(val file:File) extends Observing with Logging {
 	}
 	
 	def toogleRhythm(position:Double) {
-		updateRhythm(position, data.current.raster.isEmpty)
+		updateRhythm(position, data.current.rhythm.isEmpty)
 	}
 	
 	private def updateRhythm(position:Double, activate:Boolean) {
@@ -277,15 +278,15 @@ final class Track(val file:File) extends Observing with Logging {
 					None,
 					detectedRhythm(position) orElse fakeRhythm(position)
 				)
-		modifyData(TrackData.L.raster putter it)
+		modifyData(TrackData.L.rhythm putter it)
 	}
 	
-	private def fakeRhythm(position:Double):Option[Rhythm]	= 
-			sample.current map { it => 
-				Rhythm fake (position, it.frameRate) 
+	private def fakeRhythm(position:Double):Option[Rhythm]	=
+			sample.current map { it =>
+				Rhythm fake (position, it.frameRate)
 			}
 			
-	private def detectedRhythm(position:Double):Option[Rhythm]	= 
+	private def detectedRhythm(position:Double):Option[Rhythm]	=
 			measure.current map { measure =>
 				Rhythm default (position, measure)
 			}
@@ -309,7 +310,7 @@ final class Track(val file:File) extends Observing with Logging {
 	
 	/** does not modify if the rhythm would not be useful afterwards */
 	private def modifyRhythm(func:Rhythm=>Rhythm) {
-		modifyData(TrackData.L.raster modifier { curr	=>
+		modifyData(TrackData.L.rhythm modifier { curr	=>
 			val valid	=
 					for {
 						base	<- curr

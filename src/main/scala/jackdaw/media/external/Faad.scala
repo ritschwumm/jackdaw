@@ -14,7 +14,7 @@ object Faad extends Inspector with Decoder {
 				_		<- MediaUtil requireCommand "faad"
 				result	<-
 						MediaUtil runCommand (
-							"faad", 
+							"faad",
 							"-i",	
 							input.getPath
 						)
@@ -22,11 +22,11 @@ object Faad extends Inspector with Decoder {
 			yield {
 				val extract	= MediaUtil extractFrom result.err
 				Metadata(
-					title	= extract("""title: (.*)""".r), 
-					artist	= extract("""artist: (.*)""".r), 
-					album	= extract("""album: (.*)""".r) 
+					title	= extract("""title: (.*)""".r),
+					artist	= extract("""artist: (.*)""".r),
+					album	= extract("""album: (.*)""".r)
 					// genre		= extract("""genre: (.*)""".r)
-					// albumArtist	= extract("""album_artist: (.*)""".r), 
+					// albumArtist	= extract("""album_artist: (.*)""".r),
 				)
 			}
 	

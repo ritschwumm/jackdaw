@@ -17,7 +17,7 @@ final class SwitchUI(child:Signal[UI]) extends UI with Observing {
 		panel.removeAll()
 		panel add (ui.component, BorderLayout.CENTER)
 		panel.invalidate()
-		panel.revalidate()              
+		panel.revalidate()
 		panel.repaint()
 	}
 	

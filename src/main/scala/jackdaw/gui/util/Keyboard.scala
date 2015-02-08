@@ -24,7 +24,7 @@ object Keyboard extends Disposable {
 	private var state		= Map.empty[Key,Option[Long]]
 	
 	private def update(now:Long) {
-		state	= state filter { 
+		state	= state filter {
 			case (key, Some(when))	=> now - when < maxAge
 			case (key, None)		=> true
 		}
@@ -33,7 +33,7 @@ object Keyboard extends Disposable {
 	
 	private val connection	=
 			(GlobalAWTEvent connect AWTEvent.KEY_EVENT_MASK) {
-				_ match { 
+				_ match {
 					case ev:KeyEvent	=>
 						val when	= ev.getWhen
 						val key		= Key(ev.getKeyCode, ev.getKeyLocation)
@@ -49,7 +49,7 @@ object Keyboard extends Disposable {
 				}
 			}
 	
-	private val timer	= 
+	private val timer	=
 			new Timer(maxAge/2, mkActionListener { ev =>
 				val when	= ev.getWhen
 				update(when)

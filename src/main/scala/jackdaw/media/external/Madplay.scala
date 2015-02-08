@@ -24,8 +24,8 @@ object Madplay extends Inspector with Decoder {
 			yield {
 				val extract	= MediaUtil extractFrom result.err
 				Metadata(
-					title	= extract("""\s*Title: (.*)""".r), 
-					artist	= extract("""\s*Artist: (.*)""".r), 
+					title	= extract("""\s*Title: (.*)""".r),
+					artist	= extract("""\s*Artist: (.*)""".r),
 					album	= extract("""\s*Album: (.*)""".r)
 					// genre		= extract("""\s*Genre: (.*)""".r)
 					// publisher	= extract("""\s*Publisher: (.*)""".r),
@@ -39,7 +39,7 @@ object Madplay extends Inspector with Decoder {
 				_	<- MediaUtil requireCommand "madplay"
 				res	<-
 						MediaUtil runCommand (
-							"madplay", 
+							"madplay",
 							"--output",			"wav:" + output.getPath,
 							"--bit-depth",		"16",
 							"--sample-rate",	preferredFrameRate.toString,
@@ -58,10 +58,10 @@ object Madplay extends Inspector with Decoder {
 							"file cannot be decoded"
 						)) orElse
 						(Checked trueWin1 (
-							output.length > 44, 
+							output.length > 44,
 							"output file broken"
-						)) failEffect { 
-							_ => output.delete() 
+						)) failEffect {
+							_ => output.delete()
 						}
 			}
 			yield ()

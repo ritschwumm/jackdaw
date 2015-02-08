@@ -33,14 +33,14 @@ final class LinearUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 	private def clampMiniMax(raw:Double):Double	=
 			GeomUtil clampValue (miniMax, raw)
 	
-	private val trackBounds		= 
+	private val trackBounds		=
 			canvas.bounds map {
 				_
 				.modify (orientation,			it => GeomUtil	spanDeflate	(it,		Style.linear.knob.size))
 				.modify (orientation.opposite,	it => SgSpan	centerBy 	(it.center,	Style.linear.track.size))
 			}
 	
-	private val value2gui	= 
+	private val value2gui	=
 			trackBounds map { it =>
 				(orientation cata (miniMax, miniMax.swap))	spanTransformTo 
 				(it get orientation)
@@ -92,7 +92,7 @@ final class LinearUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 	//------------------------------------------------------------------------------
 	//## mouse
 	
-	private val mouseModify:Events[Double] = 
+	private val mouseModify:Events[Double] =
 			(canvas.mouse.leftPress orElse canvas.mouse.leftDrag snapshotWith value2gui) { (ev, value2gui) =>
 				ev.getPoint.toSgPoint get orientation into value2gui.inverse.apply
 			}
@@ -108,8 +108,8 @@ final class LinearUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 	
 	val wheel:Events[Int]	= mouseWheel
 	
-	val changes:Events[Double]	= 
+	val changes:Events[Double]	=
 			mouseModify	orElse
-			mouseReset	map 
+			mouseReset	map
 			clampMiniMax
 }

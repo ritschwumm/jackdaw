@@ -37,7 +37,7 @@ object Mp3agic extends Inspector with Logging {
 			}
 			yield {
 				Metadata(
-					title	= title2	orElse title1, 
+					title	= title2	orElse title1,
 					artist	= artist2	orElse artist1,
 					album	= album2	orElse album1
 					// genre	= genre2	orElse genre1

@@ -24,7 +24,7 @@ final class BandCurvePersister extends Persister[BandCurve] with Logging {
 						valuesFull, valuesLow, valuesMiddle, valuesHigh))
 			}
 		}
-		catch { case e:Exception	=> 
+		catch { case e:Exception	=>
 			ERROR("cannot unmarshall file: " + file, e)
 			None
 		}
@@ -42,7 +42,7 @@ final class BandCurvePersister extends Persister[BandCurve] with Logging {
 				out writeObject	curve.valuesHigh
 			}
 		}
-		catch { case e:Exception	=> 
+		catch { case e:Exception	=>
 			ERROR("cannot marshall file: " + file, e)
 		}
 	}

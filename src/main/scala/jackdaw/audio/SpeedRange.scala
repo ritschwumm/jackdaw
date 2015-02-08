@@ -11,7 +11,7 @@ object SpeedRange {
 	def clamp(it:Double):Double	=
 			clampDouble(
 				it,
-				min, 
+				min,
 				max
 			)
 }

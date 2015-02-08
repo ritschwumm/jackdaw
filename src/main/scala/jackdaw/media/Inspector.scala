@@ -12,8 +12,8 @@ object Inspector {
 			Vector(
 				Madplay,
 				Mpg123,
-				Faad, 
-				Vorbiscomment, 
+				Faad,
+				Vorbiscomment,
 				Metaflac,
 				Opusinfo,
 				Avprobe,
@@ -21,7 +21,7 @@ object Inspector {
 				JOgg
 			)
 	
-	def readMetadata(input:File):Option[Metadata]	= 
+	def readMetadata(input:File):Option[Metadata]	=
 			MediaUtil
 			.worker[Inspector,Metadata](
 				all,

@@ -1,3 +1,3 @@
 package jackdaw.data
 
-case class RhythmIndex(measure:Int, beat:Int)
+case class RhythmIndex(phrase:Int, measure:Int, beat:Int)

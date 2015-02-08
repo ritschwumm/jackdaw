@@ -77,8 +77,8 @@ final class MetaEditUI(value:Signal[Option[String]], strong:Boolean) extends UI 
 	//------------------------------------------------------------------------------
 	//## output
 	
-	val focussed:Signal[Boolean]	= 
-			SwingWidget signal ( 
+	val focussed:Signal[Boolean]	=
+			SwingWidget signal (
 					(component:FocusCaster).connect,
 					thunk { component.hasFocus })
 			

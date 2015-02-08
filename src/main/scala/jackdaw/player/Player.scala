@@ -528,7 +528,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	
 	private def moveInLoop(offset:Double) {
 		val rawX	= x + offset
-		val newX	= 
+		val newX	=
 				if (loopSpan.isDefined) {
 					val loopGot	= loopSpan.get
 					if (loopGot contains x) {

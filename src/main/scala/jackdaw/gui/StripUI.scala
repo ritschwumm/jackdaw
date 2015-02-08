@@ -47,18 +47,18 @@ final class StripUI(strip:Strip, peak:Signal[Float], phoneEnabled:Boolean, focus
 	
 	// actions
 	
-	private val moveSpeakerKey:Signal[Option[Boolean]]	= 
+	private val moveSpeakerKey:Signal[Option[Boolean]]	=
 			Key(VK_ADD,		KEY_LOCATION_NUMPAD).asModifier	upDown
 			Key(VK_ENTER,	KEY_LOCATION_NUMPAD).asModifier
-	private val moveSpeaker:Events[Int]	= 
+	private val moveSpeaker:Events[Int]	=
 			moveSpeakerKey.repeated.steps	orElse
 			speakerUI.wheel
 	moveSpeaker.withFine	trigger strip.moveSpeaker
 	
-	// private val movePhoneKey:Signal[Option[Boolean]]	= 
+	// private val movePhoneKey:Signal[Option[Boolean]]	=
 	// 		Key(VK_MULTIPLY,	KEY_LOCATION_NUMPAD).asModifier	upDown
 	// 		Key(VK_DIVIDE,		KEY_LOCATION_NUMPAD).asModifier
-	private val movePhone:Events[Int]	= 
+	private val movePhone:Events[Int]	=
 			// movePhoneKey.repeated.steps	orElse
 			phoneUI.wheel
 	movePhone.withFine	trigger strip.movePhone

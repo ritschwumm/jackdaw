@@ -26,12 +26,9 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 	//------------------------------------------------------------------------------
 	//## input
 	
-	private val rhythmLines:Signal[ISeq[RhythmLine]]	= 
+	private val rhythmLines:Signal[ISeq[RhythmLine]]	=
 			deck.rhythmLines map { _.flattenMany }
 		
-	private val anchorLines:Signal[ISeq[RhythmLine]]	=
-			rhythmLines map { _ collect { case x@AnchorLine(_) => x } }
-	
 	private val cuePoints:Signal[ISeq[Double]]	=
 			deck.cuePointsFlat
 	
@@ -58,6 +55,7 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 				playerPosition	= deck.position,
 				cuePoints		= cuePoints,
 				rhythmLines		= rhythmLines,
+				rhythmAnchor	= deck.rhythmAnchor,
 				loop			= deck.loopSpan,
 				widthOrigin		= 0.5,
 				shrink			= false
@@ -68,13 +66,14 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 				frameOrigin		= static(0.0),
 				playerPosition	= deck.position,
 				cuePoints		= cuePoints,
-				rhythmLines		= anchorLines,
+				rhythmLines		= static(ISeq.empty),
+				rhythmAnchor	= deck.rhythmAnchor,
 				loop			= deck.loopSpan,
 				widthOrigin		= 0.0,
 				shrink			= true
 			)
 	private val phaseUI			= new PhaseUI(deck.measureMatch, deck.rhythm)
-	private val transportUI		= 
+	private val transportUI		=
 			new TransportUI(
 				cueable			= deck.dataLoaded,
 				playable		= deck.sampleLoaded,
@@ -109,7 +108,7 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 	
 	import KeyEvent._
 	
-	private val focusInput	= 
+	private val focusInput	=
 			KeyInput focusInput (
 				enabled		= keyboardEnabled,
 				component	= component,
@@ -138,22 +137,22 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 			Key(VK_MINUS ,	KEY_LOCATION_STANDARD).asAction tag 0.0
 	private val phaseSync:Events[Double]	=
 			phaseSyncKey	orElse
-			phaseUI.jump 
+			phaseUI.jump
 	phaseSync observe { phase =>
 		deck syncPhase (Measure, phase)
 	}
 		
 	// TODO crude hack
-	private val delaying16Key:Events[Double]	=
-			Key(VK_PERIOD,	KEY_LOCATION_STANDARD).asModifier
-			.edge map { _ cata (+1.0/4, -1.0/4) }
-	private val delaying8Key:Events[Double]	=
+	private val pushing16Key:Events[Double]	=
 			Key(VK_COMMA,	KEY_LOCATION_STANDARD).asModifier
+			.edge map { _ cata (-1.0/4, +1.0/4) }
+	private val dragging8Key:Events[Double]	=
+			Key(VK_PERIOD,	KEY_LOCATION_STANDARD).asModifier
 			.edge map { _ cata (+1.0/2, -1.0/2) }
-	private val delayingKey:Events[Double]	=
-			delaying16Key orElse
-			delaying8Key
-	delayingKey observe { fraction =>
+	private val phasingKey:Events[Double]	=
+			pushing16Key orElse
+			dragging8Key
+	phasingKey observe { fraction =>
 		deck modifyPhase (Beat, fraction)
 	}
 	
@@ -165,7 +164,7 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 			Key(VK_LESS ,	KEY_LOCATION_STANDARD).asAction
 	private val ejectTrack:Events[Unit]	=
 			ejectTrackKey		orElse
-			transportUI.eject 
+			transportUI.eject
 	ejectTrack trigger deck.ejectTrack
 		
 	private val editAnnotationKey:Events[Unit]	=
@@ -297,7 +296,7 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 	detailUI.scratchFrame	observe	deck.scratching.set
 	pitchSlider.changes		observe	deck.setPitchOctave
 	
-	// dnd 
+	// dnd
 	
 	// NOTE this has to be done _before_ adding the DropTargetListener or the gui doesn't start any more. why?
 	DndFileImport install (

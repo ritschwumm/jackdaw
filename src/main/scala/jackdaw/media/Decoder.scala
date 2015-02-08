@@ -12,7 +12,7 @@ object Decoder {
 				Symlink,
 				Madplay,
 				Mpg123,
-				Faad, 
+				Faad,
 				Oggdec,
 				Flac,
 				Opusdec,

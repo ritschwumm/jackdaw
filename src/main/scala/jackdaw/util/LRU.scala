@@ -19,7 +19,7 @@ final class LRU[S,T](size:Int, create:S=>T, touch:Effect[T] = (t:T)=>(), delete:
 			touch(t)
 			t
 		case None	=>
-			// prune if necessary 
+			// prune if necessary
 			if (keys.size >= size) {
 				val	ss	= keys.dequeue
 				val tt	= cache(ss)

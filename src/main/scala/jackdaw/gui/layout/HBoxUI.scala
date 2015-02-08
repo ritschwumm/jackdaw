@@ -14,11 +14,11 @@ final class HBoxUI(subs:ISeq[BoxItem]) extends UI {
 	panel setLayout new BoxLayout(panel, BoxLayout.X_AXIS)
 	
 	private val items	=
-			subs map { 
+			subs map {
 				case BoxComponent(ui)	=> ui.component
 				case BoxGlue			=> Box.createHorizontalGlue()
 				case BoxStrut(size)		=> Box createHorizontalStrut size
-			} 
+			}
 	items foreach panel.add
 	
 	val component:JComponent	= panel

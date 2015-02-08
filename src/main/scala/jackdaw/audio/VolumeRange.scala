@@ -12,7 +12,7 @@ object VolumeRange {
 	def clamp(it:Double):Double	=
 			clampDouble(
 				it,
-				min, 
+				min,
 				max
 			)
 }

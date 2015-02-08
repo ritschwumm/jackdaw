@@ -8,7 +8,7 @@ trait MetronomeContext {
 }
 
 object Metronome {
-	val beatsPerMeasure	= Rhythm.defaultBeatsPerMeasure
+	val beatsPerMeasure	= Schema.default.beatsPerMeasure
 }
 
 /** 
@@ -38,6 +38,8 @@ final class Metronome(outputRate:Double, ctx:MetronomeContext) {
 	
 	private[player] def phase(rhythmUnit:RhythmUnit):Double	=
 			rhythmUnit match {
+				// metronome phrases are exactly one measure
+				case Phrase		=> mPhase
 				case Measure	=> mPhase
 				case Beat		=> bPhase
 			}
