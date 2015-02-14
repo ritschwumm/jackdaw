@@ -14,8 +14,8 @@ final class GridBagUI(subs:ISeq[GridBagItem]) extends UI {
 	private val	panel	= new JPanel
 	panel setLayout new GridBagLayout
 	
-	subs foreach { case GridBagItem(ui,constraint) => 
-		panel add (ui.component, constraint) 
+	subs foreach { case GridBagItem(ui,constraint) =>
+		panel add (ui.component, constraint)
 	}
 	
 	val component:JComponent	= panel

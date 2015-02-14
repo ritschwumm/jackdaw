@@ -9,8 +9,8 @@ final class TcpConnection(socket:Socket) {
 	instantiator setRegistrationRequired	false
 	instantiator setReferences				false
 
-	private val inputKryo	= instantiator.newKryo() 
-	private val outputKryo	= instantiator.newKryo() 
+	private val inputKryo	= instantiator.newKryo()
+	private val outputKryo	= instantiator.newKryo()
 
 	private val input	= new Input(socket.getInputStream)
 	private val output	= new Output(socket.getOutputStream)

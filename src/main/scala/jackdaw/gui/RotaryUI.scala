@@ -29,7 +29,7 @@ final class RotaryUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 	//------------------------------------------------------------------------------
 	//## input
 	
-	// NOTE rotary goes from 270 to -90 
+	// NOTE rotary goes from 270 to -90
 	// 0 degrees is right
 	// 90 degrees is top
 	// 180 degrees is left and
@@ -72,8 +72,8 @@ final class RotaryUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 							(boundsCur.x.end	spanEndBy 		Style.rotary.track.size+1)	rectangleWith
 							(boundsCur.y.center	spanCenterBy	Style.rotary.knob.size)
 					val rotation	= valueToAngle(valueCur)
-					val xform		= 
-							SgAffineTransform 
+					val xform		=
+							SgAffineTransform
 							.translate	( boundsCur.center)
 							.rotate		(toRadians(-rotation))
 							.translate	(-boundsCur.center)
@@ -145,7 +145,7 @@ final class RotaryUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 			}
 	
 	private val mouseReset:Events[Double]	=
-			mousePress filter 
+			mousePress filter
 			{ ev => calculateValue(ev.getPoint)._1 }	orElse
 			canvas.mouse.rightPress						tag
 			neutral
@@ -164,7 +164,7 @@ final class RotaryUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 			val ignore		= ((inner.x.size min inner.y.size) - Style.rotary.track.size - 2) / 3.0
 			distance < ignore
 		}
-		 
+		
 		val value	= {
 			// we need the jump at the bottom instead of at the left
 			

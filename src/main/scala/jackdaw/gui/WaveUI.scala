@@ -65,7 +65,7 @@ final class WaveUI(
 	
 	private val coords:Signal[Coords]	=
 			signal {
-				new Coords(innerRect.current, zoom.current, frameOrigin.current) 
+				new Coords(innerRect.current, zoom.current, frameOrigin.current)
 			}
 	
 	private final case class Coords(val inner:IntRect, zoomFactor:Double, frameOrig:Double) {

@@ -133,7 +133,7 @@ final class Engine(feedbackTarget:Target[EngineFeedback]) extends Logging {
 	}
 	
 	// NOTE this resets the peak detectors
-	private def mkFeedback:EngineFeedback	= 
+	private def mkFeedback:EngineFeedback	=
 			EngineFeedback(
 				masterPeak	= peakDetector.decay,
 				player1		= player1.feedback,
@@ -147,16 +147,17 @@ final class Engine(feedbackTarget:Target[EngineFeedback]) extends Logging {
 	
 	private object producer extends FrameProducer {
 		def produce(speakerBuffer:FrameBuffer, phoneBuffer:FrameBuffer) {
-			val communicate	= frame % Config.controlIntervalFrames == 0
-			if (communicate) {
+			val talkToGui	= frame % Config.guiIntervalFrames == 0
+			if (talkToGui) {
 				receiveActions()
 			}
-			val preload	= frame % Config.preloadIntervalFrames == 0
-			if (preload) {
+			val talkToLoader	= frame % Config.loaderIntervalFrames == 0
+			if (talkToLoader) {
+				// this indirectly executed loader answer thunks registered by the player
 				receiveLoading()
-				player1.preloadCurrent()
-				player2.preloadCurrent()
-				player3.preloadCurrent()
+				player1.talkToLoader()
+				player2.talkToLoader()
+				player3.talkToLoader()
 			}
 			
 			player1 generate (speakerBuffer,	phoneBuffer)
@@ -178,7 +179,7 @@ final class Engine(feedbackTarget:Target[EngineFeedback]) extends Logging {
 			speaker.step()
 			phone.step()
 			
-			if (communicate) {
+			if (talkToGui) {
 				sendFeedback()
 				// Thread.`yield`()
 			}

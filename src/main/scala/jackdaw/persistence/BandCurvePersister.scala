@@ -20,7 +20,7 @@ final class BandCurvePersister extends Persister[BandCurve] with Logging {
 				val	valuesMiddle	= in.readObject.asInstanceOf[Array[Float]]
 				val	valuesHigh		= in.readObject.asInstanceOf[Array[Float]]
 				Some(BandCurve(
-						sampleRate, rasterFrames, chunkCount, 
+						sampleRate, rasterFrames, chunkCount,
 						valuesFull, valuesLow, valuesMiddle, valuesHigh))
 			}
 		}

@@ -24,7 +24,7 @@ private final class ActorThread[T](name:String, priority:Int, parking:MilliDurat
 	
 	private val queue	= new LinkedTransferQueue[T]
 	
-	@volatile 
+	@volatile
 	private var keepAlive	= true
 
 	def dispose() {

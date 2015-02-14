@@ -11,7 +11,7 @@ object Metronome {
 	val beatsPerMeasure	= Schema.default.beatsPerMeasure
 }
 
-/** 
+/**
 something a Player can be synced to
 methods must never be called outside the engine thread
 */
@@ -27,7 +27,7 @@ final class Metronome(outputRate:Double, ctx:MetronomeContext) {
 		mIncrement	= mRate / outputRate
 		
 		ctx beatRateChanged beatRate
-	} 
+	}
 	
 	private[player] def step() {
 		if (ctx.running)	mPhase	= (mPhase + mIncrement) % 1.0

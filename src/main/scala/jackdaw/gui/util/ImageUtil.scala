@@ -31,7 +31,7 @@ final class ImageUtil(graphicsConfiguration:GraphicsConfiguration) {
 				)
 			)
 			.doto {
-				_.createGraphics.asInstanceOf[Graphics2D] use paint 
+				_.createGraphics.asInstanceOf[Graphics2D] use paint
 			}
 	
 	/*

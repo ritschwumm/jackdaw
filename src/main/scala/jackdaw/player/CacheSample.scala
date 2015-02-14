@@ -25,6 +25,8 @@ final class CacheSample(peer:Sample) extends Sample {
 	
 	//------------------------------------------------------------------------------
 	
+	private type Chunk	= Array[Float]
+	
 	private val spreadFrames:Int	=
 			ceil(Config.preloadSpread.millis * frameRate / 1000).toInt
 	
@@ -33,17 +35,19 @@ final class CacheSample(peer:Sample) extends Sample {
 		
 	// enough chunks to fill at least bufferFrames for each head
 	// scratching and fading will not occur at the same time
+	// TODO this might not work with the preloadCurrent-hack
+	// in the player's fadeNowOrLater
 	private val bufferCount:Int	=
 			divUpInt(bufferFrames, chunkFrames) * Player.headCount * 3 / 2
 		
-	private val bufferChunks	= divUpInt(bufferFrames, chunkFrames)
+	private val lru:IntQueue		= new IntQueue(bufferCount)
 	
-	private val lru	= new IntQueue(bufferCount)
+	private val bufferChunks:Int	= divUpInt(bufferFrames, chunkFrames)
 	
-	private val chunkCount		= divUpInt(frameCount, chunkFrames)
-	private val channelCount	= peer.channels.size
-	private val chunkSamples	= chunkFrames * channelCount
-	private val chunks			= new Array[Array[Float]](chunkCount)
+	private val chunkCount:Int		= divUpInt(frameCount, chunkFrames)
+	private val channelCount:Int	= peer.channels.size
+	private val chunkSamples:Int	= chunkFrames * channelCount
+	private val chunks:Array[Chunk]	= new Array[Chunk](chunkCount)
 	
 	// println(s"buffer: ${scutil.text.Human roundedBinary chunkSamples*bufferCount*4}")
 	
@@ -124,7 +128,7 @@ final class CacheSample(peer:Sample) extends Sample {
 		else if (!lru.full) {
 			// allocate new chunk
 			// TODO cache should be taken from a global pool
-			val buffer	= new Array[Float](chunkSamples)
+			val buffer	= new Chunk(chunkSamples)
 			chunks(index)	= buffer
 			lru push index
 			load(index, buffer)
@@ -142,7 +146,7 @@ final class CacheSample(peer:Sample) extends Sample {
 		}
 	}
 	
-	private def load(chunkIndex:Int, chunk:Array[Float]) {
+	private def load(chunkIndex:Int, chunk:Chunk) {
 		var inFrame		= firstFrameByChunk(chunkIndex)
 		var outSample	= 0
 		

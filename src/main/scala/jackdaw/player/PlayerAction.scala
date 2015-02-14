@@ -15,7 +15,7 @@ case class PlayerChangeControl(
 	high:Double,
 	speaker:Double,
 	phone:Double
-) 
+)
 extends PlayerAction
 
 case class PlayerSetNeedSync(needSync:Boolean)	extends PlayerAction

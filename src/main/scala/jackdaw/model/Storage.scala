@@ -28,7 +28,7 @@ object Storage extends Logging {
 				else			name
 			}
 			
-	/** path element for a file system root */ 
+	/** path element for a file system root */
 	private def prefixPath(path:String):Option[String]	=
 				 if (path == "/")					None
 			else if (path == """\\""")				Some("UNC")

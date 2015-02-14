@@ -9,19 +9,20 @@ import scaudio.dsp.BiQuadCoeffs
 import jackdaw.audio.PitchMath._
 
 object Config {
-	val guiUpdateInterval		= 40.millis 
+	val guiUpdateInterval		= 40.millis
 	
 	// how much more block should be in the engine feed back queue after update
 	val guiQueueOvershot		= 10
 	
-	// correction factor for the feedback rate 
+	// correction factor for the feedback rate
 	val guiQueuAdaptFactor		= 1.005	// 0.5%
 	
 	// (output.rate * Config.updateTick.millis / 1000).toInt / 4
-	val controlIntervalFrames	= 256
+	// how often to talk to the gui
+	val guiIntervalFrames		= 256
 	
 	// how often to talk to the loader
-	val preloadIntervalFrames	= 1024
+	val loaderIntervalFrames	= 1024
 	
 	val preloadSpread			= 1.seconds
 	

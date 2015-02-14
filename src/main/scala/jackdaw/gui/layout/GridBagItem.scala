@@ -8,7 +8,7 @@ import scutil.gui.GridBagDSL._
 
 object GridBagItem {
 	implicit def UI_is_GridBagItem[T<%UI](ui:T):GridBagItem	= GridBagItem(ui, GBC)
-} 
+}
 
 case class GridBagItem(ui:UI, gbc:GridBagConstraints) {
 	def pos(x:GridBagConstraintsPosition, y:GridBagConstraintsPosition):GridBagItem	= constrain(_ pos			(x,y))

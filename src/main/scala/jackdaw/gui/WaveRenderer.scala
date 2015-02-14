@@ -56,7 +56,7 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 		val height	= target.y.size
 		
 		// which tile first
-		var ti	= 
+		var ti	=
 				if (offset < 0)	(offset - tileOffset + 1) / tileOffset
 				else			offset / tileOffset
 		// where in the tile
@@ -88,10 +88,10 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 				// first: provide the map
 				// second: provide tiles in the map
 				val lru:LRU[Int,BufferedImage]	=
-						tileImageCache 
+						tileImageCache
 						.collect {
-							case (`height`, lru) => lru 
-						} 
+							case (`height`, lru) => lru
+						}
 						.getOrElse {
 							new LRU(
 								tileCached,
@@ -245,7 +245,7 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 		val	operation	=
 				new ConvolveOp(
 					kernel,
-					ConvolveOp.EDGE_NO_OP, 
+					ConvolveOp.EDGE_NO_OP,
 					null
 				)
 		operation

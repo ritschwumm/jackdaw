@@ -23,7 +23,7 @@ object Deck {
 	import PitchMath.cents
 	
 	private val pitchFactor:Boolean=>Double				= _ cata (cents(5),		cents(2))
-	private val stopDragSpeed:Boolean=>Double			= _ cata (1.0/4,		1.0/8) 
+	private val stopDragSpeed:Boolean=>Double			= _ cata (1.0/4,		1.0/8)
 	private val playDragSpeed:Boolean=>Double			= _ cata (cents(200),	cents(100))
 	private val independentRhythmFactor:Boolean=>Double	= _ cata (2.0,			1.5)
 	private val cursorRhythmFactor:Boolean=>Double		= _ cata (cr,			cr/2)
@@ -115,9 +115,9 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 	//------------------------------------------------------------------------------
 	//## player derivates
 	
-	val running			= playerFeedback map { _.running		} 
-	val afterEnd		= playerFeedback map { _.afterEnd		} 
-	val position		= playerFeedback map { _.position		} 
+	val running			= playerFeedback map { _.running		}
+	val afterEnd		= playerFeedback map { _.afterEnd		}
+	val position		= playerFeedback map { _.position		}
 	val measureMatch	= playerFeedback map { _.measureMatch	}
 	val beatRate		= playerFeedback map { _.beatRate		}
 	val loopSpan		= playerFeedback map { _.loopSpan		}
@@ -210,11 +210,11 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 				dragging.current map { case (forward, fine) =>
 					running.current cata (
 						additive(
-							forward, zeroFrequency, 
+							forward, zeroFrequency,
 							Deck stopDragSpeed fine
 						),
 						multiplicative(
-							forward, pitch.current, 
+							forward, pitch.current,
 							Deck playDragSpeed fine
 						)
 					)
@@ -298,9 +298,9 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 	// TODO ugly
 	def changePitch(steps:Int, fine:Boolean) {
 		setPitch(
-			pitch.current * 
+			pitch.current *
 			octave2frequency(
-				frequency2octave(Deck pitchFactor fine) * 
+				frequency2octave(Deck pitchFactor fine) *
 				steps
 			)
 		)
@@ -310,25 +310,25 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 	// 		Deck pitchFactor decouple(fineModifier.current)
 	
 	def setAnnotation(it:String) {
-		changeTrack { 
+		changeTrack {
 			_ setAnnotation it
 		}
 	}
 	
 	def changeRhythmAnchor() {
-		changeTrack { 
+		changeTrack {
 			_ setRhythmAnchor position.current
 		}
 	}
 	
 	def toggleRhythm() {
-		changeTrack { 
+		changeTrack {
 			_ toogleRhythm position.current
 		}
 	}
 	
 	def moveRhythmBy(positive:Boolean, fine:Boolean) {
-		changeTrack { 
+		changeTrack {
 			_ moveRhythmBy additive(
 				positive, 0,
 				Deck cursorRhythmFactor fine
@@ -337,23 +337,23 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 	}
 	
 	def resizeRhythmBy(positive:Boolean, fine:Boolean) {
-		changeTrack { 
+		changeTrack {
 			_ resizeRhythmBy multiplicative(
-				positive, 1, 
+				positive, 1,
 				Deck independentRhythmFactor fine
 			)
 		}
 	}
 	
 	def resizeRhythmAt(positive:Boolean, fine:Boolean) {
-		changeTrack { 
+		changeTrack {
 			_ resizeRhythmAt (
-				position.current, 
+				position.current,
 				additive(
-					positive, 0, 
+					positive, 0,
 					Deck cursorRhythmFactor fine
 				)
-			) 
+			)
 		}
 	}
 	

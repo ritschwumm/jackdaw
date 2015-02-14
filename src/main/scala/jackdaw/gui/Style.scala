@@ -47,7 +47,7 @@ object Style {
 	
 	private val STRONG_BACKGROUND	= Color.BLACK
 	// NOTE Color.WHITE leads to a black speedDisplay on java 8
-	private val STRONG_FOREGROUND	= rgb"fefefe".toColor 
+	private val STRONG_FOREGROUND	= rgb"fefefe".toColor
 	private val WEAK_FOREGROUND		= rgb"d2d2d2".toColor
 	
 	// for components with STRONG_BACKGROUND

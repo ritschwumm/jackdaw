@@ -11,7 +11,7 @@ import screact._
 import screact.swing._
 
 final class Mouse(component:Component) {
-	val events	= 
+	val events	=
 			(SwingWidget	events	(component:MouseCaster).connect)		orElse
 			(SwingWidget	events	(component:MouseMotionCaster).connect)	orElse
 			(SwingWidget	events	(component:MouseWheelCaster).connect)	

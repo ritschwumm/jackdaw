@@ -60,7 +60,7 @@ final class Speed extends Observing {
 			setValueRastered (_, true)
 		}
 		
-		value observe { 
+		value observe {
 			persister save file
 		}
 	}

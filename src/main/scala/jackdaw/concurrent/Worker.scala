@@ -16,7 +16,7 @@ private final class WorkerThread(name:String, priority:Int,  body:Thunk[Boolean]
 	setName(name)
 	setPriority(priority)
 	
-	@volatile 
+	@volatile
 	private var keepAlive	= true
 
 	def dispose() {

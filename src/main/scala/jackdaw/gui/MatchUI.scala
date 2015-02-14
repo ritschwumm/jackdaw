@@ -45,6 +45,6 @@ final class MatchUI(synced:Signal[Option[Boolean]], pitched:Signal[Boolean]) ext
 			downButton.pressed
 			
 	val dragging:Signal[Option[Boolean]]	=
-			pushButton.pressed	upDown 
+			pushButton.pressed	upDown
 			pullButton.pressed
 }

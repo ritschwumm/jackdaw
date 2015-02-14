@@ -31,7 +31,7 @@ object KeyInput {
 
 final class KeyInput(focussed:Signal[Boolean], fineModifier:Signal[Boolean], keyDown:Key=>Signal[Boolean]) {
 	implicit class RichKey(peer:Key) {
-		def asModifier:Signal[Boolean]	= 
+		def asModifier:Signal[Boolean]	=
 				(keyDown(peer) zipWith focussed) { _ && _ }
 			
 		def asAction:Events[Unit]	=

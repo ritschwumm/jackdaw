@@ -20,10 +20,15 @@ import jackdaw.data._
 import jackdaw.concurrent.Target
 
 object Player {
-	val dampTime	= 0.1	// 0..1 range in 1/10 of a second
-	val fadeTime	= 0.02	// 20 ms
-	val endDelay	= 0.1	// 100 ms
-	val noEnd		= -1d
+	private val dampTime	= 0.1	// 0..1 range in 1/10 of a second
+	private val fadeTime	= 0.02	// 20 ms
+	private val endDelay	= 0.1	// 100 ms
+	private val noEnd		= -1d
+	
+	val springPitchLimit	= 16
+	private val springDamping	= 0.8	// a factor
+	private val springHardness	= 2000.0
+	private val springMass		= 2.0
 	
 	// filter modes
 	private val filterLP	= -1
@@ -31,22 +36,20 @@ object Player {
 	private val filterHP	= +1
 	
 	// ignore small aberrations
-	private val	positionEpsilon		= 1.0E-4
+	private val	positionEpsilon	= 1.0E-4
 	
-	private val filterEpsilon		= 1.0E-5
-	
-	val springPitchLimit	= 16
+	private val filterEpsilon	= 1.0E-5
 	
 	private val interpolation	= Config.sincEnabled cata (Linear, Sinc)
 	
 	// in frames
 	 val maxDistance	= interpolation overshot springPitchLimit
-	 
-	 // x, xf, jump, loop
+	
+	 // headFrame, fadeFrame, jump, loop
 	 val headCount		= 4
 }
 
-/** 
+/**
 one audio line outputting audio data for one Deck using a MixHalf
 public methods must never be called outside the engine thread
 */
@@ -59,7 +62,6 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	
 	private var sample:Option[CacheSample]	= None
 	private var rhythm:Option[Rhythm]		= None
-	private var rate:Double					= zeroFrequency
 	private var inputL:Channel				= Channel.empty
 	private var inputR:Channel				= Channel.empty
 	
@@ -77,34 +79,62 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	
 	private val peakDetector	= new PeakDetector
 	
-	private var mode:PlayerMode		= Playing
-	private var scratchBase			= 0.0
-	private val springSpeedLimit	= Player.springPitchLimit * outputRate
-	private var endFrame			= Player.noEnd
+	private var mode:PlayerMode	= Playing
 	
 	private var running		= false
-	private var pitch		= unitFrequency
 	private var needSync	= true
 	
-	private val fadeStep	= 1.0 / (Player.fadeTime * outputRate)
-	private val fadeMin		= 0.0
-	private val fadeMax		= 1.0
-	private var fade		= fadeMax
-	private var fadeLater:Option[Task]	= None
+	private val deltaTime	= 1.0 / outputRate	// time between two frames
+	
+	private var pitch		= unitFrequency
+	// of the sample itself
+	private var rate		= zeroFrequency
+	
+	private var velocity		= 0.0
+	private var	acceleration	= 0.0	// non-zero when scratching
+	
+	private val springSpeedLimit	= Player.springPitchLimit * outputRate
+	// TODO do i need both of those?
+	private var scratchBaseFrame	= 0.0
+	private var springOriginFrame	= 0.0
+	
+	private var	fadeFrame	= 0.0	// position fading out
+	private var	headFrame	= 0.0	// position fading in
+	
+	private var endFrame	= Player.noEnd
+	@inline
+	private def afterEnd	= endFrame != Player.noEnd && headFrame > endFrame
+	
+	private val fadeStep		= 1.0 / (Player.fadeTime * outputRate)
+	private val fadeMin			= 0.0
+	private val fadeMax			= 1.0
+	private var fadeValue		= fadeMax
+	private var fadeProgress	= false
+	private var fadeLater:Option[Fade]	= None
+	
+	private var jumpLater:Option[Task]	= None
+	private var jumpProgress:Boolean	= false
 	
 	private var loopSpan:Option[Span]	= None
 	private var loopDef:Option[LoopDef]	= None
+	
+	private var filterModeOld	= Player.filterOff
+	
+	// (0+filterLow)..(nyquist-filterHigh), predivided by outputRate
+	private val filterLow	= log2(Config.filterLow / outputRate)
+	private val filterHigh	= log2(1.0 / 2.0 - Config.filterHigh / outputRate)
+	private val filterSize	= filterHigh - filterLow
 	
 	//------------------------------------------------------------------------------
 	//## engine api
 	
 	private[player] def isRunning:Boolean	= running
 	
-	private[player] def feedback:PlayerFeedback	= 
+	private[player] def feedback:PlayerFeedback	=
 			PlayerFeedback(
 				running			= running,
 				afterEnd		= afterEnd,
-				position		= x,
+				position		= headFrame,
 				pitch			= pitch,
 				measureMatch	= phaseMatch(Measure),
 				beatRate		= beatRate,
@@ -133,25 +163,55 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 				
 				case PlayerPitchAbsolute(pitch, keepSync)	=> pitchAbsolute(pitch, keepSync)
 				
-				case PlayerPhaseAbsolute(position)			=> fadeNowOrLater { syncPhaseTo(position)	}
-				case PlayerPhaseRelative(offset)			=> fadeNowOrLater { movePhaseBy(offset)		}
+				case PlayerPhaseAbsolute(position)			=>
+					registerSimpleFade {
+						syncPhaseTo(position)
+					}
+				case PlayerPhaseRelative(offset)			=>
+					registerSimpleFade {
+						movePhaseBy(offset)
+					}
 				
 				case PlayerPositionAbsolute(frame)			=>
-					loaderPreload(frame)
-					loaderNotifyEngine(thunk {
-						fadeNowOrLater { positionAbsolute(frame)	}
-					})
+					registerJump {
+						loaderPreload(frame)
+						loaderNotifyEngine {
+							registerCancellableFade(
+								{
+									positionAbsolute(frame)
+									exitJump()
+								},
+								exitJump()
+							)
+						}
+					}
 				case PlayerPositionJump(frame, rhythmUnit)	=>
-					loaderPreload(frame)
-					loaderNotifyEngine(thunk {
-						fadeNowOrLater { positionJump(frame, rhythmUnit)	}
-					})
+					registerJump {
+						loaderPreload(frame)
+						loaderNotifyEngine {
+							registerCancellableFade(
+								{
+									positionJump(frame, rhythmUnit)
+									exitJump()
+								},
+								exitJump()
+							)
+						}
+					}
 				case PlayerPositionSeek(offset)				=>
-					// TODO loader questionable
-					loaderPreload(x + offset.steps * jumpRaster(offset).size)
-					loaderNotifyEngine(thunk {
-						fadeNowOrLater { positionSeek(offset)	}
-					})
+					registerJump {
+						// TODO loader questionable
+						loaderPreload(headFrame + offset.steps * jumpRaster(offset).size)
+						loaderNotifyEngine {
+							registerCancellableFade(
+								{
+									positionSeek(offset)
+									exitJump()
+								},
+								exitJump()
+							)
+						}
+					}
 				
 				case PlayerDragAbsolute(v)					=> dragAbsolute(v)
 				case PlayerDragEnd							=> dragEnd()
@@ -163,33 +223,6 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 				case PlayerLoopDisable						=> loopDisable()
 			}
 			
-	//------------------------------------------------------------------------------
-	//## loader interaction
-	
-	private[player] def preloadCurrent() {
-		loaderPreload(x)
-		if (isFading) {
-			loaderPreload(xf)
-		}
-		if (loopSpan.isDefined) {
-			loaderPreload(loopSpan.get.start)
-		}
-	}
-	
-	private def loaderDecode(file:File) {
-		loaderTarget send LoaderDecode(file, setSample)
-	}
-
-	private def loaderPreload(centerFrame:Double) {
-		if (sample.isDefined) {
-			loaderTarget send LoaderPreload(sample.get, centerFrame.toInt)
-		}
-	}
-	
-	private def loaderNotifyEngine(task:Task) {
-		loaderTarget send LoaderNotifyEngine(task)
-	}
-	
 	//------------------------------------------------------------------------------
 	//## common control
 	
@@ -211,7 +244,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		rate	= sample cata (1, _.frameRate.toDouble)
 		
 		loopDisable()
-		updateV()
+		updateVelocity()
 		updateEndFrame()
 		keepSpeedSynced()
 	}
@@ -230,16 +263,6 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		keepSpeedSynced()
 	}
 	
-	private def updateEndFrame() {
-		val frameCount	=
-				sample cata (0, _.frameCount)
-		endFrame	=
-				rhythm cata (
-					frameCount + outputRate*Player.endDelay,
-					_.measureRaster ceil frameCount
-				)
-	}
-	
 	//------------------------------------------------------------------------------
 	//## motor running
 	
@@ -247,14 +270,14 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		val oldPhase	= phaseValue(Measure)
 		
 		this.running	= running
-		updateV()
+		updateVelocity()
 		
 		// keep phase stable over start/stop
 		if (needSync && canSync && mode == Playing) {
 			oldPhase foreach syncPhaseTo
 		}
 			
-		stopFade()
+		killFade()
 	}
 		
 	//------------------------------------------------------------------------------
@@ -277,7 +300,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	private def pitchAbsolute(pitch:Double, keepSync:Boolean)  {
 		if (this.pitch == pitch)	return	
 		this.pitch	= pitch
-		updateV()
+		updateVelocity()
 		
 		needSync	&= keepSync
 	}
@@ -297,7 +320,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		if (!hasSync)	return
 		beatRate foreach { beatRateGot =>
 			pitch	= pitch * metronome.beatRate / beatRateGot
-			updateV()
+			updateVelocity()
 		}
 	}
 	
@@ -339,7 +362,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 			}
 			
 	private def currentRhythmPhase(rhythmUnit:RhythmUnit):Option[Double]	=
-			currentRhythmRaster(rhythmUnit) map { _ phase x }
+			currentRhythmRaster(rhythmUnit) map { _ phase headFrame }
 			
 	private def currentRhythmRaster(rhythmUnit:RhythmUnit):Option[Raster]	=
 			rhythm map { _ raster rhythmUnit }
@@ -361,7 +384,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	
 	/** jump to a given position without while staying in sync  */
 	private def positionJumpWithRaster(frame:Double, raster:Raster) {
-		val raw		= (frame - x) / raster.size
+		val raw		= (frame - headFrame) / raster.size
 		val steps	= if (running) rint(raw) else raw
 		positionSeekWithRaster(steps, raster)
 	}
@@ -375,11 +398,11 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	private def positionSeekWithRaster(steps:Double, raster:Raster) {
 		val position:Double		=
 				if (running) {
-					 x + steps * raster.size
+					 headFrame + steps * raster.size
 				}
 				else {
 					val	offset 	= (0.5 - Player.positionEpsilon) * signum(steps)
-					val	raw		= x + (steps - offset) * raster.size
+					val	raw		= headFrame + (steps - offset) * raster.size
 					raster round raw
 				}
 		// loopAround(position)
@@ -397,25 +420,25 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	
 	// motor -> scratch
 	private def scratchBegin() {
-		fadeLater	= None
-		mode		= Scratching
-		scratchBase	= x
-		o			= x
-		a			= 0
-		v			= 0
+		fadeLater			= None
+		mode				= Scratching
+		scratchBaseFrame	= headFrame
+		springOriginFrame	= headFrame
+		acceleration		= 0
+		velocity			= 0
 	}
 	
 	private def scratchRelative(frames:Double) {
 		if (mode != Scratching)	{
 			scratchBegin()
 		}
-		o	= scratchBase - frames
+		springOriginFrame	= scratchBaseFrame - frames
 	}
 	
 	// scratch -> motor
 	private def scratchEnd() {
 		mode	= Playing
-		updateV()
+		updateVelocity()
 	}
 	
 	//------------------------------------------------------------------------------
@@ -430,49 +453,123 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		if (mode != Dragging) {
 			dragBegin()
 		}
-		v	= speed * rate
+		velocity	= speed * rate
 	}
 	
 	// scratch -> motor
 	private def dragEnd() {
 		mode	= Playing
-		updateV()
+		updateVelocity()
+	}
+	
+	//------------------------------------------------------------------------------
+	//## delayed jumping
+	
+	private def registerJump(block: =>Unit) {
+		jumpLater	= Some(thunk(block))
+	}
+	
+	private def enterJump() {
+		if (!jumpProgress && jumpLater.isDefined) {
+			jumpLater.get.apply()
+			jumpProgress	= true
+			jumpLater		= None
+		}
+	}
+	
+	private def exitJump() {
+		jumpProgress	= false
+	}
+	
+	//------------------------------------------------------------------------------
+	//## loader interaction
+	
+	private[player] def talkToLoader() {
+		enterJump()
+		
+		loaderPreload(headFrame)
+		
+		if (fadeProgress) {
+			loaderPreload(fadeFrame)
+		}
+		
+		// TODO fade only send when loopSpan changes
+		if (loopSpan.isDefined) {
+			loaderPreload(loopSpan.get.start)
+		}
+	}
+	
+	private def loaderDecode(file:File) {
+		loaderTarget send LoaderDecode(file, setSample)
+	}
+
+	private def loaderPreload(centerFrame:Double) {
+		if (sample.isDefined) {
+			loaderTarget send LoaderPreload(sample.get, centerFrame.toInt)
+		}
+	}
+	
+	private def loaderNotifyEngine(block: =>Unit) {
+		loaderTarget send LoaderNotifyEngine(thunk(block))
 	}
 	
 	//------------------------------------------------------------------------------
 	//## fading
 	
-	@inline
-	private def isFading	= fade < fadeMax
-	
-	private def fadeNowOrLater(block: =>Unit) {
-		if (isFading)	fadeLater	= Some(thunk { block })
-		else			block
+	private trait Fade {
+		def execute():Unit
+		def cancel():Unit
 	}
 	
-	private def startFade(newX:Double) {
-		xf		= x
-		x		= newX
-		fade	= fadeMin
+	private def registerCancellableFade(executeBlock: =>Unit, cancelBlock: =>Unit) {
+		registerFadeImpl(new Fade {
+			def execute() { executeBlock }
+			def cancel() { cancelBlock}
+		})
+	}
+	
+	private def registerSimpleFade(executeBlock: =>Unit) {
+		registerFadeImpl(new Fade {
+			def execute() { executeBlock }
+			def cancel() {}
+		})
+	}
+	
+	private def registerFadeImpl(fade:Fade) {
+		if (fadeLater.isDefined) {
+			fadeLater.get.cancel()
+		}
+		fadeLater	= Some(fade)
+	}
+	
+	private def killFade() {
+		fadeProgress	= false
+		fadeLater		= None
+	}
+	
+	/** all calls to this must be routed though registerFade */
+	private def startFade(newFrame:Double) {
+		fadeFrame		= headFrame
+		headFrame		= newFrame
+		fadeValue		= fadeMin
 	}
 	
 	@inline
-	private def stopFade() {
-		fade		= fadeMax
-		fadeLater	= None
+	private def enterFade() {
+		if (!fadeProgress && fadeLater.isDefined) {
+			// this calls back to startFade
+			fadeLater.get.execute()
+			fadeProgress	= true
+			fadeLater		= None
+		}
 	}
 	
 	@inline
-	private def doFade() {
-		fade	+= fadeStep
-		if (!isFading) {
-			if (fadeLater.isDefined) {
-				fade		= fadeMax
-				fadeLater.get.apply()
-				fadeLater	= None
-			}
-			else {
-				stopFade()
+	private def exitFade() {
+		if (fadeProgress) {
+			fadeValue	+= fadeStep
+			if (fadeValue >= fadeMax) {
+				fadeProgress	= false
 			}
 		}
 	}
@@ -480,18 +577,13 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	//------------------------------------------------------------------------------
 	//## filter calculation
 	
-	private var filterModeOld	= Player.filterOff
-	
-	// (0+filterLow)..(nyquist-filterHigh), predivided by outputRate
-	private val filterLow	= log2(Config.filterLow / outputRate)
-	private val filterHigh	= log2(1.0 / 2.0 - Config.filterHigh / outputRate)
-	private val filterSize	= filterHigh - filterLow
-	
 	// value in 0..1
+	@inline
 	private def filterFreq(offset:Double):Double	=
 			exp2(offset * filterSize + filterLow)
 		
 	// returns a filter mode
+	@inline
 	private def filterMode(value:Double):Int	=
 				 if (value < -Player.filterEpsilon)	Player.filterLP
 			else if (value > +Player.filterEpsilon)	Player.filterHP
@@ -501,7 +593,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	//## loop calculation
 	
 	private def loopEnable(preset:LoopDef) {
-		loopSpan	= mkLoop(x, preset.size)
+		loopSpan	= mkLoop(headFrame, preset.size)
 		loopDef		= loopSpan.isDefined guard preset
 	}
 	
@@ -527,26 +619,26 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	*/
 	
 	private def moveInLoop(offset:Double) {
-		val rawX	= x + offset
-		val newX	=
+		val rawFrame	= headFrame + offset
+		val newFrame	=
 				if (loopSpan.isDefined) {
 					val loopGot	= loopSpan.get
-					if (loopGot contains x) {
-						loopGot lock rawX
+					if (loopGot contains headFrame) {
+						loopGot lock rawFrame
 					}
-					else rawX
+					else rawFrame
 				}
-				else rawX
-		startFade(newX)
+				else rawFrame
+		startFade(newFrame)
 	}
 	
-	private def jumpBackAfterLoopEnd(oldX:Double) {
+	private def jumpBackAfterLoopEnd(oldFrame:Double) {
 		if (loopSpan.isDefined) {
 			val loopGot	= loopSpan.get
 			val loopEnd	= loopGot.end
-			if (oldX < loopEnd && x >= loopEnd) {
-				fadeNowOrLater { 
-					startFade(x - loopGot.size)
+			if (oldFrame < loopEnd && headFrame >= loopEnd) {
+				registerSimpleFade {
+					startFade(headFrame - loopGot.size)
 				}
 			}
 		}
@@ -556,25 +648,21 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	//## generator
 	
 	// depends on running, mode, pitch, rate
-	private def updateV() {
+	private def updateVelocity() {
 		if (mode != Scratching) {
-			v	= if (running) pitch * rate else 0
+			velocity	= if (running) pitch * rate else 0
 		}
 	}
 	
-	// spring
-	val dt	= 1.0 / outputRate	// delta time between steps
-	val df	= 0.8				// damp factor
-	val k	= 2000.0			// hardness
-	val m	= 2.0				// mass
-	var o	= 0.0				// origin, set by scratching
-
-	var	xf	= 0.0	// position fading out
-	var	x	= 0.0	// position fading in
-	var v	= 0.0	// velocity
-	var	a	= 0.0	// acceleration, non-zero when scratching
-	
-	private def afterEnd	= endFrame != Player.noEnd && x > endFrame
+	private def updateEndFrame() {
+		val frameCount	=
+				sample cata (0, _.frameCount)
+		endFrame	=
+				rhythm cata (
+					frameCount + outputRate*Player.endDelay,
+					_.measureRaster ceil frameCount
+				)
+	}
 	
 	def generate(speakerBuffer:FrameBuffer, phoneBuffer:FrameBuffer) {
 		// NOTE hack
@@ -582,21 +670,21 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 			setRunning(false)
 		}
 		
+		enterFade()
+		
 		// current head
-		val headSpeed	= abs(v)*dt
-		val fadeinL		= Player.interpolation interpolate (inputL, x, headSpeed)
-		val fadeinR		= Player.interpolation interpolate (inputR, x, headSpeed)
+		val headSpeed	= abs(velocity) * deltaTime
+		val fadeinL		= Player.interpolation interpolate (inputL, headFrame, headSpeed)
+		val fadeinR		= Player.interpolation interpolate (inputR, headFrame, headSpeed)
 		
 		// optionally fade out pre-jump head
 		var audioL	= 0d
 		var audioR	= 0d
-		// stopFade sets fade to fadeMax
-		if (isFading) {
-			val fadeoutL	= Player.interpolation interpolate (inputL, xf, headSpeed)
-			val fadeoutR	= Player.interpolation interpolate (inputR, xf, headSpeed)
-			audioL	= fadeinL * fade + fadeoutL * (1-fade)
-			audioR	= fadeinR * fade + fadeoutR * (1-fade)
-			doFade()
+		if (fadeProgress) {
+			val fadeoutL	= Player.interpolation interpolate (inputL, fadeFrame, headSpeed)
+			val fadeoutR	= Player.interpolation interpolate (inputR, fadeFrame, headSpeed)
+			audioL	= fadeinL * fadeValue + fadeoutL * (1-fadeValue)
+			audioR	= fadeinR * fadeValue + fadeoutR * (1-fadeValue)
 		}
 		else {
 			audioL	= fadeinL
@@ -611,7 +699,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		val equalizedR	= equalizerR process (audioR, lowValue, middleValue, highValue)
 		
 		// filter
-		val filterValue	= filter.current
+		val filterValue		= filter.current
 		// reset filter when the mode changed
 		val filterModeNow	= filterMode(filterValue)
 		if (filterModeNow != filterModeOld) {
@@ -640,7 +728,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		}
 		
 		// NOTE hack: output only when moving
-		if (v != zeroFrequency) {	// playing || scratchMode
+		if (velocity != zeroFrequency) {	// playing || scratchMode
 			val trimGain		= trim.current
 			val speakerValue	= speaker.current
 			val combinedGain	= speakerValue * trimGain
@@ -662,20 +750,23 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		}
 		
 		if (mode == Scratching) {
-			val	c	= df*2*sqrt(k*m)
-			val d	= x-o	// -l
-			a	= (-k*d - c*v)/m
-			val v1	= v + a*dt
-			v	= clampDouble(v1, -springSpeedLimit, springSpeedLimit)
+			val	c				= Player.springDamping * 2 * sqrt(Player.springHardness * Player.springMass)
+			// spring is assumed to have zero length when not stretched
+			val springStretch	= headFrame - springOriginFrame
+			acceleration		= (-Player.springHardness*springStretch - c*velocity) / Player.springMass
+			val v1	= velocity + acceleration * deltaTime
+			velocity	= clampDouble(v1, -springSpeedLimit, springSpeedLimit)
 		}
 		
-		val oldX	= x
-		val move	= v*dt
-		x	+= move
-		xf	+= move
+		val oldFrame	= headFrame
+		val deltaFrame	= velocity * deltaTime
+		headFrame		+= deltaFrame
+		fadeFrame		+= deltaFrame
+		
+		exitFade()
 		
 		if (mode == Playing) {
-			jumpBackAfterLoopEnd(oldX)
+			jumpBackAfterLoopEnd(oldFrame)
 		}
 
 		trim.step()

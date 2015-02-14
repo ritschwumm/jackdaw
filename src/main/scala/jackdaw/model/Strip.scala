@@ -35,5 +35,5 @@ final class Strip(initialSpeaker:Double, initialPhone:Double, val meterRange:Met
 	}
 	
 	private def modifier(steps:Int, fine:Boolean):Endo[Double]	=
-			it => VolumeRange clamp (it + steps * (Strip step fine)) 
+			it => VolumeRange clamp (it + steps * (Strip step fine))
 }

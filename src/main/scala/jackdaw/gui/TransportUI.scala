@@ -96,7 +96,7 @@ final class TransportUI(cueable:Signal[Boolean], playable:Signal[Boolean], playi
 					(button, action)
 				}
 			).unzip
-	val loopResetUI	= 
+	val loopResetUI	=
 			new ButtonUI(
 				size	= ButtonStyleFactory.size,
 				style	= static(ButtonStyleFactory.LOOP_RESET),

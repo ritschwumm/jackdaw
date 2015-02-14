@@ -16,7 +16,7 @@ object Madplay extends Inspector with Decoder {
 				_		<- MediaUtil requireCommand "madplay"
 				result	<-
 						MediaUtil runCommand (
-							"madplay", 
+							"madplay",
 							"-T",
 							input.getPath
 						)
@@ -54,7 +54,7 @@ object Madplay extends Inspector with Decoder {
 						)
 				_	<-
 						(Checked trueWin1 (
-							!(res.err contains "error: frame 0: lost synchronization"), 
+							!(res.err contains "error: frame 0: lost synchronization"),
 							"file cannot be decoded"
 						)) orElse
 						(Checked trueWin1 (

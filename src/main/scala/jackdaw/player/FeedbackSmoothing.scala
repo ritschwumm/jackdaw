@@ -11,7 +11,7 @@ final class FeedbackSmoothing[T](initialFeedbackRate:Double, overshotTarget:Int,
 	private var feedbackRate	= initialFeedbackRate
 	
 	val asTarget:Target[T]	= queue.asTarget
-	 
+	
 	def feedbackTimed(deltaNanos:Long):Option[T]	= {
 		val blocks	= round(deltaNanos.toDouble * feedbackRate / 1000000000D).toInt
 		

@@ -36,7 +36,7 @@ object Faad extends Inspector with Decoder {
 				_	<- MediaUtil requireCommand "faad"
 				_	<-
 						MediaUtil runCommand (
-							"faad", 
+							"faad",
 							"-o",	output.getPath,
 							"-b",	"1",			// 16 bit signed short
 							"-f",	"1",			// wav

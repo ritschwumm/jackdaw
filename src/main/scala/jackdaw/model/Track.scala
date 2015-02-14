@@ -108,10 +108,10 @@ final class Track(val file:File) extends Observing with Logging {
 				val metadataVal:Option[Stamped[Metadata]]	=
 						dataVal.metadata
 						.filter	{
-							_.stamp >= fileModified 
+							_.stamp >= fileModified
 						}
 						.someEffect { _ =>
-							INFO("using cached metadata") 
+							INFO("using cached metadata")
 						}
 						.orElse {
 							INFO("reading metadata")
@@ -187,7 +187,7 @@ final class Track(val file:File) extends Observing with Logging {
 							sampleVal map { sampleVal =>
 								INFO("calculating curve")
 								BandCurve
-								.calculate	(sampleVal, Config.curveRaster) 
+								.calculate	(sampleVal, Config.curveRaster)
 								.doto		(curvePersister save trackFiles.curve)
 							}
 						}

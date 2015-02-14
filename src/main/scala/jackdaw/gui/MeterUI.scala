@@ -132,7 +132,7 @@ final class MeterUI(value:Signal[Float], meterRange:MeterRange, vertical:Boolean
 					
 					Vector(
 						FillShape(inactive, Style.meter.track.color),
-						/* 
+						/*
 						FillShape(active) withPaint gradient,
 						*/
 						WithClip(

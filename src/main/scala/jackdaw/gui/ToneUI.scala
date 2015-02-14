@@ -17,9 +17,9 @@ import jackdaw.gui.util._
 import GridBagItem.UI_is_GridBagItem
 
 object ToneUI {
-	def spacer	= 
-			new SpacerUI doto { 
-				_.component setAllSizes new Dimension(0, 164) 
+	def spacer	=
+			new SpacerUI doto {
+				_.component setAllSizes new Dimension(0, 164)
 			}
 }
 
@@ -40,7 +40,7 @@ final class ToneUI(tone:Tone, focusInput:KeyInput) extends UI with Observing {
 	midKnob.component		setAllSizes	Style.rotary.size
 	lowKnob.component		setAllSizes	Style.rotary.size
 	
-	private val panel	= 
+	private val panel	=
 			GridBagUI(
 				trimKnob	pos(0,0) size(1,1) weight(1,1) fill NONE insetsTLBR(0,0,2,0),
 				filterKnob	pos(0,1) size(1,1) weight(1,1) fill NONE insetsTLBR(2,0,8+2,0),
@@ -87,7 +87,7 @@ final class ToneUI(tone:Tone, focusInput:KeyInput) extends UI with Observing {
 			Key(VK_NUMPAD8,		KEY_LOCATION_NUMPAD).asAction
 	resetHigh trigger tone.resetHigh
 	
-	// private val moveTrimKey:Signal[Option[Boolean]]	= 
+	// private val moveTrimKey:Signal[Option[Boolean]]	=
 	// 		Key(VK_SUBTRACT,	KEY_LOCATION_NUMPAD).asModifier	upDown
 	// 		Key(VK_DIVIDE,		KEY_LOCATION_NUMPAD).asModifier
 	private val moveTrim:Events[Int]	=
@@ -95,7 +95,7 @@ final class ToneUI(tone:Tone, focusInput:KeyInput) extends UI with Observing {
 			trimKnob.wheel
 	moveTrim.withFine	trigger tone.moveTrim
 	
-	private val moveFilterKey:Signal[Option[Boolean]]	= 
+	private val moveFilterKey:Signal[Option[Boolean]]	=
 			Key(VK_SUBTRACT,	KEY_LOCATION_NUMPAD).asModifier	upDown
 			Key(VK_DIVIDE,		KEY_LOCATION_NUMPAD).asModifier
 	private val moveFilter:Events[Int]	=
@@ -103,7 +103,7 @@ final class ToneUI(tone:Tone, focusInput:KeyInput) extends UI with Observing {
 			filterKnob.wheel
 	moveFilter.withFine	trigger tone.moveFilter
 	
-	private val moveLowKey:Signal[Option[Boolean]]	= 
+	private val moveLowKey:Signal[Option[Boolean]]	=
 			(	Key(VK_PAGE_DOWN,	KEY_LOCATION_NUMPAD).asModifier	orElse
 				Key(VK_NUMPAD3,		KEY_LOCATION_NUMPAD).asModifier
 			) upDown
@@ -115,7 +115,7 @@ final class ToneUI(tone:Tone, focusInput:KeyInput) extends UI with Observing {
 			lowKnob.wheel
 	moveLow.withFine	trigger tone.moveLow
 	
-	private val moveMiddleKey:Signal[Option[Boolean]]	= 
+	private val moveMiddleKey:Signal[Option[Boolean]]	=
 			(	Key(VK_KP_RIGHT,	KEY_LOCATION_NUMPAD).asModifier	orElse
 				Key(VK_NUMPAD6,		KEY_LOCATION_NUMPAD).asModifier
 			) upDown
@@ -127,7 +127,7 @@ final class ToneUI(tone:Tone, focusInput:KeyInput) extends UI with Observing {
 			midKnob.wheel
 	moveMiddle.withFine	trigger tone.moveMiddle
 					
-	private val moveHighKey:Signal[Option[Boolean]]	= 
+	private val moveHighKey:Signal[Option[Boolean]]	=
 			(	Key(VK_PAGE_UP,		KEY_LOCATION_NUMPAD).asModifier	orElse
 				Key(VK_NUMPAD9,		KEY_LOCATION_NUMPAD).asModifier
 			) upDown

@@ -39,7 +39,7 @@ final class MainUI(model:Model, windowActive:Signal[Boolean]) extends UI with Ob
 	private val masterUI	= new ChannelUI(model.mix.master, None,						model.masterPeak,	model.phoneEnabled, keyboardEnabled)
 	private val speedUI		= new SpeedUI(model.speed, keyboardEnabled)
 	
-	private val	masterPanel	= 
+	private val	masterPanel	=
 			GridBagUI(
 				channel1UI	pos(0,0) size(1,1) weight(1,1)	fill VERTICAL	anchor NORTH 	insetsTLBR(0,0,12,6),
 				channel2UI	pos(1,0) size(1,1) weight(1,1)	fill VERTICAL	anchor NORTH	insetsTLBR(0,6,12,6),

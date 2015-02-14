@@ -22,7 +22,7 @@ final class ButtonUI(size:Dimension, style:Signal[ButtonStyle], enabled:Signal[B
 	//------------------------------------------------------------------------------
 	//## wiring
 	
-	private val down	= 
+	private val down	=
 			(canvas.mouse.leftPress		tag true)	orElse
 			(canvas.mouse.leftRelease	tag false)	hold
 			false
@@ -31,7 +31,7 @@ final class ButtonUI(size:Dimension, style:Signal[ButtonStyle], enabled:Signal[B
 	private val armed	= signal { down.current && hovered.current && enabled.current }
 	private val gate	= armed delay false
 	
-	private val figures	= 
+	private val figures	=
 			signal {
 				val	styleCur	= style.current
 					 if (!enabled.current)	styleCur.disabled

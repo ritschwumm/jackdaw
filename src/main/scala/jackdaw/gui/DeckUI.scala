@@ -32,7 +32,7 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 	private val cuePoints:Signal[ISeq[Double]]	=
 			deck.cuePointsFlat
 	
-	private val cuePointsCount:Signal[Int]	= 
+	private val cuePointsCount:Signal[Int]	=
 			cuePoints map { _.size }
 		
 	private val loopChoices:ISeq[(LoopDef,Signal[Boolean])]	=
@@ -51,7 +51,7 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 	private val detailUI	=
 			new WaveUI(
 				bandCurve		= deck.bandCurve,
-				frameOrigin		= deck.position, 
+				frameOrigin		= deck.position,
 				playerPosition	= deck.position,
 				cuePoints		= cuePoints,
 				rhythmLines		= rhythmLines,

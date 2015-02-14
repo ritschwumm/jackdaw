@@ -42,7 +42,7 @@ final class LinearUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 	
 	private val value2gui	=
 			trackBounds map { it =>
-				(orientation cata (miniMax, miniMax.swap))	spanTransformTo 
+				(orientation cata (miniMax, miniMax.swap))	spanTransformTo
 				(it get orientation)
 			}
 	
@@ -56,7 +56,7 @@ final class LinearUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 				val value2guiCur		= value2gui.current
 				val valueCur			= value.current
 				
-				val track	= stripeShape(trackBoundsCur, miniMax, value2guiCur) 
+				val track	= stripeShape(trackBoundsCur, miniMax, value2guiCur)
 				val active	= neutral map { neutralVal =>
 					val	span	= neutralVal spanTo clampMiniMax(valueCur)
 					stripeShape(trackBoundsCur, span, value2guiCur)
@@ -67,7 +67,7 @@ final class LinearUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 					Some(			FillShape(track,	Style.linear.track.color)									),
 					active	map {	FillShape(_,		Style.linear.active.color)									},
 					Some(			StrokeShape(track,	Style.linear.outline.color,	Style.linear.outline.stroke)	),
-					knob	map {	FillShape(_,		Style.linear.knob.color)									},        
+					knob	map {	FillShape(_,		Style.linear.knob.color)									},
 					knob	map {	StrokeShape( _,		Style.linear.outline.color,	Style.linear.outline.stroke)	}
 				).collapse
 			}

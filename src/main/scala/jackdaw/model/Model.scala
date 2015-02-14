@@ -24,7 +24,7 @@ final class Model extends Observing {
 				(cur, cur - old)
 			}
 	
-	private val timedFeedback	= nanoChange map engine.feedbackTimed 
+	private val timedFeedback	= nanoChange map engine.feedbackTimed
 	
 	private val engineFeedback	= timedFeedback.filterOption hold EngineFeedback.empty
 	
@@ -78,7 +78,7 @@ final class Model extends Observing {
 	def dispose() {
 		engine.dispose()
 		clock.dispose()
-		// NOTE Model$ keeps being referenced by Thread#contextClassLoader 
+		// NOTE Model$ keeps being referenced by Thread#contextClassLoader
 		// clock	= null
 	}
 }

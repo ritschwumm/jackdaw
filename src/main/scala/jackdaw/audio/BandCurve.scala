@@ -63,12 +63,12 @@ object BandCurve {
 		}
 		
 		BandCurve(
-			sample.frameRate, 
-			rasterFrames, 
-			chunkCount, 
+			sample.frameRate,
+			rasterFrames,
+			chunkCount,
 			valuesFull,
-			valuesLow, 
-			valuesMiddle, 
+			valuesLow,
+			valuesMiddle,
 			valuesHigh
 		)
 	}
