@@ -43,12 +43,12 @@ final class Loader(engineTarget:Target[LoaderFeedback]) extends Logging {
 	private val reactAction:Effect[LoaderAction]	=
 			_ match {
 				// BETTER don't close over the player, we already know it
-				case LoaderDecode(file, callback)		=> decode(file, callback)
-				case LoaderPreload(sample, centerFrame)	=> preload(sample, centerFrame)
+				case LoaderDecode(file, callback)		=> doDecode(file, callback)
+				case LoaderPreload(sample, centerFrame)	=> doPreload(sample, centerFrame)
 				case LoaderNotifyEngine(task)			=> doInEngine(task)
 			}
 	
-	private def decode(file:File, callback:Effect[Option[CacheSample]]) {
+	private def doDecode(file:File, callback:Effect[Option[CacheSample]]) {
 		DEBUG("loader loading", file)
 		val sample	=
 				(Wav load file)
@@ -60,7 +60,7 @@ final class Loader(engineTarget:Target[LoaderFeedback]) extends Logging {
 		})
 	}
 	
-	private def preload(sample:CacheSample, centerFrame:Int) {
+	private def doPreload(sample:CacheSample, centerFrame:Int) {
 		val changed		= sample provide centerFrame
 		if (changed) {
 			sample.writeBarrier()

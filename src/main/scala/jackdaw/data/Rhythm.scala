@@ -64,6 +64,9 @@ case class Rhythm(anchor:Double, measure:Double, schema:Schema) {
 	lazy val measureRaster:Raster	= Raster(measure,	anchor)
 	lazy val beatRaster:Raster		= Raster(beat,		anchor)
 	
+	def sizeOf(value:RhythmValue):Double	=
+			raster(value.unit).size * value.steps
+	
 	//------------------------------------------------------------------------------
 	
 	def index(position:Double):RhythmIndex	=

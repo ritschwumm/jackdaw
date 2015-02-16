@@ -148,85 +148,29 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 			
 	private[player] def react(action:PlayerAction):Unit	=
 			action match {
-				case c@PlayerChangeControl(_,_,_,_,_,_,_)	=> changeControl(c)
-				
-				case PlayerSetNeedSync(needSync)			=> setNeedSync(needSync)
-				
-				case PlayerSetFile(file)					=>
-						file match {
-							case Some(file)	=> loaderDecode(file)
-							case None		=> setSample(None)
-						}
-				case PlayerSetRhythm(rhythm)				=> setRhythm(rhythm)
-				
-				case PlayerSetRunning(running)				=> setRunning(running)
-				
-				case PlayerPitchAbsolute(pitch, keepSync)	=> pitchAbsolute(pitch, keepSync)
-				
-				case PlayerPhaseAbsolute(position)			=>
-					registerSimpleFade {
-						syncPhaseTo(position)
-					}
-				case PlayerPhaseRelative(offset)			=>
-					registerSimpleFade {
-						movePhaseBy(offset)
-					}
-				
-				case PlayerPositionAbsolute(frame)			=>
-					registerJump {
-						loaderPreload(frame)
-						loaderNotifyEngine {
-							registerCancellableFade(
-								{
-									positionAbsolute(frame)
-									exitJump()
-								},
-								exitJump()
-							)
-						}
-					}
-				case PlayerPositionJump(frame, rhythmUnit)	=>
-					registerJump {
-						loaderPreload(frame)
-						loaderNotifyEngine {
-							registerCancellableFade(
-								{
-									positionJump(frame, rhythmUnit)
-									exitJump()
-								},
-								exitJump()
-							)
-						}
-					}
-				case PlayerPositionSeek(offset)				=>
-					registerJump {
-						// TODO loader questionable
-						loaderPreload(headFrame + offset.steps * jumpRaster(offset).size)
-						loaderNotifyEngine {
-							registerCancellableFade(
-								{
-									positionSeek(offset)
-									exitJump()
-								},
-								exitJump()
-							)
-						}
-					}
-				
-				case PlayerDragAbsolute(v)					=> dragAbsolute(v)
-				case PlayerDragEnd							=> dragEnd()
-				
-				case PlayerScratchRelative(frames)			=> scratchRelative(frames)
-				case PlayerScratchEnd						=> scratchEnd()
-				
-				case PlayerLoopEnable(size)					=> loopEnable(size)
-				case PlayerLoopDisable						=> loopDisable()
+				case c@PlayerChangeControl(_,_,_,_,_,_,_)	=> doChangeControl(c)
+				case PlayerSetNeedSync(needSync)			=> doSetNeedSync(needSync)
+				case PlayerSetFile(file)					=> doSetFile(file)
+				case PlayerSetRhythm(rhythm)				=> doSetRhythm(rhythm)
+				case PlayerSetRunning(running)				=> doSetRunning(running)
+				case PlayerPitchAbsolute(pitch, keepSync)	=> doPitchAbsolute(pitch, keepSync)
+				case PlayerPhaseAbsolute(position)			=> doPlayerPhaseAbsolute(position)
+				case PlayerPhaseRelative(offset)			=> doPlayerPhaseRelative(offset)
+				case PlayerPositionAbsolute(frame)			=> doPlayerPositionAbsolute(frame)
+				case PlayerPositionJump(frame, rhythmUnit)	=> doPlayerPositionJump(frame, rhythmUnit)
+				case PlayerPositionSeek(offset)				=> doPlayerPositionSeek(offset:RhythmValue)
+				case PlayerDragAbsolute(v)					=> doDragAbsolute(v)
+				case PlayerDragEnd							=> doDragEnd()
+				case PlayerScratchRelative(frames)			=> doScratchRelative(frames)
+				case PlayerScratchEnd						=> doScratchEnd()
+				case PlayerLoopEnable(size)					=> doLoopEnable(size)
+				case PlayerLoopDisable						=> doLoopDisable()
 			}
 			
 	//------------------------------------------------------------------------------
 	//## common control
 	
-	private def changeControl(control:PlayerChangeControl) {
+	private def doChangeControl(control:PlayerChangeControl) {
 		trim	target	control.trim
 		filter	target	control.filter
 		low		target	control.low
@@ -234,6 +178,13 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		high	target	control.high
 		speaker	target	control.speaker
 		phone	target	control.phone
+	}
+	
+	private def doSetFile(file:Option[File]) {
+		file match {
+			case Some(file)	=> loaderDecode(file)
+			case None		=> setSample(None)
+		}
 	}
 
 	private def setSample(sample:Option[CacheSample]) {
@@ -243,20 +194,20 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		inputR	= sample cata (Channel.empty, _ channelOrEmpty 1)
 		rate	= sample cata (1, _.frameRate.toDouble)
 		
-		loopDisable()
+		doLoopDisable()
 		updateVelocity()
 		updateEndFrame()
 		keepSpeedSynced()
 	}
 	
-	private def setRhythm(rhythm:Option[Rhythm]) {
+	private def doSetRhythm(rhythm:Option[Rhythm]) {
 		this.rhythm	= rhythm
 		
 		updateEndFrame()
 		keepSpeedSynced()
 	}
 	
-	private def setNeedSync(needSync:Boolean) {
+	private def doSetNeedSync(needSync:Boolean) {
 		if (needSync == this.needSync)	return
 		this.needSync	= needSync
 		
@@ -264,9 +215,71 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	}
 	
 	//------------------------------------------------------------------------------
+	//## registered fades
+	
+	private def doPlayerPhaseAbsolute(position:RhythmValue) {
+		registerSimpleFade {
+			syncPhaseTo(position)
+		}
+	}
+	
+	private def doPlayerPhaseRelative(offset:RhythmValue) {
+		registerSimpleFade {
+			movePhaseBy(offset)
+		}
+	}
+	
+	private def doPlayerPositionAbsolute(frame:Double) {
+		registerJump {
+			loaderPreload(frame)
+			loaderNotifyEngine {
+				registerCancellableFade(
+					{
+						positionAbsolute(frame)
+						exitJump()
+					},
+					exitJump()
+				)
+			}
+		}
+	}
+	
+	private def doPlayerPositionJump(frame:Double, rhythmUnit:RhythmUnit) {
+		registerJump {
+			loaderPreload(frame)
+			loaderNotifyEngine {
+				registerCancellableFade(
+					{
+						positionJump(frame, rhythmUnit)
+						exitJump()
+					},
+					exitJump()
+				)
+			}
+		}
+	}
+	
+	private def doPlayerPositionSeek(offset:RhythmValue) {
+		registerJump {
+			// TODO loader questionable
+			val estimateTarget	= headFrame + (rhythm getOrElse fakeRhythm sizeOf offset)
+			loaderPreload(estimateTarget)
+			loaderNotifyEngine {
+				registerCancellableFade(
+					{
+						positionSeek(offset)
+						exitJump()
+					},
+					exitJump()
+				)
+			}
+		}
+	}
+	
+	//------------------------------------------------------------------------------
 	//## motor running
 	
-	private def setRunning(running:Boolean) {
+	private def doSetRunning(running:Boolean) {
 		val oldPhase	= phaseValue(Measure)
 		
 		this.running	= running
@@ -297,7 +310,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	//------------------------------------------------------------------------------
 	//## motor speed
 	
-	private def pitchAbsolute(pitch:Double, keepSync:Boolean)  {
+	private def doPitchAbsolute(pitch:Double, keepSync:Boolean)  {
 		if (this.pitch == pitch)	return	
 		this.pitch	= pitch
 		updateVelocity()
@@ -336,9 +349,12 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 			
 	/** change the phase by some offset */
 	private def movePhaseBy(offset:RhythmValue) {
+		rhythm map { _ sizeOf offset } foreach moveInLoop
+		/*
 		currentRhythmRaster(offset.unit) foreach { raster =>
 			moveInLoop(offset.steps * raster.size)
 		}
+		*/
 	}
 	
 	private def phaseValue(rhythmUnit:RhythmUnit):Option[RhythmValue]	=
@@ -377,41 +393,53 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	/** jump to a given position without while staying in sync  */
 	private def positionJump(frame:Double, rhythmUnit:RhythmUnit) {
 		rhythm match {
-			case Some(rhythm)	=> positionJumpWithRaster(frame, rhythm raster rhythmUnit)
+			case Some(rhythm)	=> positionJumpWithRaster(frame, rhythmUnit, rhythm)
 			case None			=> positionAbsolute(frame)
 		}
 	}
 	
 	/** jump to a given position without while staying in sync  */
-	private def positionJumpWithRaster(frame:Double, raster:Raster) {
+	private def positionJumpWithRaster(frame:Double, unit:RhythmUnit, rhythm:Rhythm) {
+		// TODO seek ugly: raster is calculated again in positionSeekWithRaster
+		val raster	= rhythm raster unit
 		val raw		= (frame - headFrame) / raster.size
 		val steps	= if (running) rint(raw) else raw
-		positionSeekWithRaster(steps, raster)
+		positionSeekWithRaster(RhythmValue(steps, unit), rhythm)
 	}
 	
 	/** jump for a given number of rhythm while staying in sync */
 	private def positionSeek(offset:RhythmValue) {
-		positionSeekWithRaster(offset.steps, jumpRaster(offset))
+		rhythm match {
+			case Some(rhythm)	=> positionSeekWithRaster(offset, rhythm)
+			case None			=> positionSeekWithoutRaster(offset)
+		}
 	}
 	
-	/** jump for a given number of rhythm while staying in sync */
-	private def positionSeekWithRaster(steps:Double, raster:Raster) {
-		val position:Double		=
-				if (running) {
-					 headFrame + steps * raster.size
-				}
-				else {
-					val	offset 	= (0.5 - Player.positionEpsilon) * signum(steps)
-					val	raw		= headFrame + (steps - offset) * raster.size
-					raster round raw
-				}
-		// loopAround(position)
+	private def positionSeekWithoutRaster(offset:RhythmValue) {
+		val position	= headFrame + (fakeRhythm sizeOf offset)
 		startFade(position)
 	}
 	
-	private def jumpRaster(offset:RhythmValue):Raster	=
-			rhythm getOrElse fakeRhythm raster offset.unit
-		
+	/** jump for a given number of rhythm while staying in sync */
+	private def positionSeekWithRaster(offset:RhythmValue, rhythm:Rhythm) {
+		val position:Double		=
+				if (running)	headFrame + (rhythm sizeOf offset)
+				else			snappingSeekCalculation(headFrame, offset.steps, rhythm raster offset.unit)
+		startFade(position)
+	}
+	
+	/** almost ceil for negative offsets, almost floor for positive offsets */
+	private def snappingSeekCalculation(start:Double, steps:Double, raster:Raster):Double	= {
+		val	offset 	= (0.5 - Player.positionEpsilon) * signum(steps)
+		val	raw		= headFrame + (steps - offset) * raster.size
+		raster round raw
+		/*
+		// equivalent code:
+		if (steps < 0)	raster ceil		(headFrame + (steps - Player.positionEpsilon) * raster.size)
+		else			raster floor	(headFrame + (steps + Player.positionEpsilon) * raster.size)
+		*/
+	}
+	
 	// TODO raster ugly
 	private  def fakeRhythm	= Rhythm fake (0, rate)
 	
@@ -428,7 +456,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		velocity			= 0
 	}
 	
-	private def scratchRelative(frames:Double) {
+	private def doScratchRelative(frames:Double) {
 		if (mode != Scratching)	{
 			scratchBegin()
 		}
@@ -436,7 +464,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	}
 	
 	// scratch -> motor
-	private def scratchEnd() {
+	private def doScratchEnd() {
 		mode	= Playing
 		updateVelocity()
 	}
@@ -449,7 +477,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		mode	= Dragging
 	}
 	
-	private def dragAbsolute(speed:Double) {
+	private def doDragAbsolute(speed:Double) {
 		if (mode != Dragging) {
 			dragBegin()
 		}
@@ -457,7 +485,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	}
 	
 	// scratch -> motor
-	private def dragEnd() {
+	private def doDragEnd() {
 		mode	= Playing
 		updateVelocity()
 	}
@@ -592,12 +620,12 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	//------------------------------------------------------------------------------
 	//## loop calculation
 	
-	private def loopEnable(preset:LoopDef) {
+	private def doLoopEnable(preset:LoopDef) {
 		loopSpan	= mkLoop(headFrame, preset.size)
 		loopDef		= loopSpan.isDefined guard preset
 	}
 	
-	private def loopDisable() {
+	private def doLoopDisable() {
 		loopSpan	= None
 		loopDef		= None
 	}
@@ -667,7 +695,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	def generate(speakerBuffer:FrameBuffer, phoneBuffer:FrameBuffer) {
 		// NOTE hack
 		if (running && mode == Playing && afterEnd) {
-			setRunning(false)
+			doSetRunning(false)
 		}
 		
 		enterFade()

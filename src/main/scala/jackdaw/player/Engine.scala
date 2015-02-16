@@ -112,7 +112,7 @@ final class Engine(feedbackTarget:Target[EngineFeedback]) extends Logging {
 	
 	private val reactAction:Effect[EngineAction]	=
 			_ match {
-				case c@EngineChangeControl(_,_)			=> changeControl(c)
+				case c@EngineChangeControl(_,_)			=> doChangeControl(c)
 				case EngineSetBeatRate(beatRate)		=> metronome setBeatRate beatRate
 				case EngineControlPlayer(1, action)		=> player1 react action
 				case EngineControlPlayer(2, action)		=> player2 react action
@@ -120,7 +120,7 @@ final class Engine(feedbackTarget:Target[EngineFeedback]) extends Logging {
 				case EngineControlPlayer(x, _)			=> ERROR("unexpected player", x)
 			}
 	
-	private def changeControl(control:EngineChangeControl) {
+	private def doChangeControl(control:EngineChangeControl) {
 		speaker	target	control.speaker
 		phone	target	control.phone
 	}
