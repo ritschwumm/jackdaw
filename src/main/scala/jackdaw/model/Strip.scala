@@ -7,7 +7,7 @@ import screact._
 
 import scaudio.math._
 
-import jackdaw.audio._
+import jackdaw.range._
 
 object Strip {
 	def forMaster	= new Strip(VolumeRange.alot,	VolumeRange.alot,	MasterRange)

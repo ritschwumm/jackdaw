@@ -12,9 +12,10 @@ import scaudio.sample._
 import screact._
 
 import jackdaw.Config
-import jackdaw.audio._
 import jackdaw.data._
 import jackdaw.media._
+import jackdaw.curve._
+import jackdaw.key._
 import jackdaw.persistence._
 import jackdaw.persistence.JSONProtocol._
 import jackdaw.util.LRU
@@ -208,7 +209,7 @@ final class Track(val file:File) extends Observing with Logging {
 						.orElse {
 							curveVal map { curveVal =>
 								INFO("detecting beat rate")
-								val out	=
+								val out:Double	=
 										MeasureDetector measureFrames (
 											curveVal,
 											Config.detectBpsRange,
@@ -223,6 +224,31 @@ final class Track(val file:File) extends Observing with Logging {
 				edtWait {
 					modifyData(
 						TrackData.L.measure putter measureVal
+					)
+				}
+				
+				// provide key
+				val keyVal:Option[Stamped[MusicKey]]	=
+						dataVal.key
+						.filter	{
+							_.stamp >= fileModified
+						}
+						.someEffect	{ _ =>
+							INFO("using cached key")
+						}
+						.orElse {
+							sampleVal map { sampleVal =>
+								INFO("detecting key")
+								val out:MusicKey	= KeyDetector findKey sampleVal
+								Stamped(fileModified, out)
+							}
+						}
+						.noneEffect {
+							WARN("cannot provide key")
+						}
+				edtWait {
+					modifyData(
+						TrackData.L.key putter keyVal
 					)
 				}
 				
@@ -244,6 +270,7 @@ final class Track(val file:File) extends Observing with Logging {
 	val rhythm		= data map { _.rhythm		}
 	val metadata	= data map { _.metadata	map { _.data	} }
 	val measure		= data map { _.measure	map { _.data	} }
+	val key			= data map { _.key		map { _.data	} }
 	
 	//------------------------------------------------------------------------------
 	

@@ -2,7 +2,7 @@ package jackdaw.gui
 
 import screact._
 
-import jackdaw.gui.action._
+import jackdaw.gui.util._
 
 /** controls the playback pitch of a deck */
 final class MatchUI(synced:Signal[Option[Boolean]], pitched:Signal[Boolean]) extends UI {

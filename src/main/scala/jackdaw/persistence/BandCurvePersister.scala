@@ -5,7 +5,7 @@ import java.io._
 import scutil.implicits._
 import scutil.log._
 
-import jackdaw.audio.BandCurve
+import jackdaw.curve.BandCurve
 
 /** loading and saving an BandCurvePersister from/to a File */
 final class BandCurvePersister extends Persister[BandCurve] with Logging {
@@ -20,8 +20,9 @@ final class BandCurvePersister extends Persister[BandCurve] with Logging {
 				val	valuesMiddle	= in.readObject.asInstanceOf[Array[Float]]
 				val	valuesHigh		= in.readObject.asInstanceOf[Array[Float]]
 				Some(BandCurve(
-						sampleRate, rasterFrames, chunkCount,
-						valuesFull, valuesLow, valuesMiddle, valuesHigh))
+					sampleRate, rasterFrames, chunkCount,
+					valuesFull, valuesLow, valuesMiddle, valuesHigh
+				))
 			}
 		}
 		catch { case e:Exception	=>

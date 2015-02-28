@@ -5,7 +5,8 @@ import scala.math._
 import scutil.lang._
 import scutil.implicits._
 
-import jackdaw.audio.Metadata
+import jackdaw.media.Metadata
+import jackdaw.key.MusicKey
 
 object TrackData {
 	val empty	=
@@ -14,7 +15,8 @@ object TrackData {
 				cuePoints	= ISeq.empty,
 				rhythm		= None,
 				metadata	= None,
-				measure		= None
+				measure		= None,
+				key			= None
 			)
 			
 	val L	= Lenser[TrackData]
@@ -25,7 +27,8 @@ case class TrackData(
 	cuePoints:ISeq[Double],
 	rhythm:Option[Rhythm],
 	metadata:Option[Stamped[Metadata]],
-	measure:Option[Stamped[Double]]
+	measure:Option[Stamped[Double]],
+	key:Option[Stamped[MusicKey]]
 ) {
 	// BETTER make this a class
 	

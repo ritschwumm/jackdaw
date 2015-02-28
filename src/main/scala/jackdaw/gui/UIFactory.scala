@@ -2,7 +2,7 @@ package jackdaw.gui
 
 import screact._
 
-import jackdaw.audio._
+import jackdaw.range._
 
 object UIFactory {
 	//------------------------------------------------------------------------------

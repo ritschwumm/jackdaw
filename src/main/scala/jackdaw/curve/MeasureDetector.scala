@@ -1,4 +1,4 @@
-package jackdaw.audio
+package jackdaw.curve
 
 import java.io.File
 import java.nio.charset.Charset

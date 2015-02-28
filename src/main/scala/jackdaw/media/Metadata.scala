@@ -1,4 +1,4 @@
-package jackdaw.audio
+package jackdaw.media
 
 /** audio file metadata */
 case class Metadata(

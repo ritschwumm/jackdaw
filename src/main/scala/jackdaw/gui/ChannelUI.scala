@@ -8,7 +8,7 @@ import scutil.gui.GridBagDSL._
 import screact._
 
 import jackdaw.model._
-import jackdaw.gui.action._
+import jackdaw.gui.util._
 
 import GridBagItem.UI_is_GridBagItem
 

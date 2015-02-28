@@ -2,7 +2,7 @@ package jackdaw.data
 
 object Schema {
 	// TODO hardcoded, look up references
-	val default:Schema	= Schema(4,4)
+	val default:Schema	= Schema(4, 4)
 }
 
 case class Schema(measuresPerPhrase:Int, beatsPerMeasure:Int) {

@@ -1,6 +1,6 @@
 name			:= "jackdaw"
 organization	:= "de.djini"
-version			:= "1.22.0"
+version			:= "1.23.0"
 
 scalaVersion	:= "2.11.5"
 scalacOptions	++= Seq(
@@ -22,14 +22,15 @@ scalacOptions	++= Seq(
 
 conflictManager	:= ConflictManager.strict
 libraryDependencies	++= Seq(
-	"de.djini"		%%	"scutil-core"	% "0.64.0"	% "compile",
-	"de.djini"		%%	"scutil-swing"	% "0.64.0"	% "compile",
-	"de.djini"		%%	"scaudio"		% "0.51.0"	% "compile",
-	"de.djini"		%%	"scjson"		% "0.69.0"	% "compile",
-	"de.djini"		%%	"screact"		% "0.72.0"	% "compile",
-	"de.djini"		%%	"scgeom"		% "0.26.0"	% "compile",
+	"de.djini"		%%	"scutil-core"	% "0.65.0"	% "compile",
+	"de.djini"		%%	"scutil-swing"	% "0.65.0"	% "compile",
+	"de.djini"		%%	"scaudio"		% "0.52.0"	% "compile",
+	"de.djini"		%%	"scjson"		% "0.70.0"	% "compile",
+	"de.djini"		%%	"screact"		% "0.73.0"	% "compile",
+	"de.djini"		%%	"scgeom"		% "0.27.0"	% "compile",
 	"de.djini"		%%	"sc2d"			% "0.20.0"	% "compile",
 	"com.twitter"	%%	"chill"			% "0.5.2"	% "compile",
+	"de.djini"					% "jkeyfinder"	% "0.2.0"	% "compile",
 	"org.simplericity.macify"	% "macify"		% "1.6"		% "compile",
 	"javazoom"					% "jlayer"		% "1.0.1"	% "compile",
 	"com.mpatric"				% "mp3agic"		% "0.8.3"	% "compile",

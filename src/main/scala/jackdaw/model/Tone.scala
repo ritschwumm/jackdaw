@@ -5,8 +5,7 @@ import scutil.implicits._
 
 import screact._
 
-import jackdaw.audio.FilterRange
-import jackdaw.audio.TrimRange
+import jackdaw.range._
 
 object Tone {
 	val trimStep:Boolean=>Double	=

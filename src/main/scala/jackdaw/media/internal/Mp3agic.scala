@@ -8,7 +8,6 @@ import scutil.lang._
 import scutil.implicits._
 import scutil.log._
 
-import jackdaw.audio.Metadata
 import jackdaw.util.Checked
 
 object Mp3agic extends Inspector with Logging {

@@ -12,11 +12,15 @@ import scutil.log._
 import scjson._
 import scjson.serialization._
 
-import jackdaw.audio.Metadata
+import jackdaw.media.Metadata
 import jackdaw.data._
 import jackdaw.persistence._
 
-object V1 extends Logging {
+object V1 extends Migration with Logging {
+	import V2._
+	
+	//------------------------------------------------------------------------------
+	
 	case class TrackDataV1(
 		annotation:String,
 		cuePoints:ISeq[Double],
@@ -52,13 +56,13 @@ object V1 extends Logging {
 		JSONIO.loadFile[TrackDataV1](file)
 	}
 	
-	private def write(file:File)(data:TrackData):Unit	= {
-		import JSONProtocol._
-		(new JSONPersister[TrackData]).save(file)(data)
+	private def write(file:File)(data:TrackDataV2):Unit	= {
+		import JSONProtocolV2._
+		(new JSONPersister[TrackDataV2]).save(file)(data)
 	}
 	
-	private def convert(it:TrackDataV1):TrackData	=
-			TrackData(
+	private def convert(it:TrackDataV1):TrackDataV2	=
+			TrackDataV2(
 				annotation	= it.annotation,
 				cuePoints	= it.cuePoints,
 				rhythm		= it.raster map { jt =>

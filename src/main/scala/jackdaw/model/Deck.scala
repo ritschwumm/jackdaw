@@ -2,6 +2,8 @@ package jackdaw.model
 
 import java.io.File
 
+import jkeyfinder.Key
+
 import scutil.lang._
 import scutil.implicits._
 
@@ -12,8 +14,11 @@ import screact._
 import screact.extra._
 	
 import jackdaw.Config
-import jackdaw.audio._
+import jackdaw.range.PitchMath
 import jackdaw.data._
+import jackdaw.media.Metadata
+import jackdaw.curve.BandCurve
+import jackdaw.key._
 import jackdaw.player._
 
 import jackdaw.player.PlayerAction
@@ -78,22 +83,22 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 		val offset	= RhythmValue(steps * (Deck phaseMoveOffset fine), scale)
 		otherEmitter emit PlayerPhaseRelative(offset)
  	}
- 	
+	
  	def modifyPhase(scale:RhythmUnit, fraction:Double) {
 		val offset	= RhythmValue(fraction, scale)
 		otherEmitter emit PlayerPhaseRelative(offset)
  	}
- 	
+	
  	private def emitSetNeedSync(needSync:Boolean) {
  		otherEmitter	emit PlayerSetNeedSync(needSync)
  	}
- 	
+	
  	private def emitLooping(size:Option[LoopDef]) {
  		otherEmitter emit (
  			size cata (PlayerLoopDisable, PlayerLoopEnable)
  		)
  	}
- 	
+	
 	//------------------------------------------------------------------------------
 	//## track derivates
 
@@ -105,6 +110,8 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 	val wav:Signal[Option[File]]				= (trackWrap flatMap { it => OptionSignal(it.wav)		}).unwrap
 	val fileName:Signal[Option[String]]			= signal { track.current map	{ _.fileName				} }
 	val cuePoints:Signal[Option[ISeq[Double]]]	= signal { track.current map	{ _.cuePoints.current		} }
+	// TODO key ugly flatMap, do this like in metadata
+	val	key:Signal[Option[MusicKey]]			= signal { track.current flatMap	{ _.key.current			} }
 	val annotation:Signal[Option[String]]		= signal { track.current map	{ _.annotation.current		} }
 	val dataLoaded:Signal[Boolean]				= signal { track.current exists	{ _.dataLoaded.current		} }
 	val sampleLoaded:Signal[Boolean]			= signal { track.current exists	{ _.sampleLoaded.current	} }
@@ -134,13 +141,20 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 				}
 			}
 	
-	private val pitch	= playerFeedback map { _.pitch	}
+	private val pitch:Signal[Double]	= playerFeedback map { _.pitch	}
 	
 	/** pitch in octaves */
-	val pitchOctave	= pitch map frequency2octave
+	val pitchOctave:Signal[Double]		= pitch map frequency2octave
 	/** whether the player's pitch is non-unit */
-	val pitched		= pitch map { _ != unitFrequency }
+	val pitched:Signal[Boolean]			= pitch map { _ != unitFrequency }
 	
+	val detunedKey:Signal[Option[DetunedKey]]	=
+			signal {
+				val baseKeyOpt		= key.current
+				val semitoneOffset	= pitchOctave.current * 12
+				baseKeyOpt map { DetunedKey compile (_, semitoneOffset) }
+			}
+			
 	//------------------------------------------------------------------------------
 	//## position
 	

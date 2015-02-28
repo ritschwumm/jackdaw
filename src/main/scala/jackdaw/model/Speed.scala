@@ -9,8 +9,8 @@ import scutil.implicits._
 
 import screact._
 
-import jackdaw.audio._
-import jackdaw.audio.PitchMath._
+import jackdaw.range._
+import jackdaw.range.PitchMath._
 import jackdaw.data._
 import jackdaw.persistence._
 import jackdaw.persistence.JSONProtocol._

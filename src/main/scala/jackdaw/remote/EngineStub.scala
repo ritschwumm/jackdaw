@@ -100,7 +100,7 @@ final class EngineStub extends Logging {
 			new FeedbackSmoothing[EngineFeedback](
 				initialFeedbackRate	= outputRate.toDouble / Config.guiIntervalFrames,
 				overshotTarget		= Config.guiQueueOvershot,
-				adaptFactor			= Config.guiQueuAdaptFactor
+				adaptFactor			= Config.guiQueueAdaptFactor
 			)
 	private val feedbackTarget		= feedbackSmoothing.asTarget
 

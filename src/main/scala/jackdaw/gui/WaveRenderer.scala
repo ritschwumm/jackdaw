@@ -9,7 +9,7 @@ import scutil.implicits._
 import scutil.geom._
 import scutil.math._
 
-import jackdaw.audio.BandCurve
+import jackdaw.curve.BandCurve
 import jackdaw.util.LRU
 import jackdaw.gui.util.ImageUtil
 

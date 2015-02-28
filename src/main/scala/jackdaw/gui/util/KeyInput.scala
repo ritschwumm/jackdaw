@@ -1,4 +1,4 @@
-package jackdaw.gui.action
+package jackdaw.gui.util
 
 import java.awt.event.KeyEvent
 import javax.swing.JComponent
@@ -7,8 +7,6 @@ import javax.swing.border.Border
 import scutil.implicits._
 
 import screact._
-
-import jackdaw.gui.util._
 
 object KeyInput {
 	def focusInput(enabled:Signal[Boolean], component:JComponent, off:Border, on:Border)(implicit observing:Observing):KeyInput	= {

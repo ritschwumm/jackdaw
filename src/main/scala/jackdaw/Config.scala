@@ -6,7 +6,7 @@ import scutil.time.implicits._
 import scaudio.output._
 import scaudio.dsp.BiQuadCoeffs
 
-import jackdaw.audio.PitchMath._
+import jackdaw.range.PitchMath._
 
 object Config {
 	val guiUpdateInterval		= 40.millis
@@ -15,7 +15,7 @@ object Config {
 	val guiQueueOvershot		= 10
 	
 	// correction factor for the feedback rate
-	val guiQueuAdaptFactor		= 1.005	// 0.5%
+	val guiQueueAdaptFactor		= 1.005	// 0.5%
 	
 	// (output.rate * Config.updateTick.millis / 1000).toInt / 4
 	// how often to talk to the gui

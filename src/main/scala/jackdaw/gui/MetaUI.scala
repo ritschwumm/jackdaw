@@ -24,22 +24,24 @@ final class MetaUI(deck:Deck) extends UI {
 	private val remains		= deck.playerRemainingSeconds	map Render.secondsOpt
 	*/
 	
-	private val	bpm			= deck.beatRate			map Render.bpmOpt
-	private val	pitch		= deck.pitchOctave		map Render.cents
+	private val	bpm			= deck.beatRate		map Render.bpmOpt
+	private val	pitch		= deck.pitchOctave	map Render.cents
+	private val	key			= deck.detunedKey	map Render.detunedKeyOpt
 	
 	//------------------------------------------------------------------------------
 	//## components
 	
-	private val titleDisplay		= new MetaDisplayUI(title,		strong	= true,		start	= true)
-	private val artistDisplay		= new MetaDisplayUI(artist,		strong	= false,	start	= true)
+	private val titleDisplay		= new MetaDisplayUI(title,			strong	= true,		start	= true)
+	private val artistDisplay		= new MetaDisplayUI(artist,			strong	= false,	start	= true)
 	
-	private val locationDisplay		= new MetaDisplayUI(location,	strong	= true,		start	= false)
-	private val remainsDisplay		= new MetaDisplayUI(remains,	strong	= false,	start	= false)
+	private val locationDisplay		= new MetaDisplayUI(location,		strong	= true,		start	= false)
+	private val remainsDisplay		= new MetaDisplayUI(remains,		strong	= false,	start	= false)
 	
-	private val bpmDisplay			= new MetaDisplayUI(bpm,		strong	= true,		start	= false)
-	private val pitchDisplay		= new MetaDisplayUI(pitch,		strong	= false,	start	= false)
+	private val bpmDisplay			= new MetaDisplayUI(bpm,			strong	= true,		start	= false)
+	private val pitchDisplay		= new MetaDisplayUI(pitch,			strong	= false,	start	= false)
 	
 	private val annotationEditor	= new MetaEditUI(deck.annotation,	strong	= false)
+	private val keyDisplay			= new MetaDisplayUI(key,			strong	= false,	start	= false)
 
 	private val panel	= GridBagUI(
 		titleDisplay		pos(0,0) size(1,1) weight(1,1) fill HORIZONTAL insetsTLBR(2,4,0,4),
@@ -48,7 +50,8 @@ final class MetaUI(deck:Deck) extends UI {
 		remainsDisplay		pos(1,1) size(1,1) weight(0,1) fill HORIZONTAL insetsTLBR(0,4,0,4),
 		bpmDisplay			pos(2,0) size(1,1) weight(0,1) fill HORIZONTAL insetsTLBR(2,4,0,4),
 		pitchDisplay		pos(2,1) size(1,1) weight(0,1) fill HORIZONTAL insetsTLBR(0,4,0,4),
-		annotationEditor	pos(0,2) size(3,1) weight(1,1) fill HORIZONTAL insetsTLBR(0,4,2,4)
+		annotationEditor	pos(0,2) size(2,1) weight(1,1) fill HORIZONTAL insetsTLBR(0,4,2,4),
+		keyDisplay			pos(2,2) size(1,1) weight(0,1) fill HORIZONTAL insetsTLBR(0,4,2,4)
 	)
 	panel.component setBackground	Style.meta.background.color
 	panel.component setBorder		Style.meta.border

@@ -7,7 +7,7 @@ import scutil.lang.ISeq
 import scutil.implicits._
 import scutil.math._
 
-import jackdaw.audio.PitchMath._
+import jackdaw.range.PitchMath._
 
 object Rhythm {
 	def default(anchor:Double, measure:Double):Rhythm	=

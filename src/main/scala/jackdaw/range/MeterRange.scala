@@ -1,4 +1,4 @@
-package jackdaw.audio
+package jackdaw.range
 
 import scaudio.math._
 

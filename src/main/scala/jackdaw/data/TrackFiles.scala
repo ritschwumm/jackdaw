@@ -4,10 +4,8 @@ import java.io.File
 
 import scutil.implicits._
 
-// TODO library rename TrackFiles to LibraryItem or something like this?
-
 object TrackFiles {
-	val latest	= TrackVersion(1)
+	val latest	= TrackVersion(2)
 }
 
 case class TrackFiles(meta:File) {
@@ -16,6 +14,8 @@ case class TrackFiles(meta:File) {
 	val data:File	= dataByVersion(TrackFiles.latest)
 	
 	def dataByVersion(version:TrackVersion):File	=
-			if (version == TrackVersion(0))	meta / "data.json"
-			else							meta / s"data-v${version.value}.json"
+			version match {
+				case TrackVersion(0)	=> meta / "data.json"
+				case TrackVersion(x)	=> meta / s"data-v${x}.json"
+			}
 }

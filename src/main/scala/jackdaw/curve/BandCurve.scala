@@ -1,4 +1,4 @@
-package jackdaw.audio
+package jackdaw.curve
 
 import scala.math._
 

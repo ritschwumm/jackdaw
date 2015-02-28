@@ -8,7 +8,7 @@ import scutil.implicits._
 import screact._
 
 import jackdaw.data._
-import jackdaw.gui.action._
+import jackdaw.gui.util._
 
 object TransportUI {
 	private val maxCuePoints	= ButtonStyleFactory.digitCount

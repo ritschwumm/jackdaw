@@ -1,13 +1,13 @@
-package jackdaw.audio
+package jackdaw.range
 
 import scutil.math._
 
-object VolumeRange {
-	val max		= 1.0
+object TrimRange {
 	val min		= 0.0
-	val size	= max - min
+	val neutral	= 1.0
+	val max		= 2.0
 	
-	val alot	= max * 2 / 3
+	val size	= max - min
 	
 	def clamp(it:Double):Double	=
 			clampDouble(

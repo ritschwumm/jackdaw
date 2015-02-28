@@ -15,7 +15,7 @@ import sc2d._
 import scgeom._
 
 import jackdaw.Config
-import jackdaw.audio.BandCurve
+import jackdaw.curve.BandCurve
 import jackdaw.data._
 import jackdaw.gui.util._
 

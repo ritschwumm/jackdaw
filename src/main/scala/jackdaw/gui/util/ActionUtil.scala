@@ -1,4 +1,4 @@
-package jackdaw.gui.action
+package jackdaw.gui.util
 
 import java.awt.event.KeyEvent
 

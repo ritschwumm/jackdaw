@@ -4,7 +4,6 @@ import java.io.File
 
 import scutil.math.clampInt
 
-import jackdaw.audio.Metadata
 import jackdaw.util.Checked
 
 object Mpg123 extends Inspector with Decoder {
