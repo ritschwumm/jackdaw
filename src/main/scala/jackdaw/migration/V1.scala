@@ -13,6 +13,7 @@ import scjson._
 import scjson.serialization._
 
 import jackdaw.media.Metadata
+import jackdaw.library._
 import jackdaw.data._
 import jackdaw.persistence._
 

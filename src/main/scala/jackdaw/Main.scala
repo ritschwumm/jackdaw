@@ -13,6 +13,7 @@ import scutil.gui.CasterInstances._
 import screact._
 import screact.swing._
 
+import jackdaw.library._
 import jackdaw.model._
 import jackdaw.gui._
 
@@ -34,8 +35,7 @@ object Main extends Observing {
 	windowActiveFb observe windowActive.set
 	
 	def start() {
-		Library.cleanup()
-		Library.migrateAll()
+		Library.init()
 		
 		model.start()
 		
@@ -69,7 +69,7 @@ object Main extends Observing {
 		sys exit 0
 	}
 	
-	model.speed persist (Storage.base / "speed.json")
+	model.speed persist (Config.dataBase / "speed.json")
 	
 	start()
 }

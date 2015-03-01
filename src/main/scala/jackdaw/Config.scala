@@ -1,7 +1,8 @@
 package jackdaw
 
 import scutil.lang.ISeq
-import scutil.time.implicits._
+import scutil.implicits._
+import scutil.io.Files._
 
 import scaudio.output._
 import scaudio.dsp.BiQuadCoeffs
@@ -46,6 +47,9 @@ object Config {
 	
 	// NOTE must be greater than the number of decks
 	val curTrackCount	= 4
+	
+	// TODO use a better place on windows systems
+	val dataBase		= HOME / ".jackdaw"
 	
 	val minCacheCount	= curTrackCount * 2
 	

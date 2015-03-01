@@ -12,6 +12,7 @@ import scaudio.sample._
 import screact._
 
 import jackdaw.Config
+import jackdaw.library._
 import jackdaw.data._
 import jackdaw.media._
 import jackdaw.curve._
@@ -68,10 +69,94 @@ final class Track(val file:File) extends Observing with Logging {
 	val bandCurve:Signal[Option[BandCurve]]	= bandCurveCell.signal
 	val fullyLoaded:Signal[Boolean]			= fullyLoadedCell.signal
 	
-	private def modifyData(func:Endo[TrackData]) {
-		val modified	= func(dataCell.current)
-		dataCell set modified
-		(dataPersister save trackFiles.data)(modified)
+	//------------------------------------------------------------------------------
+	
+	val annotation	= data map { _.annotation	}
+	val cuePoints	= data map { _.cuePoints	}
+	val rhythm		= data map { _.rhythm		}
+	val metadata	= data map { _.metadata	map { _.data	} }
+	val measure		= data map { _.measure	map { _.data	} }
+	val key			= data map { _.key		map { _.data	} }
+	
+	//------------------------------------------------------------------------------
+	
+	def setAnnotation(it:String) {
+		modifyData(TrackData.L.annotation putter it)
+	}
+	
+	def addCuePoint(nearFrame:Double, rhythmUnit:RhythmUnit) {
+		val snap:Endo[Double]	=
+				rhythm.current cata (
+					identity,
+					rhythm => rhythm raster rhythmUnit round _
+				)
+		modifyData {
+			_ addCuePoint snap(nearFrame)
+		}
+	}
+	
+	def removeCuePoint(nearFrame:Double) {
+		modifyData {
+			_ removeCuePoint nearFrame
+		}
+	}
+	
+	def toogleRhythm(position:Double) {
+		updateRhythm(position, data.current.rhythm.isEmpty)
+	}
+	
+	private def updateRhythm(position:Double, activate:Boolean) {
+		val it	=
+				activate cata (
+					None,
+					detectedRhythm(position) orElse fakeRhythm(position)
+				)
+		modifyData(TrackData.L.rhythm putter it)
+	}
+	
+	private def fakeRhythm(position:Double):Option[Rhythm]	=
+			sample.current map { it =>
+				Rhythm fake (position, it.frameRate)
+			}
+			
+	private def detectedRhythm(position:Double):Option[Rhythm]	=
+			measure.current map { measure =>
+				Rhythm default (position, measure)
+			}
+	
+	def setRhythmAnchor(position:Double) {
+		modifyRhythm { _ copy (anchor=position) }
+	}
+	
+	def moveRhythmBy(offset:Double) {
+		modifyRhythm { _ moveBy offset }
+	}
+	
+	def resizeRhythmBy(factor:Double) {
+		modifyRhythm { _ resizeBy factor }
+	}
+	
+	/** changes the rhythm size so lines under the cursor move with a constant offset */
+	def resizeRhythmAt(position:Double, offset:Double) {
+		modifyRhythm { _ resizeAt (position, offset) }
+	}
+	
+	/** does not modify if the rhythm would not be useful afterwards */
+	private def modifyRhythm(func:Rhythm=>Rhythm) {
+		modifyData(TrackData.L.rhythm modifier { curr	=>
+			val valid	=
+					for {
+						base	<- curr
+						rhythm	= func(base)
+						sample	<- sample.current
+						rate	= sample.frameRate
+						beat	= rhythm.beat
+						if	beat >= rate / Config.rhythmBpsRange._2 &&
+							beat <= rate / Config.rhythmBpsRange._1
+					}
+					yield rhythm
+			valid orElse curr
+		})
 	}
 	
 	//------------------------------------------------------------------------------
@@ -82,11 +167,10 @@ final class Track(val file:File) extends Observing with Logging {
 	// NOTE using swing here is ugly
 	def load() {
 		worker {
-			Library touch trackFiles
-			Library cleanup ()
-			
 			try {
 				INFO("loading file", file)
+				
+				Library touch trackFiles
 				
 				val fileModified	= file.lastModifiedMilliInstant
 				
@@ -263,97 +347,11 @@ final class Track(val file:File) extends Observing with Logging {
 		}
 	}
 	
-	//------------------------------------------------------------------------------
-	
-	val annotation	= data map { _.annotation	}
-	val cuePoints	= data map { _.cuePoints	}
-	val rhythm		= data map { _.rhythm		}
-	val metadata	= data map { _.metadata	map { _.data	} }
-	val measure		= data map { _.measure	map { _.data	} }
-	val key			= data map { _.key		map { _.data	} }
-	
-	//------------------------------------------------------------------------------
-	
-	def setAnnotation(it:String) {
-		modifyData(TrackData.L.annotation putter it)
+	private def modifyData(func:Endo[TrackData]) {
+		val modified	= func(dataCell.current)
+		dataCell set modified
+		(dataPersister save trackFiles.data)(modified)
 	}
-	
-	def addCuePoint(nearFrame:Double, rhythmUnit:RhythmUnit) {
-		val snap:Endo[Double]	=
-				rhythm.current cata (
-					identity,
-					rhythm => rhythm raster rhythmUnit round _
-				)
-		modifyData {
-			_ addCuePoint snap(nearFrame)
-		}
-	}
-	
-	def removeCuePoint(nearFrame:Double) {
-		modifyData {
-			_ removeCuePoint nearFrame
-		}
-	}
-	
-	def toogleRhythm(position:Double) {
-		updateRhythm(position, data.current.rhythm.isEmpty)
-	}
-	
-	private def updateRhythm(position:Double, activate:Boolean) {
-		val it	=
-				activate cata (
-					None,
-					detectedRhythm(position) orElse fakeRhythm(position)
-				)
-		modifyData(TrackData.L.rhythm putter it)
-	}
-	
-	private def fakeRhythm(position:Double):Option[Rhythm]	=
-			sample.current map { it =>
-				Rhythm fake (position, it.frameRate)
-			}
-			
-	private def detectedRhythm(position:Double):Option[Rhythm]	=
-			measure.current map { measure =>
-				Rhythm default (position, measure)
-			}
-	
-	def setRhythmAnchor(position:Double) {
-		modifyRhythm { _ copy (anchor=position) }
-	}
-	
-	def moveRhythmBy(offset:Double) {
-		modifyRhythm { _ moveBy offset }
-	}
-	
-	def resizeRhythmBy(factor:Double) {
-		modifyRhythm { _ resizeBy factor }
-	}
-	
-	/** changes the rhythm size so lines under the cursor move with a constant offset */
-	def resizeRhythmAt(position:Double, offset:Double) {
-		modifyRhythm { _ resizeAt (position, offset) }
-	}
-	
-	/** does not modify if the rhythm would not be useful afterwards */
-	private def modifyRhythm(func:Rhythm=>Rhythm) {
-		modifyData(TrackData.L.rhythm modifier { curr	=>
-			val valid	=
-					for {
-						base	<- curr
-						rhythm	= func(base)
-						sample	<- sample.current
-						rate	= sample.frameRate
-						beat	= rhythm.beat
-						if	beat >= rate / Config.rhythmBpsRange._2 &&
-							beat <= rate / Config.rhythmBpsRange._1
-					}
-					yield rhythm
-			valid orElse curr
-		})
-	}
-	
-	//------------------------------------------------------------------------------
 	
 	// initialize
 	load()

@@ -2,7 +2,7 @@ package jackdaw.migration
 
 import java.io.File
 
-import jackdaw.data._
+import jackdaw.library._
 
 object Migration {
 	val all	= Vector(V1, V2)
