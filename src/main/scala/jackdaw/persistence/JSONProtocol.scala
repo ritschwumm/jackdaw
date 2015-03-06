@@ -24,10 +24,11 @@ object JSONProtocol extends FullProtocol {
 				"minor"	-> Minor
 			))
 	implicit lazy val MusicPitchF			= viaFormat(Bijector[MusicPitch])
+	implicit lazy val MusicChordF			= caseClassFormat2(MusicChord.apply,	MusicChord.unapply)
 	implicit lazy val MusicKeyF	=
 			caseClassSumFormat[MusicKey](
 				"silence"	-> caseObjectFormat(Silence),
-				"chord"		-> caseClassFormat2(Chord.apply, Chord.unapply)
+				"chord"		-> caseClassFormat1(Chord.apply, Chord.unapply)
 			)
 	implicit def StampedF[T:TypeTag:Format]	= caseClassFormat2(Stamped.apply[T],	Stamped.unapply[T])
 	implicit lazy val TrackDataF			= caseClassFormat6(TrackData.apply,		TrackData.unapply)

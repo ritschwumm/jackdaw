@@ -4,8 +4,8 @@ import scala.math._
 
 import scutil.math._
 
-object DetunedKey {
-	def compile(baseKey:MusicKey, semitoneOffset:Double):DetunedKey	= {
+case class MusicChord(root:MusicPitch, scale:MusicScale) {
+	def detuned(semitoneOffset:Double):DetunedChord	= {
 		val shift:Int		= round(semitoneOffset).toInt
 		// val small:Int	= round(moduloDouble(semitoneOffset - 0.5, 1) * 4 - 2).toInt
 		val detune:Detune	=
@@ -16,11 +16,12 @@ object DetunedKey {
 					case x if x > 0.6	=> High
 					case _				=> InTune
 				}
-		baseKey match {
-			case Chord(pitch, scale)	=> DetunedKey(Chord(pitch move shift, scale), detune)
-			case Silence				=> DetunedKey(Silence, InTune)
-		}
+		DetunedChord(
+			MusicChord(
+				root move shift,
+				scale
+			),
+			detune
+		)
 	}
 }
-
-case class DetunedKey(base:MusicKey, detune:Detune)

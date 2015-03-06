@@ -26,7 +26,7 @@ final class MetaUI(deck:Deck) extends UI {
 	
 	private val	bpm			= deck.beatRate		map Render.bpmOpt
 	private val	pitch		= deck.pitchOctave	map Render.cents
-	private val	key			= deck.detunedKey	map Render.detunedKeyOpt
+	private val	key			= deck.effectiveKey	map Render.effectiveKeyOpt
 	
 	//------------------------------------------------------------------------------
 	//## components

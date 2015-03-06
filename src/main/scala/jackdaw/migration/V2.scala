@@ -18,6 +18,8 @@ import jackdaw.data._
 import jackdaw.persistence._
 
 object V2 extends Migration with Logging {
+	import V3._
+	
 	case class TrackDataV2(
 		annotation:String,
 		cuePoints:ISeq[Double],
@@ -52,13 +54,13 @@ object V2 extends Migration with Logging {
 		JSONIO.loadFile[TrackDataV2](file)
 	}
 	
-	private def write(file:File)(data:TrackData):Unit	= {
-		import JSONProtocol._
-		(new JSONPersister[TrackData]).save(file)(data)
+	private def write(file:File)(data:TrackDataV3):Unit	= {
+		import JSONProtocolV3._
+		(new JSONPersister[TrackDataV3]).save(file)(data)
 	}
 	
-	private def convert(it:TrackDataV2):TrackData	=
-			TrackData(
+	private def convert(it:TrackDataV2):TrackDataV3	=
+			TrackDataV3(
 				annotation	= it.annotation,
 				cuePoints	= it.cuePoints,
 				rhythm		= it.rhythm,

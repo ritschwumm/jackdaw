@@ -4,14 +4,12 @@ import java.io.File
 
 import scutil.implicits._
 
-object TrackFiles {
-	val latest	= TrackVersion(2)
-}
+import jackdaw.migration.Migration
 
 case class TrackFiles(meta:File) {
 	val wav:File	= meta / "sample.wav"
 	val curve:File	= meta / "bandCurve.bin"
-	val data:File	= dataByVersion(TrackFiles.latest)
+	val data:File	= dataByVersion(Migration.latestVersion)
 	
 	def dataByVersion(version:TrackVersion):File	=
 			version match {

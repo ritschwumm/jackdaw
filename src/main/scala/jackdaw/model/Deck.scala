@@ -6,6 +6,7 @@ import jkeyfinder.Key
 
 import scutil.lang._
 import scutil.implicits._
+import scutil.log._
 
 import scaudio.sample.Sample
 import scaudio.math._
@@ -36,7 +37,7 @@ object Deck {
 }
 
 /** model for a single deck */
-final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], playerFeedback:Signal[PlayerFeedback]) extends Observing {
+final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], playerFeedback:Signal[PlayerFeedback]) extends Observing with Logging {
 	// NOTE these are set by the DeckUI
 	val track		= cell[Option[Track]](None)
 	val scratching	= cell[Option[Double]](None)
@@ -148,11 +149,16 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 	/** whether the player's pitch is non-unit */
 	val pitched:Signal[Boolean]			= pitch map { _ != unitFrequency }
 	
-	val detunedKey:Signal[Option[DetunedKey]]	=
+	// Some(None) means silence
+	val effectiveKey:Signal[Option[Option[DetunedChord]]]	=
 			signal {
 				val baseKeyOpt		= key.current
 				val semitoneOffset	= pitchOctave.current * 12
-				baseKeyOpt map { DetunedKey compile (_, semitoneOffset) }
+				baseKeyOpt map {
+					_.toMusicChordOption map {
+						_ detuned semitoneOffset
+					}
+				}
 			}
 			
 	//------------------------------------------------------------------------------
@@ -260,6 +266,13 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 	//## actions
 	
 	def loadTrack(file:File) {
+		// TODO ugly hack
+		val done	= track.current.exists { _.file ==== file }
+		if (done) {
+			INFO("rejected drop of already loaded file", file)
+			return
+		}
+		
 		setRunning(false)
 		track set (Track load file)
 	}

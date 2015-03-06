@@ -45,11 +45,13 @@ object KeyDetector {
 			if (it.isPresent) {
 				val orig	= it.get
 				Chord(
-					MusicPitch(orig.pitch.ordinal),
-					orig.mode match {
-						case Mode.MAJOR	=> Major
-						case Mode.MINOR	=> Minor
-					}
+					MusicChord(
+						MusicPitch(orig.pitch.ordinal),
+						orig.mode match {
+							case Mode.MAJOR	=> Major
+							case Mode.MINOR	=> Minor
+						}
+					)
 				)
 			}
 			else Silence
