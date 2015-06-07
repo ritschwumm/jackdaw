@@ -1,71 +1,50 @@
 package jackdaw.migration
 
-import java.io.File
-
-import reflect.runtime.universe._
+import reflect.runtime.universe.TypeTag
 
 import scutil.lang._
-import scutil.implicits._
 import scutil.time._
-import scutil.log._
 
-import scjson._
 import scjson.serialization._
 
+import jackdaw.library.TrackVersion
 import jackdaw.media.Metadata
-import jackdaw.library._
 import jackdaw.data._
-import jackdaw.persistence._
+import jackdaw.key._
 
-object V2 extends Migration with Logging {
-	import V3._
+object V2 {
+	val version	= TrackVersion(2)
 	
 	case class TrackDataV2(
 		annotation:String,
 		cuePoints:ISeq[Double],
 		rhythm:Option[Rhythm],
 		metadata:Option[Stamped[Metadata]],
-		measure:Option[Stamped[Double]]
+		measure:Option[Stamped[Double]],
+		key:Option[Stamped[MusicKeyV2]]
 	)
 	
-	object JSONProtocolV2 extends FullProtocol {
+	sealed trait MusicKeyV2
+	case object SilenceV2									extends MusicKeyV2
+	case class ChordV2(root:MusicPitch, scale:MusicScale)	extends MusicKeyV2
+	
+	object LocalProtocol extends FullProtocol {
 		implicit lazy val MilliInstantF			= viaFormat(MilliInstant.newType)
 		implicit lazy val SchemaF				= caseClassFormat2(Schema.apply,		Schema.unapply)
 		implicit lazy val RhythmF				= caseClassFormat3(Rhythm.apply,		Rhythm.unapply)
 		implicit lazy val MetadataF				= caseClassFormat3(Metadata.apply,		Metadata.unapply)
-		implicit def StampedF[T:TypeTag:Format]	= caseClassFormat2(Stamped.apply[T],	Stamped.unapply[T])
-		implicit lazy val TrackDataF			= caseClassFormat5(TrackDataV2.apply,	TrackDataV2.unapply)
-	}
-	
-	//------------------------------------------------------------------------------
-
-	val oldVersion	= TrackVersion(1)
-	val newVersion	= TrackVersion(2)
-	
-	def migrate(oldFile:File, newFile:File) {
-		read(oldFile) match {
-			case Fail(e)	=> ERROR("cannot migrate", oldFile, e)
-			case Win(x)		=> x |> convert |> write(newFile) _
-		}
-	}
-	
-	private def read(file:File):Tried[JSONInputException,TrackDataV2]	= {
-		import JSONProtocolV2._
-		JSONIO.loadFile[TrackDataV2](file)
-	}
-	
-	private def write(file:File)(data:TrackDataV3):Unit	= {
-		import JSONProtocolV3._
-		(new JSONPersister[TrackDataV3]).save(file)(data)
-	}
-	
-	private def convert(it:TrackDataV2):TrackDataV3	=
-			TrackDataV3(
-				annotation	= it.annotation,
-				cuePoints	= it.cuePoints,
-				rhythm		= it.rhythm,
-				metadata	= it.metadata,
-				measure		= it.measure,
-				key			= None
+		implicit lazy val ScaleF	=
+				enumFormat[MusicScale](ISeq(
+					"major"	-> Major,
+					"minor"	-> Minor
+				))
+		implicit lazy val MusicPitchF			= viaFormat(Bijector[MusicPitch])
+		implicit lazy val MusicKeyV2F	=
+			caseClassSumFormat[MusicKeyV2](
+				"silence"	-> caseObjectFormat(SilenceV2),
+				"chord"		-> caseClassFormat2(ChordV2.apply, ChordV2.unapply)
 			)
+		implicit def StampedF[T:TypeTag:Format]	= caseClassFormat2(Stamped.apply[T],	Stamped.unapply[T])
+		implicit lazy val TrackDataF			= caseClassFormat6(TrackDataV2.apply,	TrackDataV2.unapply)
+	}
 }

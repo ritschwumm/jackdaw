@@ -11,23 +11,24 @@ import jackdaw.library.TrackVersion
 import jackdaw.media.Metadata
 import jackdaw.data._
 
-object V1 {
-	val version	= TrackVersion(1)
+object V0 {
+	val version	= TrackVersion(0)
 	
-	case class TrackDataV1(
+	case class TrackDataV0(
 		annotation:String,
 		cuePoints:ISeq[Double],
-		rhythm:Option[Rhythm],
+		raster:Option[RhythmV0],
 		metadata:Option[Stamped[Metadata]],
 		measure:Option[Stamped[Double]]
 	)
 	
+	case class RhythmV0(anchor:Double, measure:Double, beatsPerMeasure:Int)
+	
 	object LocalProtocol extends FullProtocol {
 		implicit lazy val MilliInstantF			= viaFormat(MilliInstant.newType)
-		implicit lazy val SchemaF				= caseClassFormat2(Schema.apply,		Schema.unapply)
-		implicit lazy val RhythmF				= caseClassFormat3(Rhythm.apply,		Rhythm.unapply)
+		implicit lazy val RhythmF				= caseClassFormat3(RhythmV0.apply,		RhythmV0.unapply)
 		implicit lazy val MetadataF				= caseClassFormat3(Metadata.apply,		Metadata.unapply)
 		implicit def StampedF[T:TypeTag:Format]	= caseClassFormat2(Stamped.apply[T],	Stamped.unapply[T])
-		implicit lazy val TrackDataF			= caseClassFormat5(TrackDataV1.apply,	TrackDataV1.unapply)
+		implicit lazy val TrackDataF			= caseClassFormat5(TrackDataV0.apply,	TrackDataV0.unapply)
 	}
 }

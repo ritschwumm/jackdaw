@@ -55,18 +55,10 @@ object Library extends Logging {
 	
 	//------------------------------------------------------------------------------
 	
-	private def autoMigrate(tf:TrackFiles):Unit	= synchronized {
-		Migration.all foreach { autoMigrateStep(tf, _) }
-	}
-	
-	private def autoMigrateStep(tf:TrackFiles, migration:Migration):Unit	= {
-		val oldData	= tf dataByVersion migration.oldVersion
-		val newData	= tf dataByVersion migration.newVersion
-		if (oldData.exists && !newData.exists) {
-			INFO("migrating", oldData)
-			migration migrate (oldData, newData)
-		}
-	}
+	private def autoMigrate(tf:TrackFiles):Unit	=
+			synchronized {
+				Migration migrate tf
+			}
 	
 	/** lately modified tracks come first in the list */
 	private def cleanup(allTracks:ISeq[TrackFiles]) {
@@ -128,12 +120,7 @@ object Library extends Logging {
 							it.data
 						)
 				val migrationFiles	=
-						for {
-							migration	<- Migration.all.toSet[Migration]
-							version		<- Set(migration.oldVersion, migration.newVersion)
-							dataFile	= it dataByVersion version
-						}
-						yield dataFile
+						Migration involved it
 				(standardFiles ++ migrationFiles) exists { _.isFile }
 			}
 			

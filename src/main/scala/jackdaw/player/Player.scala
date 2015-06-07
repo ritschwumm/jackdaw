@@ -331,8 +331,14 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	// depends on metronome.beatRate, beatRate (sample&rhythm) and needSync
 	private def keepSpeedSynced() {
 		if (!hasSync)	return
+		/*
 		beatRate foreach { beatRateGot =>
 			pitch	= pitch * metronome.beatRate / beatRateGot
+			updateVelocity()
+		}
+		*/
+		rhythm foreach { rhythmGot =>
+			pitch	= metronome.beatRate * rhythmGot.beat / rate
 			updateVelocity()
 		}
 	}

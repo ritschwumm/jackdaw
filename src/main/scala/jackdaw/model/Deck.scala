@@ -109,10 +109,9 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 	val metadata:Signal[Option[Metadata]]		= (trackWrap flatMap { it => OptionSignal(it.metadata)	}).unwrap
 	val rhythm:Signal[Option[Rhythm]]			= (trackWrap flatMap { it => OptionSignal(it.rhythm)	}).unwrap
 	val wav:Signal[Option[File]]				= (trackWrap flatMap { it => OptionSignal(it.wav)		}).unwrap
+	val	key:Signal[Option[MusicKey]]			= (trackWrap flatMap { it => OptionSignal(it.key)		}).unwrap
 	val fileName:Signal[Option[String]]			= signal { track.current map	{ _.fileName				} }
 	val cuePoints:Signal[Option[ISeq[Double]]]	= signal { track.current map	{ _.cuePoints.current		} }
-	// TODO key ugly flatMap, do this like in metadata
-	val	key:Signal[Option[MusicKey]]			= signal { track.current flatMap	{ _.key.current			} }
 	val annotation:Signal[Option[String]]		= signal { track.current map	{ _.annotation.current		} }
 	val dataLoaded:Signal[Boolean]				= signal { track.current exists	{ _.dataLoaded.current		} }
 	val sampleLoaded:Signal[Boolean]			= signal { track.current exists	{ _.sampleLoaded.current	} }

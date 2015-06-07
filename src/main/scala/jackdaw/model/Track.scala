@@ -282,6 +282,7 @@ final class Track(val file:File) extends Observing with Logging {
 				edtWait { bandCurveCell set curveVal }
 				
 				// provide measure
+				// TODO can use cached much earlier, before the curve is calculated!
 				val measureVal:Option[Stamped[Double]]	=
 						dataVal.measure
 						.filter	{
