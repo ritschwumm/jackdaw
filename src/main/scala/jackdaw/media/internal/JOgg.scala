@@ -29,7 +29,7 @@ object JOgg extends Inspector with Decoder with Logging {
 				_	<- recognizeFile(input)
 				out	<-
 						withVorbisStream(input) { vorbis =>
-							DEBUG(s"reading metadata with ${name}")
+							DEBUG(so"reading metadata with ${name}")
 							val header		= vorbis.getCommentHeader
 							Win(Metadata(
 								title	= header.getTitle.guardNotNull,
@@ -47,7 +47,7 @@ object JOgg extends Inspector with Decoder with Logging {
 				_	<- recognizeFile(input)
 				_	<-
 					withVorbisStream(input) { vorbis =>
-						DEBUG(s"decoding with ${name}")
+						DEBUG(so"decoding with ${name}")
 						val header	= vorbis.getIdentificationHeader
 						for {
 							_		<-
@@ -120,7 +120,7 @@ object JOgg extends Inspector with Decoder with Logging {
 			val UIntMaxValue	= 1L<<32-1
 			
 			def writeId(it:String):Unit	= {
-				require(it.length == 4, s"tag id expected to have 4 chars, ${it} has ${it.length}")
+				require(it.length == 4, so"tag id expected to have 4 chars, ${it} has ${it.length.toString}")
 				outFile write (it getBytes us_ascii)
 			}
 			def writeInt(it:Int):Unit						= outFile write (ByteArrayUtil littleEndianInt		it)

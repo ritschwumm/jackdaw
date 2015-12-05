@@ -75,10 +75,10 @@ object BandCurve {
 }
 
 case class BandCurve(sampleRate:Double, rasterFrames:Int, chunkCount:Int, valuesFull:Array[Float], valuesLow:Array[Float], valuesMiddle:Array[Float], valuesHigh:Array[Float]) {
-	def rangeFull(start:Int, size:Int):Float 	= rangeImpl(valuesFull,		start, size)
-	def rangeLow(start:Int, size:Int):Float 	= rangeImpl(valuesLow,		start, size)
-	def rangeMiddle(start:Int, size:Int):Float	= rangeImpl(valuesMiddle,	start, size)
-	def rangeHigh(start:Int, size:Int):Float 	= rangeImpl(valuesHigh,		start, size)
+	@inline def rangeFull(start:Int, size:Int):Float 	= rangeImpl(valuesFull,		start, size)
+	@inline def rangeLow(start:Int, size:Int):Float 	= rangeImpl(valuesLow,		start, size)
+	@inline def rangeMiddle(start:Int, size:Int):Float	= rangeImpl(valuesMiddle,	start, size)
+	@inline def rangeHigh(start:Int, size:Int):Float 	= rangeImpl(valuesHigh,		start, size)
 			
 	def rangeImpl(values:Array[Float], start:Int, size:Int):Float = {
 		val	end		= start + size

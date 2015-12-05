@@ -64,7 +64,7 @@ final class EngineStub extends Logging {
 	val (outputRate, phoneEnabled)	=	
 			tcpConnection.receive() match {
 				case StartedStub(outputRate, phoneEnabled)	=> (outputRate, phoneEnabled)
-				case x										=> sys error s"unexpected message ${x}"
+				case x										=> sys error so"unexpected message ${x.toString}"
 			}
 	DEBUG("output rate", outputRate)
 	DEBUG("phone enabled", phoneEnabled)

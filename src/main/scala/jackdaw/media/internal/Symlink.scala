@@ -5,6 +5,7 @@ import java.nio.file.Path
 import java.nio.file.Files
 
 import scutil.lang._
+import scutil.implicits._
 import scutil.log._
 
 import jackdaw.util.Checked
@@ -18,7 +19,7 @@ object Symlink extends Decoder with Logging {
 				_ 	<-
 					try {
 						// TODO should ensure the wav file is compatible
-						DEBUG(s"decoding with ${name}")
+						DEBUG(so"decoding with ${name}")
 						val orig:Path	= input.toPath
 						val link:Path	= output.toPath
 						Files deleteIfExists		link
@@ -26,8 +27,8 @@ object Symlink extends Decoder with Logging {
 						Win(())
 					}
 					catch { case e:Exception =>
-						ERROR(s"${name} failed", e)
-						Checked fail1 s"${name} failed: ${e.getMessage}"
+						ERROR(so"${name} failed", e)
+						Checked fail1 so"${name} failed: ${e.getMessage}"
 					}
 			}
 			yield ()

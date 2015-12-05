@@ -72,9 +72,9 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 				
 				// clip away tileInset
 				val oldClip	= g.getClip
-				g clipRect (tilePos, 0, tileOffset, height)
-				g drawImage (tile, drawPos, y, null)
-				g  setClip oldClip
+				g	clipRect	(tilePos, 0, tileOffset, height)
+				g	drawImage	(tile, drawPos, y, null)
+				g 	setClip		oldClip
 			}
 				
 			// next tile
@@ -198,6 +198,7 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 		g drawLine	(x, bottomY-ySum, x, bottomY)
 	}
 	
+	@inline
 	private def sumColor(low:Float, middle:Float, high:Float):Color	= {
 		val max	= max3Float(low, middle, high)
 		new Color(

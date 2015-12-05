@@ -60,7 +60,7 @@ object MediaUtil extends Logging {
 				case Some(Linux) | Some(OSX)	=>
 					Checked trueWin1 (
 						(External exec Vector("which", command) result false).rc == 0,
-						s"command ${command} not available"
+						so"command ${command} not available"
 					)
 				case _ =>
 					Checked fail1 "external media converters are only supported on OSX and Linux"

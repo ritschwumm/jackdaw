@@ -136,20 +136,24 @@ final class MeterUI(value:Signal[Float], meterRange:MeterRange, vertical:Boolean
 						FillShape(active) withPaint gradient,
 						*/
 						WithClip(
-								active,
-								DrawImage(
-										activeImageCur,
-										componentBoundsCur.x.start.toInt,
-										componentBoundsCur.y.start.toInt))
+							active,
+							DrawImage(
+								activeImageCur,
+								componentBoundsCur.x.start.toInt,
+								componentBoundsCur.y.start.toInt
+							)
+						)
 					)
 				}
 			}
 	
 	private def stripeShape(bounds:SgRectangle, span:SgSpan):Shape	=
 			GeomUtil normalRectangle (
-					bounds set (
-							orientation,
-							span))
+				bounds set (
+					orientation,
+					span
+				)
+			)
 	
 	//------------------------------------------------------------------------------
 	//## wiring

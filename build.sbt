@@ -1,8 +1,8 @@
 name			:= "jackdaw"
 organization	:= "de.djini"
-version			:= "1.26.0"
+version			:= "1.27.0"
 
-scalaVersion	:= "2.11.6"
+scalaVersion	:= "2.11.7"
 scalacOptions	++= Seq(
 	"-deprecation",
 	"-unchecked",
@@ -22,14 +22,14 @@ scalacOptions	++= Seq(
 
 conflictManager	:= ConflictManager.strict
 libraryDependencies	++= Seq(
-	"de.djini"		%%	"scutil-core"	% "0.68.0"	% "compile",
-	"de.djini"		%%	"scutil-swing"	% "0.68.0"	% "compile",
-	"de.djini"		%%	"scaudio"		% "0.55.0"	% "compile",
-	"de.djini"		%%	"scjson"		% "0.73.0"	% "compile",
-	"de.djini"		%%	"screact"		% "0.76.0"	% "compile",
-	"de.djini"		%%	"scgeom"		% "0.28.0"	% "compile",
-	"de.djini"		%%	"sc2d"			% "0.21.0"	% "compile",
-	"com.twitter"	%%	"chill"			% "0.6.0"	% "compile",
+	"de.djini"		%%	"scutil-core"	% "0.74.0"	% "compile",
+	"de.djini"		%%	"scutil-swing"	% "0.74.0"	% "compile",
+	"de.djini"		%%	"scaudio"		% "0.61.0"	% "compile",
+	"de.djini"		%%	"scjson"		% "0.79.0"	% "compile",
+	"de.djini"		%%	"screact"		% "0.82.0"	% "compile",
+	"de.djini"		%%	"scgeom"		% "0.31.0"	% "compile",
+	"de.djini"		%%	"sc2d"			% "0.23.0"	% "compile",
+	"com.twitter"	%%	"chill"			% "0.7.2"	% "compile",
 	"de.djini"					% "jkeyfinder"	% "0.2.0"	% "compile",
 	"org.simplericity.macify"	% "macify"		% "1.6"		% "compile",
 	"javazoom"					% "jlayer"		% "1.0.1"	% "compile",
@@ -42,12 +42,10 @@ dependencyOverrides	++= Set(
 	"org.scala-lang"	% "scala-reflect"	% scalaVersion.value
 )
 
-enablePlugins(ScriptStartPlugin, OsxAppPlugin, CapsulePlugin)
+enablePlugins(ScriptStartPlugin, OsxAppPlugin, CapsulePlugin, BuildInfoPlugin)
 
 //------------------------------------------------------------------------------
 
-buildInfoSettings
-sourceGenerators in Compile	<+= buildInfo
 buildInfoKeys		:= Seq[BuildInfoKey](name, version)
 buildInfoPackage	:= "jackdaw"
 
@@ -84,14 +82,14 @@ val systemProperties	= Map(
 	//		"sun.java2d.trace"	-> "log"
 	
 	//	new xrender pipeline
-	//		"-Dsun.java2d.xrender=True"
+	//		"sun.java2d.xrender"	-> "True"
 	
 	//	crashes on too many systems, fbobject=false helps
-	//		"-Dsun.java2d.opengl=True",
-	//		"-Dsun.java2d.opengl.fbobject=false"
+	//		"sun.java2d.opengl"	-> "True",
+	//		"sun.java2d.opengl.fbobject"	-> "false"
 	
 	//	allows jvisualvm
-	//		"-Dcom.sun.management.jmxremote.local.only=false"
+	//		"com.sun.management.jmxremote.local.only"	-> "false"
 )
 
 // val mainClassX		= Keys.mainClass.value.get	// "jackdaw.Boot"

@@ -14,6 +14,6 @@ case class TrackFiles(meta:File) {
 	def dataByVersion(version:TrackVersion):File	=
 			version match {
 				case TrackVersion(0)	=> meta / "data.json"
-				case TrackVersion(x)	=> meta / s"data-v${x}.json"
+				case TrackVersion(x)	=> meta / so"data-v${x.toString}.json"
 			}
 }

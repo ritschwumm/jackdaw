@@ -21,15 +21,15 @@ object JLayer extends Decoder with Logging {
 				_	<- recognizeFile(input)
 				_ 	<-
 					input withInputStream { ist =>
-						DEBUG(s"decoding with ${name}")
+						DEBUG(so"decoding with ${name}")
 						
 						try {
 							new Converter convert (ist, output.getAbsolutePath, pl, null)
 							Win(())
 						}
 						catch { case e:JavaLayerException =>
-							ERROR(s"${name} failed", e)
-							Checked fail1 s"${name} failed: ${e.getMessage}"
+							ERROR(so"${name} failed", e)
+							Checked fail1 so"${name} failed: ${e.getMessage}"
 						}
 					}
 			}

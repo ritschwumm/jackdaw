@@ -79,16 +79,16 @@ object Library extends Logging {
 		// inform user
 		if (deleteTracks.nonEmpty) {
 			INFO(
-				s"cleaned library",
-				s"was ${info(allTracks)}",
-				s"kept ${info(keepTracks)}",
-				s"deleted ${info(deleteTracks)}"
+				so"cleaned library",
+				so"was ${info(allTracks)}",
+				so"kept ${info(keepTracks)}",
+				so"deleted ${info(deleteTracks)}"
 			)
 		}
 		else {
 			INFO(
-				s"library untouched",
-				s"was ${info(allTracks)}"
+				so"library untouched",
+				so"was ${info(allTracks)}"
 			)
 		}
 	}
@@ -147,7 +147,7 @@ object Library extends Logging {
 			else if (path == """\\""")				Some("UNC")
 			else if (path matches """[A-Z]:\\""")	Some(path substring (0,1))
 			else {
-				ERROR(s"unexpected root path ${path}")
+				ERROR(so"unexpected root path ${path}")
 				None
 			}
 }

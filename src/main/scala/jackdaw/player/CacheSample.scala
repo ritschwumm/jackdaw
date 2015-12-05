@@ -49,7 +49,7 @@ final class CacheSample(peer:Sample) extends Sample {
 	private val chunkSamples:Int	= chunkFrames * channelCount
 	private val chunks:Array[Chunk]	= new Array[Chunk](chunkCount)
 	
-	// println(s"buffer: ${scutil.text.Human roundedBinary chunkSamples*bufferCount*4}")
+	// println(so"buffer: ${scutil.text.Human roundedBinary chunkSamples*bufferCount*4}")
 	
 	@inline
 	private def validChannelIndex(channelIndex:Int):Boolean	=
