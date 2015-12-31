@@ -1,6 +1,6 @@
 name			:= "jackdaw"
 organization	:= "de.djini"
-version			:= "1.27.0"
+version			:= "1.28.0"
 
 scalaVersion	:= "2.11.7"
 scalacOptions	++= Seq(
@@ -42,7 +42,7 @@ dependencyOverrides	++= Set(
 	"org.scala-lang"	% "scala-reflect"	% scalaVersion.value
 )
 
-enablePlugins(ScriptStartPlugin, OsxAppPlugin, CapsulePlugin, BuildInfoPlugin)
+enablePlugins(BuildInfoPlugin, OsxAppPlugin, CapsulePlugin)
 
 //------------------------------------------------------------------------------
 
@@ -92,15 +92,6 @@ val systemProperties	= Map(
 	//		"com.sun.management.jmxremote.local.only"	-> "false"
 )
 
-// val mainClassX		= Keys.mainClass.value.get	// "jackdaw.Boot"
-	
-scriptstartConfigs	:= Seq(ScriptConfig(
-	scriptName			= name.value,
-	mainClass			= bootClass,
-	vmOptions			= vmOptions,
-	systemProperties	= systemProperties
-))
-
 // osxappBundleName		:= name.value
 osxappBundleIcons		:= baseDirectory.value / "src/main/osxapp/default.icns"
 osxappVm				:= OracleJava7()
@@ -115,7 +106,6 @@ capsuleMinJavaVersion	:= Some("1.7.0")
 capsuleMakeExecutable	:= true
 
 TaskKey[Seq[File]]("bundle")	:= Seq(
-	scriptstartZip.value,
 	osxappZip.value,
 	capsule.value
 )

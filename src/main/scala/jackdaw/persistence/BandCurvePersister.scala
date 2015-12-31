@@ -12,15 +12,15 @@ final class BandCurvePersister extends Persister[BandCurve] with Logging {
 	def load(file:File):Option[BandCurve] = {
 		try {
 			new ObjectInputStream(new FileInputStream(file)) use { in =>
-				val	sampleRate		= in.readDouble
+				val	fragmentRate	= in.readDouble
 				val	rasterFrames	= in.readInt
 				val	chunkCount		= in.readInt
-				val	valuesFull		= in.readObject.asInstanceOf[Array[Float]]
-				val	valuesLow		= in.readObject.asInstanceOf[Array[Float]]
-				val	valuesMiddle	= in.readObject.asInstanceOf[Array[Float]]
-				val	valuesHigh		= in.readObject.asInstanceOf[Array[Float]]
+				val	valuesFull		= readFloatArray(in, chunkCount)
+				val	valuesLow		= readFloatArray(in, chunkCount)
+				val	valuesMiddle	= readFloatArray(in, chunkCount)
+				val	valuesHigh		= readFloatArray(in, chunkCount)
 				Some(BandCurve(
-					sampleRate, rasterFrames, chunkCount,
+					fragmentRate, rasterFrames, chunkCount,
 					valuesFull, valuesLow, valuesMiddle, valuesHigh
 				))
 			}
@@ -34,17 +34,35 @@ final class BandCurvePersister extends Persister[BandCurve] with Logging {
 	def save(file:File)(curve:BandCurve) {
 		try {
 			new ObjectOutputStream(new FileOutputStream(file)) use { out =>
-				out writeDouble	curve.sampleRate
+				out writeDouble	curve.fragmentRate
 				out writeInt	curve.rasterFrames
 				out writeInt	curve.chunkCount
-				out writeObject	curve.valuesFull
-				out writeObject	curve.valuesLow
-				out writeObject	curve.valuesMiddle
-				out writeObject	curve.valuesHigh
+				writeFloatArray(out, curve.valuesFull)
+				writeFloatArray(out, curve.valuesLow)
+				writeFloatArray(out, curve.valuesMiddle)
+				writeFloatArray(out, curve.valuesHigh)
 			}
 		}
 		catch { case e:Exception	=>
 			ERROR("cannot marshall file: " + file, e)
+		}
+	}
+	
+	private def readFloatArray(in:ObjectInputStream, size:Int):Array[Float] = {
+		val array	= Array.ofDim[Float](size)
+		var i	= 0
+		while (i < size) {
+			array(i)	= in.readFloat
+			i	= i + 1
+		}
+		array
+	}
+	
+	private def writeFloatArray(out:ObjectOutputStream, array:Array[Float]) {
+		var i = 0
+		while (i < array.length) {
+			out writeFloat array(i)
+			i	= i + 1
 		}
 	}
 }

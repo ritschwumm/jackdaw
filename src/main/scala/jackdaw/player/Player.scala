@@ -37,13 +37,12 @@ object Player {
 	
 	// ignore small aberrations
 	private val	positionEpsilon	= 1.0E-4
-	
 	private val filterEpsilon	= 1.0E-5
 	
 	private val interpolation	= Config.sincEnabled cata (Linear, Sinc)
 	
 	// in frames
-	 val maxDistance	= interpolation overshot springPitchLimit
+	val maxDistance	= interpolation overshot springPitchLimit
 	
 	 // headFrame, fadeFrame, jump, loop
 	 val headCount		= 4

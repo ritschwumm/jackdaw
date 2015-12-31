@@ -9,6 +9,7 @@ import scala.math._
 import scutil.lang._
 import scutil.implicits._
 import scutil.geom._
+import scutil.gui.implicits._
 
 import screact._
 import sc2d._
@@ -39,6 +40,8 @@ final class WaveUI(
 	// component setBackground Style.STRONG_BACKGROUND
 	component setOpaque	true
 	component setBorder	Style.wave.border
+	
+	component setDoubleBuffered false
 	
 	// NOTE this is a def, the ImageUtil is different once the component has a parent
 	private def imageUtil	= ImageUtil forComponent component
@@ -115,6 +118,10 @@ final class WaveUI(
 			signal {
 				val decorator	= new Decorator(coords.current)
 				
+				val rollFigures:ISeq[Figure]	=
+						decorator.preRollFigure.toVector ++
+						decorator.postRollFigure.toVector
+					
 				val loopFigures:ISeq[Figure]	=
 						loop.current.toISeq flatMap decorator.loopSpanFigure
 
@@ -164,7 +171,7 @@ final class WaveUI(
 				val cuePointJumps:ISeq[Jump]	=
 						(cuePointClickables map { _._2 }).flatten
 						
-				val figures:ISeq[Figure]	= loopFigures ++ rhythmLineFigures ++ rhythmAnchorFigures ++ cuePointFigures ++ playerPositionFigures
+				val figures:ISeq[Figure]	= rollFigures ++ loopFigures ++ rhythmLineFigures ++ rhythmAnchorFigures ++ cuePointFigures ++ playerPositionFigures
 				val jumps:ISeq[Jump]		= rhythmAnchorJumps ++ cuePointJumps
 				
 				(figures, jumps)
@@ -178,6 +185,18 @@ final class WaveUI(
 			its.toISeq.flatten
 			
 	private final class Decorator(coords:Coords) {
+		def preRollFigure:Option[Figure]	=
+				coords frame2pixel 0 guardBy { _ > coords.leftX } map { before =>
+					val shape	= new Rectangle2D.Double(coords.leftX, coords.bottomY-Style.wave.roll.height, before-coords.leftX, Style.wave.roll.height)
+					FillShape(shape, Style.wave.roll.paint)
+				}
+			
+		def postRollFigure:Option[Figure]	=
+				coords frame2pixel frameCount.current guardBy { _ < coords.rightX } map { after =>
+					val shape	= new Rectangle2D.Double(after, coords.bottomY-Style.wave.roll.height, coords.rightX-after, Style.wave.roll.height)
+					FillShape(shape, Style.wave.roll.paint)
+				}
+				
 		def loopSpanFigure(loop:Span):Option[Figure]	=
 				coords span2pixelsGuarded loop map { case (startPixel, endPixel) =>
 					val shape	= spanShape(startPixel, endPixel)
@@ -344,7 +363,18 @@ final class WaveUI(
 	private val repaints:Events[ISeq[Rectangle]]	=
 			fullRepaints orElse partialRepaints
 	
-	repaints observe { _ foreach component.repaint }
+	repaints observe { _ =>
+		val g	= component.getGraphics.asInstanceOf[Graphics2D]
+		if (g ne null) {
+			val oldClip= g.getClip
+			g setClip new Rectangle(component.getSize())
+			// NOTE paintCompoment(g) works, but doesn't paint the border
+			component paint g
+			g setClip oldClip
+			Toolkit.getDefaultToolkit.sync()
+		}
+	}
+	// repaints observe { _ foreach component.repaint }
 	// completeRepaints observe { _ => component.paintImmediately(0,0,component.getWidth,component.getHeight) }
 
 	//------------------------------------------------------------------------------
@@ -357,44 +387,60 @@ final class WaveUI(
 		// g setRenderingHint (RenderingHints.KEY_COLOR_RENDERING,		RenderingHints.VALUE_COLOR_RENDER_QUALITY)
 		// g setRenderingHint (RenderingHints.KEY_ALPHA_INTERPOLATION,	RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY)
 
-		val clipBounds	= g.getClipBounds
+		val coord	= coords.current
+		// NOTE if very small the inner size might become negative
+		if (coord.goodSize) {
+			// renderToGraphics(coord, g)
+			renderUsingImage(coord, g)
+		}
+	}
+	
+	private def renderUsingImage(coord:Coords, g:Graphics2D) {
+		g drawImage (renderToImage(coord), 0, 0, null)
+	}
+	
+	private var bufferImage:BufferedImage	= null
+	
+	private def renderToImage(coord:Coords):BufferedImage	= {
+		import coord._
 		
+		if (bufferImage == null || bufferImage.getWidth != sizeX || bufferImage.getHeight != sizeY) {
+			bufferImage	= imageUtil createImage (inner.size, false)
+		}
+		bufferImage.createGraphics.asInstanceOf[Graphics2D] use { bg =>
+			renderToGraphics(coord, bg)
+		}
+		
+		bufferImage
+	}
+	
+	private def renderToGraphics(coord:Coords, bg:Graphics2D) {
+		import coord._
+		
+		/*
 		// background
+		val clipBounds	= g.getClipBounds
 		g setPaint Style.wave.background.color
 		g fill clipBounds
+		*/
 		
-		val coord	= coords.current; import coord._
+		// background
+		bg setPaint Style.wave.background.color
+		bg fillRect (leftX, topY, sizeX, sizeY)
 		
-		// NOTE if very small the inner size might become negative
-		if (goodSize) {
-			// curves
-			// val beginX	= clipBounds.x
-			// val endX	= clipBounds.x+clipBounds.width
-			for (waveRenderer <- waveRenderer.current) {
-				// g setRenderingHint (RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-				// g setRenderingHint (RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC)
-				// g setRenderingHint (RenderingHints.KEY_RENDER_QUALITY, RenderingHints.VALUE_RENDER_QUALITY)
-	
-				if (shrink)	waveRenderer drawFully		(g, inner)
-				else		waveRenderer drawPartial	(g, inner, src(leftX))
-			}
-			
-			// pre-roll
-			val before	= frame2pixel(0)
-			if (before > leftX) {
-				g setPaint Style.wave.roll.paint
-				g fillRect (leftX, bottomY-Style.wave.roll.height, before-leftX, Style.wave.roll.height)
-			}
-		
-			// post-roll
-			val after	= frame2pixel(frameCount.current)
-			if (after < rightX) {
-				g setPaint Style.wave.roll.paint
-				g fillRect (after, bottomY-Style.wave.roll.height, rightX-after, Style.wave.roll.height)
-			}
-			
-			// figures
-			figures.current foreach { _ paint g }
+		// curves
+		// val beginX	= clipBounds.x
+		// val endX	= clipBounds.x+clipBounds.width
+		for (waveRenderer <- waveRenderer.current) {
+			// g setRenderingHint (RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+			// g setRenderingHint (RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC)
+			// g setRenderingHint (RenderingHints.KEY_RENDER_QUALITY, RenderingHints.VALUE_RENDER_QUALITY)
+
+			if (shrink)	waveRenderer drawFully		(bg, inner)
+			else		waveRenderer drawPartial	(bg, inner, src(leftX))
 		}
+		
+		// figures
+		figures.current foreach { _ paint bg }
 	}
 }

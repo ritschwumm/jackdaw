@@ -11,6 +11,8 @@ import jackdaw.Config
 
 object BandCurve {
 	def calculate(sample:Sample, rasterFrames:Int):BandCurve	= {
+		val fragmentRate	= sample.frameRate / rasterFrames
+		
 		val chunkCount		= (sample.frameCount + rasterFrames - 1) / rasterFrames
 		val equalizer		= new Equalizer(Config.lowEq, Config.highEq, sample.frameRate)
 		val valuesFull		= new Array[Float](chunkCount)
@@ -63,7 +65,7 @@ object BandCurve {
 		}
 		
 		BandCurve(
-			sample.frameRate,
+			fragmentRate,
 			rasterFrames,
 			chunkCount,
 			valuesFull,
@@ -74,7 +76,7 @@ object BandCurve {
 	}
 }
 
-case class BandCurve(sampleRate:Double, rasterFrames:Int, chunkCount:Int, valuesFull:Array[Float], valuesLow:Array[Float], valuesMiddle:Array[Float], valuesHigh:Array[Float]) {
+final case class BandCurve(fragmentRate:Double, rasterFrames:Int, chunkCount:Int, valuesFull:Array[Float], valuesLow:Array[Float], valuesMiddle:Array[Float], valuesHigh:Array[Float]) {
 	@inline def rangeFull(start:Int, size:Int):Float 	= rangeImpl(valuesFull,		start, size)
 	@inline def rangeLow(start:Int, size:Int):Float 	= rangeImpl(valuesLow,		start, size)
 	@inline def rangeMiddle(start:Int, size:Int):Float	= rangeImpl(valuesMiddle,	start, size)
@@ -98,7 +100,6 @@ case class BandCurve(sampleRate:Double, rasterFrames:Int, chunkCount:Int, values
 		energyV	/ sizeR
 	}
 	
-	val fragmentRate	= sampleRate / rasterFrames
 	// NOTE this might be up to rasterFrames-1 more than the sample actually contains
 	val frameCount		= chunkCount * rasterFrames
 }
