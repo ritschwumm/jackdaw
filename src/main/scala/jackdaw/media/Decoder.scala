@@ -16,6 +16,7 @@ object Decoder {
 				Oggdec,
 				Flac,
 				Opusdec,
+				FFmpeg,
 				Avconv,
 				JLayer,
 				JOgg

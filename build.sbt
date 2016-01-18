@@ -1,6 +1,6 @@
 name			:= "jackdaw"
 organization	:= "de.djini"
-version			:= "1.28.0"
+version			:= "1.29.0"
 
 scalaVersion	:= "2.11.7"
 scalacOptions	++= Seq(

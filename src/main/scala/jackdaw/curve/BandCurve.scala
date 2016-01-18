@@ -76,7 +76,15 @@ object BandCurve {
 	}
 }
 
-final case class BandCurve(fragmentRate:Double, rasterFrames:Int, chunkCount:Int, valuesFull:Array[Float], valuesLow:Array[Float], valuesMiddle:Array[Float], valuesHigh:Array[Float]) {
+final case class BandCurve(
+	fragmentRate:Double,
+	rasterFrames:Int,
+	chunkCount:Int,
+	valuesFull:Array[Float],
+	valuesLow:Array[Float],
+	valuesMiddle:Array[Float],
+	valuesHigh:Array[Float]
+) {
 	@inline def rangeFull(start:Int, size:Int):Float 	= rangeImpl(valuesFull,		start, size)
 	@inline def rangeLow(start:Int, size:Int):Float 	= rangeImpl(valuesLow,		start, size)
 	@inline def rangeMiddle(start:Int, size:Int):Float	= rangeImpl(valuesMiddle,	start, size)

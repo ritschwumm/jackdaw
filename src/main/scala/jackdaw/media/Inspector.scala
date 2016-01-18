@@ -15,6 +15,7 @@ object Inspector {
 				Vorbiscomment,
 				Metaflac,
 				Opusinfo,
+				FFprobe,
 				Avprobe,
 				Mp3agic,
 				JOgg
