@@ -1,6 +1,6 @@
 package jackdaw.gui.util
 
-import java.awt.{ List=>AwtList, _ }
+import java.awt.{ List=>_, _ }
 import java.awt.image._
 
 import scutil.lang._

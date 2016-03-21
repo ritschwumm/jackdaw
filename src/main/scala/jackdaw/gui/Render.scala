@@ -2,9 +2,6 @@ package jackdaw.gui
 
 import java.util.Locale
 
-import jkeyfinder.Key
-import jkeyfinder.{ Render => KFRender }
-
 import scala.math._
 
 import scutil.implicits._

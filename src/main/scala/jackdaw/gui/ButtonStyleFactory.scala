@@ -1,8 +1,9 @@
 package jackdaw.gui
 
-import java.awt.{ List=>AwtList, Canvas=>AwtCanvas, _ }
+import java.awt.{ List=>_, Canvas=>_, _ }
 
 import scutil.lang.ISeq
+import scutil.lang.implicits._
 
 import scgeom._
 
@@ -27,13 +28,13 @@ object ButtonStyleFactory {
 	private val medium		= (small+big)/2
 	private val seri		= Vector(small, smallish, smallisher, medium, biggisher, biggish, big)
 	
-	private val Vector(a1,b1,c1,d1,e1,f1,g1)	= seri map { SgPoint(_, small)			}
-	private val Vector(a2,b2,c2,d2,e2,f2,g2)	= seri map { SgPoint(_, smallish)		}
-	private val Vector(a3,b3,c3,d3,e3,f3,g3)	= seri map { SgPoint(_, smallisher)		}
-	private val Vector(a4,b4,c4,d4,e4,f4,g4)	= seri map { SgPoint(_, medium)			}
-	private val Vector(a5,b5,c5,d5,e5,f5,g5)	= seri map { SgPoint(_, biggisher)		}
-	private val Vector(a6,b6,c6,d6,e6,f6,g6)	= seri map { SgPoint(_, biggish)		}
-	private val Vector(a7,b7,c7,d7,e7,f7,g7)	= seri map { SgPoint(_, big)			}
+	private val Vector(a1,b1,c1,d1,e1,f1,g1)	= seri map { SgPoint(_, small)		}
+	private val Vector(a2,b2,c2,d2,e2,f2,g2)	= seri map { SgPoint(_, smallish)	}
+	private val Vector(a3,b3,c3,d3,e3,f3,g3)	= seri map { SgPoint(_, smallisher)	}
+	private val Vector(a4,b4,c4,d4,e4,f4,g4)	= seri map { SgPoint(_, medium)		}
+	private val Vector(a5,b5,c5,d5,e5,f5,g5)	= seri map { SgPoint(_, biggisher)	}
+	private val Vector(a6,b6,c6,d6,e6,f6,g6)	= seri map { SgPoint(_, biggish)	}
+	private val Vector(a7,b7,c7,d7,e7,f7,g7)	= seri map { SgPoint(_, big)		}
 	
 	val PLAY	= outlineButtonStyle(poly(
 		draft(	a1,	g4,	a7, a1	)
@@ -158,7 +159,7 @@ object ButtonStyleFactory {
 				) ++
 				(digit map { it =>
 					StrokeShape(it, shapePaint, Style.button.label.stroke)
-				})
+				}).toVector
 			}
 	
 	// fills the inner part
@@ -171,7 +172,7 @@ object ButtonStyleFactory {
 				) ++
 				(digit map { it =>
 					StrokeShape(it, Style.button.label.color, Style.button.label.stroke)
-				})
+				}).toVector
 			}
 	
 	private def trialButtonStyle(base:Poly, state:Option[Boolean]):ButtonStyle	=

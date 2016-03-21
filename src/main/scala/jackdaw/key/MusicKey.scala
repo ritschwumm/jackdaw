@@ -9,4 +9,4 @@ sealed trait MusicKey {
 }
 
 case object Silence					extends MusicKey
-case class Chord(value:MusicChord)	extends MusicKey
+final case class Chord(value:MusicChord)	extends MusicKey

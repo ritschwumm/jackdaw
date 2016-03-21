@@ -1,7 +1,5 @@
 package jackdaw.persistence
 
-import jkeyfinder.Key
-
 import reflect.runtime.universe._
 
 import scutil.lang._

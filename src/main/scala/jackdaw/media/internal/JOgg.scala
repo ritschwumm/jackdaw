@@ -6,8 +6,6 @@ import java.io.RandomAccessFile
 import de.jarnbjo.ogg._
 import de.jarnbjo.vorbis._
 
-import scala.annotation.tailrec
-
 import scutil.lang._
 import scutil.implicits._
 import scutil.io.Charsets._

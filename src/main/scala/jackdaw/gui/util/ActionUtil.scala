@@ -1,7 +1,5 @@
 package jackdaw.gui.util
 
-import java.awt.event.KeyEvent
-
 import scutil.lang._
 import scutil.implicits._
 

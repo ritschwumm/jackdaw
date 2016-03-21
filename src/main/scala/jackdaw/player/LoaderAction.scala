@@ -8,19 +8,19 @@ import scutil.lang._
 
 sealed trait LoaderAction
 
-case class LoaderDecode(
+final case class LoaderDecode(
 	file:File,
 	done:Effect[Option[CacheSample]]
 )
 extends LoaderAction
 
-case class LoaderPreload(
+final case class LoaderPreload(
 	sample:CacheSample,
 	centerFrame:Int
 )
 extends LoaderAction
 
-case class LoaderNotifyEngine(
+final case class LoaderNotifyEngine(
 	done:Task
 )
 extends LoaderAction

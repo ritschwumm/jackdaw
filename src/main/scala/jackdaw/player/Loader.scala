@@ -8,7 +8,6 @@ import scutil.time._
 import scutil.log._
 
 import scaudio.sample._
-import scaudio.interpolation.Sinc
 
 import jackdaw.concurrent._
 

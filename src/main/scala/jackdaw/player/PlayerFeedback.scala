@@ -18,7 +18,7 @@ object PlayerFeedback {
 	)
 }
 
-case class PlayerFeedback(
+final case class PlayerFeedback(
 	running:Boolean,
 	afterEnd:Boolean,
 	position:Double,

@@ -22,7 +22,7 @@ object TrackData {
 	val L	= Lenser[TrackData]
 }
 
-case class TrackData(
+final case class TrackData(
 	annotation:String,
 	cuePoints:ISeq[Double],
 	rhythm:Option[Rhythm],

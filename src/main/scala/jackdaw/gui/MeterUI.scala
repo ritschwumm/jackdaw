@@ -1,6 +1,6 @@
 package jackdaw.gui
 
-import java.awt.{ List=>AwtList, Canvas=>JCanvas, _ }
+import java.awt.{ List=>_, Canvas=>_, _ }
 import javax.swing._
 import java.awt.image._
 

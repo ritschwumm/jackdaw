@@ -1,6 +1,6 @@
 package jackdaw.model
 
-import screact.{ Engine => REngine, _ }
+import screact.{ Engine => _, _ }
 import screact.swing._
 
 import jackdaw.Config

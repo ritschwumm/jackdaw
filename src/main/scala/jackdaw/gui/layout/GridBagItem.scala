@@ -10,7 +10,7 @@ object GridBagItem {
 	implicit def UI_is_GridBagItem[T<%UI](ui:T):GridBagItem	= GridBagItem(ui, GBC)
 }
 
-case class GridBagItem(ui:UI, gbc:GridBagConstraints) {
+final case class GridBagItem(ui:UI, gbc:GridBagConstraints) {
 	def pos(x:GridBagConstraintsPosition, y:GridBagConstraintsPosition):GridBagItem	= constrain(_ pos			(x,y))
 		
 	def size(x:GridBagConstraintsSize, y:GridBagConstraintsSize):GridBagItem		= constrain(_ size			(x,y))

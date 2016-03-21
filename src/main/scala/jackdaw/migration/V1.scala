@@ -14,7 +14,7 @@ import jackdaw.data._
 object V1 {
 	val version	= TrackVersion(1)
 	
-	case class TrackDataV1(
+	final case class TrackDataV1(
 		annotation:String,
 		cuePoints:ISeq[Double],
 		rhythm:Option[Rhythm],

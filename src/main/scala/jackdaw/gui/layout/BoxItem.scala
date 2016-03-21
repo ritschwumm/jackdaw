@@ -6,6 +6,6 @@ object BoxItem {
 
 sealed trait BoxItem
 
-case class BoxComponent(ui:UI)	extends BoxItem
-case class BoxStrut(size:Int)	extends BoxItem
+final case class BoxComponent(ui:UI)	extends BoxItem
+final case class BoxStrut(size:Int)	extends BoxItem
 case object BoxGlue				extends BoxItem

@@ -135,7 +135,7 @@ object Library extends Logging {
 			.selfAndParentChain
 			.reverse
 			.zipWithIndex
-			.flatMap { case (file, index) =>
+			.collapseMap { case (file, index) =>
 				val name	= file.getName.guardNonEmpty
 				if (index == 0)	name orElse prefixPath(file.getPath)
 				else			name

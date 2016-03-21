@@ -1,12 +1,8 @@
 package jackdaw.migration
 
-import java.io.File
-
 import scutil.lang._
 
 import scjson._
-
-import jackdaw.media.Metadata
 
 object V1toV2 extends Migration {
 	import V1._

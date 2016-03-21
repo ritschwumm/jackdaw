@@ -1,3 +1,3 @@
 package jackdaw.key
 
-case class DetunedChord(chord:MusicChord, detune:Detune)
+final case class DetunedChord(chord:MusicChord, detune:Detune)

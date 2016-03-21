@@ -3,7 +3,6 @@ package jackdaw.media
 import java.io.File
 
 import javazoom.jl.decoder._
-import javazoom.jl.decoder.Decoder.{ Params => DecoderParams }
 import javazoom.jl.converter._
 import javazoom.jl.converter.Converter.{ ProgressListener => ConverterProgressListener }
 

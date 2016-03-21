@@ -2,7 +2,6 @@ package jackdaw.gui
 
 import javax.swing._
 import java.awt.event._
-import java.util.Locale
 
 import scutil.implicits._
 import scutil.gui.implicits._

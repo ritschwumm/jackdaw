@@ -4,7 +4,6 @@ import java.util.Optional
 import jkeyfinder._
 
 import scaudio.sample._
-import scaudio.interpolation.Sinc
 
 object KeyDetector {
 	private val scaling	= 8

@@ -2,6 +2,8 @@ package jackdaw.model
 
 import java.io.File
 
+import scala.ref.WeakReference
+
 import scutil.lang._
 import scutil.implicits._
 import scutil.gui.SwingUtil._
@@ -19,36 +21,43 @@ import jackdaw.curve._
 import jackdaw.key._
 import jackdaw.persistence._
 import jackdaw.persistence.JSONProtocol._
-import jackdaw.util.LRU
 
-/** a loaded audio File with all its meta data */
 object Track extends Logging {
-	private val lru	=
-			new LRU[File,Track](
-				Config.curTrackCount,
-				new Track(_),
-				_.load()
-			)
-			
+	private var cache:Map[File,WeakReference[Track]]	= Map.empty
+	
+	private def insert(file:File, track:Track) {
+		cache	=
+				(cache filter { case (_, ref) => ref.get.isDefined }) +
+				(file -> WeakReference(track))
+	}
+	
+	// NOTE different Track instances for the same File would be fatal
 	def load(file:File):Option[Track]	=
+			file.getCanonicalFile into { canon =>
+				cache get canon flatMap { _.get } orElse {
+					loadImpl(canon) doto {
+						_ foreach { track =>
+							insert(canon, track)
+						}
+					}
+				}
+			}
+			
+	private def loadImpl(file:File):Option[Track]	=
 			try {
-				// NOTE different Track objects for the same File would be fatal
-				Some(lru load file.getCanonicalFile)
+				Some(new Track(file) doto { _.load() })
 			}
 			catch { case e:Exception	=>
 				ERROR(e)
 				None
 			}
-	
-	def dispose() {
-		lru.dispose()
-	}
 			
 	private val preferredFrameRate		= Config.outputConfig.rate
 	private val preferredChannelCount	= 2
 }
 
-final class Track(val file:File) extends Observing with Logging {
+/** a loaded audio File with all its meta data */
+final class Track private(val file:File) extends Observing with Logging {
 	val fileName	= file.getName
 	
 	private val trackFiles	= Library trackFilesFor file
@@ -353,7 +362,4 @@ final class Track(val file:File) extends Observing with Logging {
 		dataCell set modified
 		(dataPersister save trackFiles.data)(modified)
 	}
-	
-	// initialize
-	load()
 }

@@ -15,7 +15,7 @@ import jackdaw.key._
 object V2 {
 	val version	= TrackVersion(2)
 	
-	case class TrackDataV2(
+	final case class TrackDataV2(
 		annotation:String,
 		cuePoints:ISeq[Double],
 		rhythm:Option[Rhythm],
@@ -25,8 +25,8 @@ object V2 {
 	)
 	
 	sealed trait MusicKeyV2
-	case object SilenceV2									extends MusicKeyV2
-	case class ChordV2(root:MusicPitch, scale:MusicScale)	extends MusicKeyV2
+	case object SilenceV2										extends MusicKeyV2
+	final case class ChordV2(root:MusicPitch, scale:MusicScale)	extends MusicKeyV2
 	
 	object LocalProtocol extends FullProtocol {
 		implicit lazy val MilliInstantF			= viaFormat(MilliInstant.newType)

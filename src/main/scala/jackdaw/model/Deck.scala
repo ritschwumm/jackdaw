@@ -2,8 +2,6 @@ package jackdaw.model
 
 import java.io.File
 
-import jkeyfinder.Key
-
 import scutil.lang._
 import scutil.implicits._
 import scutil.log._
@@ -39,9 +37,11 @@ object Deck {
 /** model for a single deck */
 final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], playerFeedback:Signal[PlayerFeedback]) extends Observing with Logging {
 	// NOTE these are set by the DeckUI
-	val track		= cell[Option[Track]](None)
 	val scratching	= cell[Option[Double]](None)
 	val dragging	= cell[Option[(Boolean,Boolean)]](None)
+	
+	private val track	= cell[Option[Track]](None)
+	val trackSignal		= track.signal
 	
 	//------------------------------------------------------------------------------
 	//## internal emitters

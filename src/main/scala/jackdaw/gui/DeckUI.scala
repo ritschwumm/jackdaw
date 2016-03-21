@@ -313,6 +313,6 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 	
 	DndFileExport install (
 		component,
-		_ => deck.track.current map { it => Nes single it.file }
+		_ => deck.trackSignal.current map { it => Nes single it.file }
 	)
 }

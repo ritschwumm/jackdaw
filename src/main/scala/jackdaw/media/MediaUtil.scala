@@ -1,6 +1,5 @@
 package jackdaw.media
 
-import java.lang.{ Iterable => JIterable }
 import java.io.File
 
 import scala.util.matching.Regex
@@ -17,7 +16,7 @@ object MediaUtil extends Logging {
 	def worker[S,T](all:ISeq[S], name:S=>String, work:S=>Checked[T]):Option[T] = {
 		type Outcome	= Tried[ISeq[Group],T]
 		
-		case class Group(worker:String, messages:Nes[String])
+		final case class Group(worker:String, messages:Nes[String])
 		
 		val start:Outcome	= Fail(ISeq.empty[Group])
 		val outcome:Outcome	=
@@ -87,5 +86,5 @@ object MediaUtil extends Logging {
 	//------------------------------------------------------------------------------
 	
 	def extractFrom(lines:ISeq[String]):Regex=>Option[String]	=
-			lines collapseFirst _.unapplySeq flatMap { _.headOption }
+			lines collapseMapFirst _.unapplySeq flatMap { _.headOption }
 }

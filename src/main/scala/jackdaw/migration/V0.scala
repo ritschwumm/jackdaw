@@ -14,7 +14,7 @@ import jackdaw.data._
 object V0 {
 	val version	= TrackVersion(0)
 	
-	case class TrackDataV0(
+	final case class TrackDataV0(
 		annotation:String,
 		cuePoints:ISeq[Double],
 		raster:Option[RhythmV0],
@@ -22,7 +22,7 @@ object V0 {
 		measure:Option[Stamped[Double]]
 	)
 	
-	case class RhythmV0(anchor:Double, measure:Double, beatsPerMeasure:Int)
+	final case class RhythmV0(anchor:Double, measure:Double, beatsPerMeasure:Int)
 	
 	object LocalProtocol extends FullProtocol {
 		implicit lazy val MilliInstantF			= viaFormat(MilliInstant.newType)

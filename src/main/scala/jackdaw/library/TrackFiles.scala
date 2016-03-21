@@ -6,7 +6,7 @@ import scutil.implicits._
 
 import jackdaw.migration.Migration
 
-case class TrackFiles(meta:File) {
+final case class TrackFiles(meta:File) {
 	val wav:File	= meta / "sample.wav"
 	val curve:File	= meta / "bandCurve2.bin"
 	val data:File	= dataByVersion(Migration.latestVersion)

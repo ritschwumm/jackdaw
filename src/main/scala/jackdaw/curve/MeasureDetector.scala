@@ -1,8 +1,5 @@
 package jackdaw.curve
 
-import java.io.File
-import java.nio.charset.Charset
-
 import scala.math._
 
 object MeasureDetector {

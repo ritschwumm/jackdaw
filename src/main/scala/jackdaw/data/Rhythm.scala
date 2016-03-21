@@ -27,7 +27,7 @@ object Rhythm {
 }
 
 // BETTER use BigFraction here?
-case class Rhythm(anchor:Double, measure:Double, schema:Schema) {
+final case class Rhythm(anchor:Double, measure:Double, schema:Schema) {
 	val beat	= measure / schema.beatsPerMeasure
 	val phrase	= measure * schema.measuresPerPhrase
 	

@@ -4,7 +4,7 @@ import scala.math._
 
 import scutil.math._
 
-case class MusicChord(root:MusicPitch, scale:MusicScale) {
+final case class MusicChord(root:MusicPitch, scale:MusicScale) {
 	def detuned(semitoneOffset:Double):DetunedChord	= {
 		val shift:Int		= round(semitoneOffset).toInt
 		// val small:Int	= round(moduloDouble(semitoneOffset - 0.5, 1) * 4 - 2).toInt

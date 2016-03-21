@@ -1,13 +1,11 @@
 package jackdaw
 
-import java.io.File
 import java.awt._
 import javax.swing._
 
 import org.simplericity.macify.eawt._
 
 import scutil.implicits._
-import scutil.log.Logging
 import scutil.gui.CasterInstances._
 
 import screact._
@@ -62,7 +60,6 @@ object Main extends Observing {
 	
 	private def dispose() {
 		model.dispose()
-		Track.dispose()
 		frame.dispose()
 		
 		// TODO ugly, but Main$ is referenced from Thread#contextClassLoader and there are some additional GC roots still alive in swing

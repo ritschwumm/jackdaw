@@ -4,7 +4,7 @@ import scutil.lang._
 
 sealed trait LoaderFeedback
 
-case class LoaderExecute(
+final case class LoaderExecute(
 	task:Task
 )
 extends LoaderFeedback

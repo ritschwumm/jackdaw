@@ -1,6 +1,6 @@
 package jackdaw.gui.util
 
-import java.awt.{ List=>AwtList, Canvas=>AwtCanvas, _ }
+import java.awt.{ List=>_, Canvas=>_, _ }
 
 import scutil.lang.ISeq
 

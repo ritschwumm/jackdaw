@@ -1,6 +1,6 @@
 package jackdaw.gui
 
-import java.awt.{ List=>AwtList, _ }
+import java.awt.{ List=>_, _ }
 import javax.swing._
 
 /** used to break cycles between UI components */

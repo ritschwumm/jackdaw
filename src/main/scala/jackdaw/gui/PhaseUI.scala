@@ -74,7 +74,7 @@ final class PhaseUI(value:Signal[Option[Double]], rhythm:Signal[Option[Rhythm]])
 				
 				val lines	=
 						for {
-							rhythm		<- rhythmCur.toSeq
+							rhythm		<- rhythmCur.toISeq
 							subRaster	= rhythm.schema.beatsPerMeasure * PhaseUI.subDivide
 							max			= (subRaster - 1) / 2
 							index		<- -max to +max

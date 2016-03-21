@@ -43,17 +43,11 @@ object Config {
 	
 	val curveRaster		= 256
 	
-	// TODO rethink these
-	
-	// NOTE must be greater than the number of decks
-	val curTrackCount	= 4
-	
 	// TODO use a better place on windows systems
 	val dataBase		= HOME / ".jackdaw"
 	
-	val minCacheCount	= curTrackCount * 2
-	
-	require(minCacheCount > curTrackCount)
+	// at least the number of decks
+	val minCacheCount	= 3
 	
 	val maxCacheSize	= 10 * 1024L * 1024L * 1024L	// 10 gig
 }

@@ -5,7 +5,7 @@ object Schema {
 	val default:Schema	= Schema(4, 4)
 }
 
-case class Schema(measuresPerPhrase:Int, beatsPerMeasure:Int) {
+final case class Schema(measuresPerPhrase:Int, beatsPerMeasure:Int) {
 	val beatsPerPhrase:Int		= beatsPerMeasure * measuresPerPhrase
 	
 	/*

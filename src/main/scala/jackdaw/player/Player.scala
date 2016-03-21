@@ -503,10 +503,13 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	}
 	
 	private def enterJump() {
-		if (!jumpProgress && jumpLater.isDefined) {
-			jumpLater.get.apply()
-			jumpProgress	= true
-			jumpLater		= None
+		if (!jumpProgress) {
+			// TODO dewart slow
+			jumpLater foreach { it =>
+				it.apply()
+				jumpProgress	= true
+				jumpLater		= None
+			}
 		}
 	}
 	
@@ -527,8 +530,9 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		}
 		
 		// TODO fade only send when loopSpan changes
-		if (loopSpan.isDefined) {
-			loaderPreload(loopSpan.get.start)
+		// TODO dewart slow
+		loopSpan foreach { it =>
+			loaderPreload(it.start)
 		}
 	}
 	
@@ -537,8 +541,9 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	}
 
 	private def loaderPreload(centerFrame:Double) {
-		if (sample.isDefined) {
-			loaderTarget send LoaderPreload(sample.get, centerFrame.toInt)
+		// TODO dewart slow
+		sample foreach { it =>
+			loaderTarget send LoaderPreload(it, centerFrame.toInt)
 		}
 	}
 	
@@ -569,8 +574,9 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	}
 	
 	private def registerFadeImpl(fade:Fade) {
-		if (fadeLater.isDefined) {
-			fadeLater.get.cancel()
+		// TODO dewart slow
+		fadeLater foreach {
+			_.cancel()
 		}
 		fadeLater	= Some(fade)
 	}
@@ -589,11 +595,14 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	
 	@inline
 	private def enterFade() {
-		if (!fadeProgress && fadeLater.isDefined) {
-			// this calls back to startFade
-			fadeLater.get.execute()
-			fadeProgress	= true
-			fadeLater		= None
+		if (!fadeProgress) {
+			// TODO dewart slow
+			fadeLater foreach { it =>
+				// this calls back to startFade
+				it.execute()
+				fadeProgress	= true
+				fadeLater		= None
+			}
 		}
 	}
 	
@@ -653,21 +662,23 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	
 	private def moveInLoop(offset:Double) {
 		val rawFrame	= headFrame + offset
+		// TODO dewart slow
 		val newFrame	=
-				if (loopSpan.isDefined) {
-					val loopGot	= loopSpan.get
-					if (loopGot contains headFrame) {
-						loopGot lock rawFrame
-					}
-					else rawFrame
+				loopSpan match {
+					case Some(loopGot) =>
+						if (loopGot contains headFrame) {
+							loopGot lock rawFrame
+						}
+						else rawFrame
+					case None	=>
+						rawFrame
 				}
-				else rawFrame
 		startFade(newFrame)
 	}
 	
 	private def jumpBackAfterLoopEnd(oldFrame:Double) {
-		if (loopSpan.isDefined) {
-			val loopGot	= loopSpan.get
+		// TODO dewart slow
+		loopSpan foreach { loopGot =>
 			val loopEnd	= loopGot.end
 			if (oldFrame < loopEnd && headFrame >= loopEnd) {
 				registerSimpleFade {

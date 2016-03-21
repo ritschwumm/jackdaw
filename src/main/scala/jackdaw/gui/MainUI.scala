@@ -3,8 +3,6 @@ package jackdaw.gui
 import javax.swing._
 
 import scutil.gui.GridBagDSL._
-import scutil.gui.GlobalKeyEvent
-import scutil.gui.GlobalAWTEvent
 
 import screact._
 

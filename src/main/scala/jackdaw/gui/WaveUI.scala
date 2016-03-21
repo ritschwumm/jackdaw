@@ -1,6 +1,6 @@
 package jackdaw.gui
 
-import java.awt.{ List=>AwtList, _ }
+import java.awt.{ List=>_, _ }
 import java.awt.geom._
 import java.awt.image.BufferedImage
 
@@ -123,7 +123,7 @@ final class WaveUI(
 						decorator.postRollFigure.toVector
 					
 				val loopFigures:ISeq[Figure]	=
-						loop.current.toISeq flatMap decorator.loopSpanFigure
+						loop.current.toISeq collapseMap decorator.loopSpanFigure
 
 				val playerPositionFigures:ISeq[Figure]	=
 						(decorator positionLineFigure playerPosition.current).toISeq
@@ -137,14 +137,14 @@ final class WaveUI(
 										case Measure	=> decorator triangleBoppelFigure	frame
 										case Beat		=> None
 									}
-							flatSeq(line, boppel)
+							flatSeq(line.toVector, boppel.toVector)
 						}
 						
 				val rhythmAnchorClickables:Option[(ISeq[Figure],Option[Jump])]	=
 						rhythmAnchor.current map { frame =>
 							val line	= decorator markerLineFigure		frame
 							val boppel	= decorator rectangleBoppelFigure	frame
-							val figures	= flatSeq(line, boppel)
+							val figures	= flatSeq(line.toVector, boppel.toVector)
 							val action	= boppel map { _ -> frame }
 							(figures, action)
 						}
@@ -153,14 +153,14 @@ final class WaveUI(
 						(rhythmAnchorClickables map { _._1 }).flattenMany
 					
 				val rhythmAnchorJumps:ISeq[Jump]	=
-						(rhythmAnchorClickables map { _._2 }).toISeq.flatten
+						(rhythmAnchorClickables map { _._2 }).flatten.toISeq
 						
 				val cuePointClickables:ISeq[(ISeq[Figure],Option[Jump])]	=
 						cuePoints.current.zipWithIndex map { case (frame, index) =>
 							val line	= decorator markerLineFigure		frame
 							val boppel	= decorator rectangleBoppelFigure	frame
 							val label	= decorator numberLabelFigure		(frame, index)
-							val figures	= flatSeq(line, boppel, label)
+							val figures	= flatSeq(line.toVector, boppel.toVector, label.toVector)
 							val action	= boppel map { _ -> frame }
 							(figures, action)
 						}
@@ -169,7 +169,7 @@ final class WaveUI(
 						(cuePointClickables map { _._1 }).flatten
 					
 				val cuePointJumps:ISeq[Jump]	=
-						(cuePointClickables map { _._2 }).flatten
+						(cuePointClickables map { _._2 }).collapse
 						
 				val figures:ISeq[Figure]	= rollFigures ++ loopFigures ++ rhythmLineFigures ++ rhythmAnchorFigures ++ cuePointFigures ++ playerPositionFigures
 				val jumps:ISeq[Jump]		= rhythmAnchorJumps ++ cuePointJumps
@@ -181,7 +181,7 @@ final class WaveUI(
 	typed[Signal[ISeq[Figure]]](figures)
 	typed[Signal[ISeq[Jump]]](jumps)
 			
-	private def flatSeq[T](its:Iterable[T]*):ISeq[T]	=
+	private def flatSeq[T](its:ISeq[T]*):ISeq[T]	=
 			its.toISeq.flatten
 			
 	private final class Decorator(coords:Coords) {
@@ -329,7 +329,7 @@ final class WaveUI(
 	
 	private val jumpFlag:Events[Double]	=
 			((mouse.leftPress snapshotWith jumps) { (ev, jumps) =>
-				jumps collapseFirst { case (figure, frame) =>
+				jumps collapseMapFirst { case (figure, frame) =>
 					figure pick ev.getPoint guard frame
 				}
 			})

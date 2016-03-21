@@ -9,7 +9,7 @@ object EngineFeedback {
 	)
 }
 
-case class EngineFeedback(
+final case class EngineFeedback(
 	masterPeak:Float,
 	player1:PlayerFeedback,
 	player2:PlayerFeedback,
