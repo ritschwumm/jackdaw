@@ -8,8 +8,12 @@ final class TcpServer {
 	val port	= serverSocket.getLocalPort
 	
 	// TODO needs proper exception checks
-	def connect():TcpConnection	= {
-		val connection	= new TcpConnection(serverSocket.accept())
+	def connect():TcpConnection[ToStub,ToSkeleton]	= {
+		val connection	= new TcpConnection[ToStub,ToSkeleton](
+			serverSocket.accept(),
+			(input:Input)					=> input.readToStub(),
+			(output:Output, it:ToSkeleton)	=> output.writeToSkeleton(it) 
+		)
 		serverSocket.close()
 		connection
 	}

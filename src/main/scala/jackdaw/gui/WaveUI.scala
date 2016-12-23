@@ -72,7 +72,7 @@ final class WaveUI(
 				new Coords(innerRect.current, zoom.current, frameOrigin.current)
 			}
 	
-	private final case class Coords(val inner:IntRect, zoomFactor:Double, frameOrig:Double) {
+	private sealed case class Coords(val inner:IntRect, zoomFactor:Double, frameOrig:Double) {
 		val leftX	= inner.x.start
 		val rightX	= inner.x.end
 		val topY	= inner.y.start

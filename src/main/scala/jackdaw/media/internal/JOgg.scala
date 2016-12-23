@@ -8,6 +8,7 @@ import de.jarnbjo.vorbis._
 
 import scutil.base.implicits._
 import scutil.core.implicits._
+import scutil.lang.tc.Resource
 import scutil.lang._
 import scutil.lang.Charsets._
 import scutil.bit.ByteArrayUtil
@@ -18,8 +19,7 @@ import jackdaw.util.Checked
 object JOgg extends Inspector with Decoder with Logging {
 	def name	= "j-ogg"
 	
-	private implicit def PhysicalOggStreamIsDisposable(physical:PhysicalOggStream):Disposable	=
-			disposable { physical.close() }
+	private implicit val FileStreamResource:Resource[FileStream]	= Resource by (_.close())
 		
 	private type BufferWriter	= (Array[Byte], Int) => Unit
 	

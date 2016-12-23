@@ -62,7 +62,7 @@ object Main extends Observing {
 		model.dispose()
 		frame.dispose()
 		
-		// TODO ugly, but Main$ is referenced from Thread#contextClassLoader and there are some additional GC roots still alive in swing
+		// NOTE ugly, but necessary because Main$ is referenced from Thread#contextClassLoader and there are some additional GC roots still alive in swing
 		sys exit 0
 	}
 	

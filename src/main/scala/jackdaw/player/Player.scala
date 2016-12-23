@@ -504,7 +504,6 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	
 	private def enterJump() {
 		if (!jumpProgress) {
-			// TODO dewart slow
 			jumpLater foreach { it =>
 				it.apply()
 				jumpProgress	= true
@@ -530,7 +529,6 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		}
 		
 		// TODO fade only send when loopSpan changes
-		// TODO dewart slow
 		loopSpan foreach { it =>
 			loaderPreload(it.start)
 		}
@@ -541,7 +539,6 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	}
 
 	private def loaderPreload(centerFrame:Double) {
-		// TODO dewart slow
 		sample foreach { it =>
 			loaderTarget send LoaderPreload(it, centerFrame.toInt)
 		}
@@ -574,7 +571,6 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	}
 	
 	private def registerFadeImpl(fade:Fade) {
-		// TODO dewart slow
 		fadeLater foreach {
 			_.cancel()
 		}
@@ -596,7 +592,6 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	@inline
 	private def enterFade() {
 		if (!fadeProgress) {
-			// TODO dewart slow
 			fadeLater foreach { it =>
 				// this calls back to startFade
 				it.execute()
@@ -662,7 +657,6 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	
 	private def moveInLoop(offset:Double) {
 		val rawFrame	= headFrame + offset
-		// TODO dewart slow
 		val newFrame	=
 				loopSpan match {
 					case Some(loopGot) =>
@@ -677,7 +671,6 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	}
 	
 	private def jumpBackAfterLoopEnd(oldFrame:Double) {
-		// TODO dewart slow
 		loopSpan foreach { loopGot =>
 			val loopEnd	= loopGot.end
 			if (oldFrame < loopEnd && headFrame >= loopEnd) {

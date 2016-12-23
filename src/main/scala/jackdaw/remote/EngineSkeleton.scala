@@ -34,7 +34,7 @@ final class EngineSkeleton(port:Int) extends Logging {
 			
 	private val engine			= new Engine(sender)
 	private val tcpClient		= new TcpClient(port)
-	private val tcpConnection	= tcpClient.connect()
+	private val tcpConnection:TcpConnection[ToSkeleton,ToStub]	= tcpClient.connect()
 	
 	def start() {
 		DEBUG("starting")
@@ -71,11 +71,10 @@ final class EngineSkeleton(port:Int) extends Logging {
 				tcpConnection.receive() match {
 					case KillSkeleton			=> die();							false
 					case SendSkeleton(action)	=> engine enqueueAction action;		true
-					case x						=> ERROR("unexpected message", x);	false
 				}
 			}
 			catch { case e:Exception =>
-				ERROR("parent (stub) died unexpectedly, commiting suicide")
+				ERROR("parent (stub) died unexpectedly, commiting suicide", e)
 				sys exit 1
 				nothing
 			}

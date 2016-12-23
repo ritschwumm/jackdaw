@@ -2,12 +2,12 @@ package jackdaw
 
 import scutil.core.implicits._
 import scutil.lang.ISeq
-import scutil.platform._
 
 import scaudio.output._
 import scaudio.dsp.BiQuadCoeffs
 
 import jackdaw.range.PitchMath._
+import jackdaw.util.AppDirs
 
 object Config {
 	val guiUpdateInterval		= 40.millis
@@ -43,8 +43,7 @@ object Config {
 	
 	val curveRaster		= 256
 	
-	// TODO use a better place on windows systems
-	val dataBase		= Platform.homeDir / ".jackdaw"
+	val dataBase		= AppDirs forApp "jackdaw"
 	
 	// at least the number of decks
 	val minCacheCount	= 3

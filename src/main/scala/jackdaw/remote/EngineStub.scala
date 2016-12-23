@@ -2,8 +2,8 @@ package jackdaw.remote
 
 import java.io._
 
-import scutil.base.implicits._
 import scutil.core.implicits._
+import scutil.base.implicits._
 import scutil.lang._
 import scutil.platform._
 import scutil.log._
@@ -61,11 +61,11 @@ final class EngineStub extends Logging {
 	private val process			= builder.start()
 	
 	DEBUG("initializing communication")
-	private val tcpConnection	= tcpServer.connect()
+	private val tcpConnection:TcpConnection[ToStub,ToSkeleton]	= tcpServer.connect()
 	val (outputRate, phoneEnabled)	=	
 			tcpConnection.receive() match {
 				case StartedStub(outputRate, phoneEnabled)	=> (outputRate, phoneEnabled)
-				case x										=> sys error so"unexpected message ${x.toString}"
+				case x@SendStub(_)							=> sys error so"unexpected message ${x.toString}"
 			}
 	DEBUG("output rate", outputRate)
 	DEBUG("phone enabled", phoneEnabled)
@@ -126,8 +126,8 @@ final class EngineStub extends Logging {
 	private def receiveAndAct():Boolean	=
 			try {
 				tcpConnection.receive() match {
-					case SendStub(feedback)	=> feedbackTarget send feedback;	true
-					case x					=> ERROR("unexpected message", x);	false
+					case SendStub(feedback)		=> feedbackTarget send feedback;	true
+					case x@StartedStub(_, _)	=> ERROR("unexpected message", x);	false
 				}
 			}
 			catch { case e:Exception =>

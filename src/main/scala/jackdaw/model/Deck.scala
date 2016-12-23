@@ -266,7 +266,7 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 	//## actions
 	
 	def loadTrack(file:File) {
-		// TODO ugly hack
+		// NOTE ugly hack
 		val done	= track.current.exists { _.file ==== file }
 		if (done) {
 			INFO("rejected drop of already loaded file", file)
@@ -322,7 +322,6 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 		setPitch(unitFrequency)
 	}
 	
-	// TODO ugly
 	def changePitch(steps:Int, fine:Boolean) {
 		setPitch(
 			pitch.current *

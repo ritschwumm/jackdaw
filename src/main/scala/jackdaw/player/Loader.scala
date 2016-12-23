@@ -70,7 +70,6 @@ final class Loader(engineTarget:Target[LoaderFeedback]) extends Logging {
 		}
 	}
 	
-	// TODO cleanup naming
 	private def doInEngine(task:Task) {
 		 engineTarget send LoaderExecute(task)
 	}

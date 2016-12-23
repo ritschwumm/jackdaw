@@ -61,30 +61,30 @@ final class ToneUI(tone:Tone, focusInput:KeyInput) extends UI with Observing {
 	private val resetAll:Events[Unit]	=
 			Key(VK_INSERT,		KEY_LOCATION_NUMPAD).asAction	orElse
 			Key(VK_NUMPAD0,		KEY_LOCATION_NUMPAD).asAction
-	resetAll trigger tone.resetAll
+	resetAll trigger tone.resetAll _
 	
 	private val resetTrim:Events[Unit]	=
 			Key(VK_MULTIPLY,		KEY_LOCATION_NUMPAD).asAction
-	resetTrim trigger tone.resetTrim
+	resetTrim trigger tone.resetTrim _
 	
 	private val resetFilter:Events[Unit]	=
 			Key(VK_MULTIPLY,		KEY_LOCATION_NUMPAD).asAction
-	resetFilter trigger tone.resetFilter
+	resetFilter trigger tone.resetFilter _
 	
 	private val resetLow:Events[Unit]	=
 			Key(VK_KP_DOWN,		KEY_LOCATION_NUMPAD).asAction	orElse
 			Key(VK_NUMPAD2,		KEY_LOCATION_NUMPAD).asAction
-	resetLow trigger tone.resetLow
+	resetLow trigger tone.resetLow _
 	
 	private val resetMiddle:Events[Unit]	=
 			Key(VK_BEGIN,		KEY_LOCATION_NUMPAD).asAction	orElse
 			Key(VK_NUMPAD5,		KEY_LOCATION_NUMPAD).asAction
-	resetMiddle trigger tone.resetMiddle
+	resetMiddle trigger tone.resetMiddle _
 			
 	private val resetHigh:Events[Unit]	=
 			Key(VK_KP_UP,		KEY_LOCATION_NUMPAD).asAction	orElse
 			Key(VK_NUMPAD8,		KEY_LOCATION_NUMPAD).asAction
-	resetHigh trigger tone.resetHigh
+	resetHigh trigger tone.resetHigh _
 	
 	// private val moveTrimKey:Signal[Option[Boolean]]	=
 	// 		Key(VK_SUBTRACT,	KEY_LOCATION_NUMPAD).asModifier	upDown

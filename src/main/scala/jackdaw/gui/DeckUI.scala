@@ -165,11 +165,11 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 	private val ejectTrack:Events[Unit]	=
 			ejectTrackKey		orElse
 			transportUI.eject
-	ejectTrack trigger deck.ejectTrack
+	ejectTrack trigger deck.ejectTrack _
 		
 	private val editAnnotationKey:Events[Unit]	=
 			Key(VK_E,		KEY_LOCATION_STANDARD).asAction
-	editAnnotationKey trigger metaUI.editAnnotation
+	editAnnotationKey trigger metaUI.editAnnotation _
 	
 	private val playToggleKey:Events[Unit]	=
 			Key(VK_SPACE,		KEY_LOCATION_STANDARD).asAction
@@ -177,7 +177,7 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 			playToggleKey		orElse
 			detailUI.playToggle	orElse
 			transportUI.playToggle	
-	playToggle	trigger	deck.playToggle
+	playToggle	trigger	deck.playToggle _
 	
 	private val setLoopKey:Events[Option[LoopDef]]	=
 			Events multiOrElse (
@@ -199,14 +199,14 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 	private val syncToggle:Events[Unit]	=
 			syncToggleKey	orElse
 			matchUI.syncToggle
-	syncToggle trigger deck.syncToggle
+	syncToggle trigger deck.syncToggle _
 	
 	private val resetPitchKey:Events[Unit]	=
 			Key(VK_DELETE,		KEY_LOCATION_STANDARD).asAction
 	private val resetPitch:Events[Unit]	=
 			resetPitchKey	orElse
 			matchUI.reset
-	resetPitch	trigger deck.resetPitch
+	resetPitch	trigger deck.resetPitch _
 	
 	private val changePitchKey:Signal[Option[Boolean]]	=
 			Key(VK_HOME,	KEY_LOCATION_STANDARD).asModifier	upDown
@@ -218,11 +218,11 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 	
 	private val changeRhythmAnchor:Events[Unit]	=
 			Key(VK_T,			KEY_LOCATION_STANDARD).asAction
-	changeRhythmAnchor trigger deck.changeRhythmAnchor
+	changeRhythmAnchor trigger deck.changeRhythmAnchor _
 	
 	private val toggleRhythm:Events[Unit]	=
 			Key(VK_R,			KEY_LOCATION_STANDARD).asAction
-	toggleRhythm trigger deck.toggleRhythm
+	toggleRhythm trigger deck.toggleRhythm _
 	
 	private val seekKey:Signal[Option[Boolean]]	=
 			Key(VK_RIGHT,	KEY_LOCATION_STANDARD).asModifier	upDown
@@ -263,7 +263,7 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 	private val removeCue:Events[Unit]	=
 			removeCueKey	orElse
 			transportUI.removeCue
-	removeCue	trigger deck.removeCue
+	removeCue	trigger deck.removeCue _
 	
 	private val jumpCueKey:Events[Int]	=
 			Events multiOrElse (

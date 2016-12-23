@@ -1,8 +1,8 @@
 name			:= "jackdaw"
 organization	:= "de.djini"
-version			:= "1.31.0"
+version			:= "1.32.0"
 
-scalaVersion	:= "2.11.8"
+scalaVersion	:= "2.12.0"
 scalacOptions	++= Seq(
 	"-deprecation",
 	"-unchecked",
@@ -14,23 +14,22 @@ scalacOptions	++= Seq(
 	// "-language:postfixOps",
 	// "-language:experimental.macros"
 	"-feature",
-	"-optimize",
+	// attention: requires build and runtime library version never differ
+	"-opt:l:classpath",
 	"-Ywarn-unused-import",
-	// "-Yinline-warnings",
-	//"-Xfatal-warnings",
+	"-Xfatal-warnings",
 	"-Xlint"
 )
 
 conflictManager	:= ConflictManager.strict
 libraryDependencies	++= Seq(
-	"de.djini"		%%	"scutil-core"	% "0.91.0"	% "compile",
-	"de.djini"		%%	"scutil-swing"	% "0.91.0"	% "compile",
-	"de.djini"		%%	"scaudio"		% "0.78.0"	% "compile",
-	"de.djini"		%%	"scjson-io"		% "0.100.0"	% "compile",
-	"de.djini"		%%	"screact"		% "0.99.0"	% "compile",
-	"de.djini"		%%	"scgeom"		% "0.35.0"	% "compile",
-	"de.djini"		%%	"sc2d"			% "0.26.0"	% "compile",
-	"com.twitter"	%%	"chill"			% "0.8.1"	% "compile",
+	"de.djini"		%%	"scutil-core"	% "0.93.0"	% "compile",
+	"de.djini"		%%	"scutil-swing"	% "0.93.0"	% "compile",
+	"de.djini"		%%	"scaudio"		% "0.80.0"	% "compile",
+	"de.djini"		%%	"scjson-io"		% "0.102.0"	% "compile",
+	"de.djini"		%%	"screact"		% "0.101.0"	% "compile",
+	"de.djini"		%%	"scgeom"		% "0.37.0"	% "compile",
+	"de.djini"		%%	"sc2d"			% "0.28.0"	% "compile",
 	"de.djini"					% "jkeyfinder"	% "0.3.0"	% "compile",
 	"org.simplericity.macify"	% "macify"		% "1.6"		% "compile",
 	"javazoom"					% "jlayer"		% "1.0.1"	% "compile",
