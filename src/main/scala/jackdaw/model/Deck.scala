@@ -2,8 +2,9 @@ package jackdaw.model
 
 import java.io.File
 
+import scutil.base.implicits._
+import scutil.core.implicits._
 import scutil.lang._
-import scutil.implicits._
 import scutil.log._
 
 import scaudio.sample.Sample

@@ -4,7 +4,7 @@ import java.awt.event.KeyEvent
 import javax.swing.JComponent
 import javax.swing.border.Border
 
-import scutil.implicits._
+import scutil.base.implicits._
 
 import screact._
 

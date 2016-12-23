@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 import scala.math._
 
-import scutil.math.divUpInt
+import scutil.math.ceilDivInt
 
 import scaudio.sample._
 
@@ -38,13 +38,13 @@ final class CacheSample(peer:Sample) extends Sample {
 	// TODO this might not work with the preloadCurrent-hack
 	// in the player's fadeNowOrLater
 	private val bufferCount:Int	=
-			divUpInt(bufferFrames, chunkFrames) * Player.headCount * 3 / 2
+			ceilDivInt(bufferFrames, chunkFrames) * Player.headCount * 3 / 2
 		
 	private val lru:IntQueue		= new IntQueue(bufferCount)
 	
-	private val bufferChunks:Int	= divUpInt(bufferFrames, chunkFrames)
+	private val bufferChunks:Int	= ceilDivInt(bufferFrames, chunkFrames)
 	
-	private val chunkCount:Int		= divUpInt(frameCount, chunkFrames)
+	private val chunkCount:Int		= ceilDivInt(frameCount, chunkFrames)
 	private val channelCount:Int	= peer.channels.size
 	private val chunkSamples:Int	= chunkFrames * channelCount
 	private val chunks:Array[Chunk]	= new Array[Chunk](chunkCount)

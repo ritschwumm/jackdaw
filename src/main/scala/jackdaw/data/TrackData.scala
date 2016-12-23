@@ -2,8 +2,8 @@ package jackdaw.data
 
 import scala.math._
 
+import scutil.base.implicits._
 import scutil.lang._
-import scutil.implicits._
 
 import jackdaw.media.Metadata
 import jackdaw.key.MusicKey

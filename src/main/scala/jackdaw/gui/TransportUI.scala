@@ -2,8 +2,8 @@ package jackdaw.gui
 
 import javax.swing._
 
+import scutil.base.implicits._
 import scutil.lang._
-import scutil.implicits._
 
 import screact._
 

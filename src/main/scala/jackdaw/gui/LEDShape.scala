@@ -2,8 +2,8 @@ package jackdaw.gui
 
 import java.awt.Shape
 
+import scutil.base.implicits._
 import scutil.lang.ISeq
-import scutil.implicits._
 
 import scgeom._
 

@@ -5,7 +5,7 @@ import java.awt.image._
 
 import scala.math._
 
-import scutil.implicits._
+import scutil.base.implicits._
 import scutil.geom._
 import scutil.math._
 
@@ -99,7 +99,7 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 							)
 							
 						}
-				tileImageCache	= Some(height, lru)
+				tileImageCache	= Some((height, lru))
 				lru load index
 			}
 	

@@ -6,8 +6,8 @@ import java.awt.image._
 
 import scala.math._
 
+import scutil.base.implicits._
 import scutil.lang._
-import scutil.implicits._
 import scutil.geom._
 
 import screact._

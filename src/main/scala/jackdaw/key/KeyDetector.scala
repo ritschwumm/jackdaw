@@ -45,7 +45,7 @@ object KeyDetector {
 				val orig	= it.get
 				Chord(
 					MusicChord(
-						MusicPitch(orig.pitch.ordinal),
+						MusicPitch(orig.root.ordinal),
 						orig.mode match {
 							case Mode.MAJOR	=> Major
 							case Mode.MINOR	=> Minor

@@ -4,8 +4,6 @@ import java.io.File
 
 import scutil.lang._
 
-import scutil.lang._
-
 sealed trait LoaderAction
 
 final case class LoaderDecode(

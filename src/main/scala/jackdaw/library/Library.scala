@@ -2,8 +2,9 @@ package jackdaw.library
 
 import java.io.File
 
+import scutil.base.implicits._
+import scutil.core.implicits._
 import scutil.lang._
-import scutil.implicits._
 import scutil.text.Human
 import scutil.log._
 import scutil.time._

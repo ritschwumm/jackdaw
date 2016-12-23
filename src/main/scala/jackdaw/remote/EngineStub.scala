@@ -2,8 +2,9 @@ package jackdaw.remote
 
 import java.io._
 
+import scutil.base.implicits._
+import scutil.core.implicits._
 import scutil.lang._
-import scutil.implicits._
 import scutil.platform._
 import scutil.log._
 

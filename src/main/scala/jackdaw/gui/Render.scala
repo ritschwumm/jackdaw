@@ -4,7 +4,7 @@ import java.util.Locale
 
 import scala.math._
 
-import scutil.implicits._
+import scutil.base.implicits._
 import scutil.math._
 
 import scaudio.math._
@@ -38,7 +38,7 @@ object Render {
 			chord(it.chord) + " " + detune(it.detune)
 		
 	private def chord(mk:MusicChord):String	=
-			basicCof(mk.root.index, mk.scale cata (3, 0)) +
+			basicCof(mk.root.index, mk.scale cata (3, 0)).toString +
 			" " +
 			notes(mk.root.index) + (mk.scale cata ("", "m"))
 		

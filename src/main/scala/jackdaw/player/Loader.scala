@@ -2,8 +2,8 @@ package jackdaw.player
 
 import java.io.File
 
+import scutil.core.implicits._
 import scutil.lang._
-import scutil.implicits._
 import scutil.time._
 import scutil.log._
 

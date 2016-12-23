@@ -3,8 +3,8 @@ package jackdaw.gui
 import java.awt.Shape
 import java.awt.geom._
 
+import scutil.base.implicits._
 import scutil.lang.Nes
-import scutil.implicits._
 
 import scgeom._
 

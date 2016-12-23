@@ -4,8 +4,9 @@ import java.io.File
 import java.awt.event._
 import javax.swing._
 
+import scutil.base.implicits._
+import scutil.core.implicits._
 import scutil.lang._
-import scutil.implicits._
 import scutil.gui.implicits._
 import scutil.gui.DndFileImport
 import scutil.gui.DndFileExport
@@ -301,7 +302,7 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 	DndFileImport install (
 		component,
 		_	=> Some {
-			(files:Validated[Exception,Nes[File]]) => {
+			(files:Validated[Nes[Exception],Nes[File]]) => {
 				files
 				.badEffect	{ es => ERROR((es.toISeq):_*)	}
 				.toOption

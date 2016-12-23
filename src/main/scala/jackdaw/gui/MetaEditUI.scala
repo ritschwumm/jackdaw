@@ -3,8 +3,8 @@ package jackdaw.gui
 import java.awt.event._
 import javax.swing._
 
+import scutil.base.implicits._
 import scutil.lang._
-import scutil.implicits._
 import scutil.gui.CasterInstances._
 import scutil.gui.SwingUtil._
 

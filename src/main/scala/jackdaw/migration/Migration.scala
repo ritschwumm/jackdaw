@@ -1,13 +1,15 @@
 package jackdaw.migration
 
-import java.io.File
+import java.io._
 
+import scutil.core.implicits._
 import scutil.lang._
-import scutil.implicits._
 import scutil.log._
 
-import scjson._
+import scjson.ast._
 import scjson.codec._
+import scjson.pickle._
+import scjson.io._
 
 import jackdaw.library._
 
@@ -44,7 +46,7 @@ object Migration extends Logging {
 					strO	<- readFile(oldFile)
 					astO	<- JSONCodec decode strO
 					astN	<- step convert astO
-					strN	= JSONCodec encode astN
+					strN	= JSONCodec encodePretty astN
 					_		= writeFile(newFile, strN)
 				}
 				yield ()
@@ -53,13 +55,12 @@ object Migration extends Logging {
 		}
 	}
 	
-	// TODO scjson 0.71.0 use function in JSONIO
-	private def readFile(file:File):Tried[JSONFileException,String]	=
+	private def readFile(file:File):Tried[JSONIOExceptionFailure,String]	=
 			try {
 				Win(file readString JSONIO.charset)
 			}
-			catch { case e:Exception =>
-				Fail(new JSONFileException(file, e))
+			catch { case e:IOException =>
+				Fail(JSONIOExceptionFailure(e))
 			}
 			
 	private def writeFile(file:File, content:String):Unit	=
@@ -70,5 +71,5 @@ trait Migration {
 	val oldVersion:TrackVersion
 	val newVersion:TrackVersion
 	
-	def convert(old:JSONValue):Tried[JSONInputException,JSONValue]
+	def convert(old:JSONValue):Tried[JSONUnpickleFailure,JSONValue]
 }

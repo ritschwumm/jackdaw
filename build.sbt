@@ -1,6 +1,6 @@
 name			:= "jackdaw"
 organization	:= "de.djini"
-version			:= "1.30.0"
+version			:= "1.31.0"
 
 scalaVersion	:= "2.11.8"
 scalacOptions	++= Seq(
@@ -15,34 +15,31 @@ scalacOptions	++= Seq(
 	// "-language:experimental.macros"
 	"-feature",
 	"-optimize",
-	"-Ywarn-unused-import"
+	"-Ywarn-unused-import",
 	// "-Yinline-warnings",
-	//"-Xfatal-warnings"
+	//"-Xfatal-warnings",
+	"-Xlint"
 )
 
 conflictManager	:= ConflictManager.strict
 libraryDependencies	++= Seq(
-	"de.djini"		%%	"scutil-core"	% "0.82.0"	% "compile",
-	"de.djini"		%%	"scutil-swing"	% "0.82.0"	% "compile",
-	"de.djini"		%%	"scaudio"		% "0.69.0"	% "compile",
-	"de.djini"		%%	"scjson"		% "0.87.0"	% "compile",
-	"de.djini"		%%	"screact"		% "0.90.0"	% "compile",
-	"de.djini"		%%	"scgeom"		% "0.34.0"	% "compile",
-	"de.djini"		%%	"sc2d"			% "0.25.0"	% "compile",
-	"com.twitter"	%%	"chill"			% "0.8.0"	% "compile",
-	"de.djini"					% "jkeyfinder"	% "0.2.0"	% "compile",
+	"de.djini"		%%	"scutil-core"	% "0.91.0"	% "compile",
+	"de.djini"		%%	"scutil-swing"	% "0.91.0"	% "compile",
+	"de.djini"		%%	"scaudio"		% "0.78.0"	% "compile",
+	"de.djini"		%%	"scjson-io"		% "0.100.0"	% "compile",
+	"de.djini"		%%	"screact"		% "0.99.0"	% "compile",
+	"de.djini"		%%	"scgeom"		% "0.35.0"	% "compile",
+	"de.djini"		%%	"sc2d"			% "0.26.0"	% "compile",
+	"com.twitter"	%%	"chill"			% "0.8.1"	% "compile",
+	"de.djini"					% "jkeyfinder"	% "0.3.0"	% "compile",
 	"org.simplericity.macify"	% "macify"		% "1.6"		% "compile",
 	"javazoom"					% "jlayer"		% "1.0.1"	% "compile",
 	"com.mpatric"				% "mp3agic"		% "0.8.4"	% "compile",
 	"de.jarnbjo"				% "j-ogg-all"	% "1.0.0"	% "compile"
 )
-dependencyOverrides	++= Set(
-	"org.scala-lang"	% "scala-library"	% scalaVersion.value,
-	"org.scala-lang"	% "scala-reflect"	% scalaVersion.value
-)
 
 wartremoverErrors ++= Seq(
-	Wart.Any2StringAdd,
+	Wart.StringPlusAny,
 	Wart.EitherProjectionPartial,
 	Wart.OptionPartial,
 	Wart.Enumeration,
@@ -52,7 +49,7 @@ wartremoverErrors ++= Seq(
 	Wart.TryPartial
 )
 
-enablePlugins(BuildInfoPlugin, OsxAppPlugin, CapsulePlugin)
+enablePlugins(BuildInfoPlugin, OsxAppPlugin, CapsulePlugin, ScriptStartPlugin)
 
 //------------------------------------------------------------------------------
 
@@ -112,10 +109,18 @@ osxappSystemProperties	:= systemProperties
 capsuleMainClass		:= Some(bootClass)
 capsuleVmOptions		:= vmOptions
 capsuleSystemProperties	:= systemProperties
-capsuleMinJavaVersion	:= Some("1.7.0")
+capsuleMinJavaVersion	:= Some("1.8.0")
 capsuleMakeExecutable	:= true
+
+scriptstartConfigs	:= Seq(ScriptConfig(
+	scriptName			= "jackdaw",
+	mainClass			= bootClass,
+	vmOptions			= vmOptions,
+	systemProperties	= systemProperties
+))
 
 TaskKey[Seq[File]]("bundle")	:= Seq(
 	osxappZip.value,
-	capsule.value
+	capsule.value,
+	scriptstart.value
 )

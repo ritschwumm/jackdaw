@@ -3,8 +3,8 @@ package jackdaw.gui.util
 import java.awt.{ List=>_, _ }
 import java.awt.image._
 
+import scutil.base.implicits._
 import scutil.lang._
-import scutil.implicits._
 import scutil.geom._
 import scutil.gui.implicits._
 

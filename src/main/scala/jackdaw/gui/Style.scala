@@ -8,7 +8,8 @@ import javax.swing.border._
 import javax.swing.plaf.metal.MetalLookAndFeel
 import javax.imageio.ImageIO
 
-import scutil.implicits._
+import scutil.base.implicits._
+import scutil.core.implicits._
 import scutil.color._
 import scutil.geom._
 import scutil.gui.implicits._

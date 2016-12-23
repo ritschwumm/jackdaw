@@ -1,7 +1,7 @@
 package jackdaw.util
 
+import scutil.base.implicits._
 import scutil.lang._
-import scutil.implicits._
 
 import scala.collection.mutable
 

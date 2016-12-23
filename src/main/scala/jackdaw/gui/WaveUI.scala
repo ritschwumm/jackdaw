@@ -6,8 +6,9 @@ import java.awt.image.BufferedImage
 
 import scala.math._
 
+import scutil.base.implicits._
+import scutil.core.implicits._
 import scutil.lang._
-import scutil.implicits._
 import scutil.geom._
 import scutil.gui.implicits._
 

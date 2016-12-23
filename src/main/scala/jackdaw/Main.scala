@@ -5,7 +5,7 @@ import javax.swing._
 
 import org.simplericity.macify.eawt._
 
-import scutil.implicits._
+import scutil.core.implicits._
 import scutil.gui.CasterInstances._
 
 import screact._

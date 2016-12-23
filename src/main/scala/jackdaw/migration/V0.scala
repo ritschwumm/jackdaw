@@ -5,7 +5,8 @@ import reflect.runtime.universe.TypeTag
 import scutil.lang._
 import scutil.time._
 
-import scjson.serialization._
+import scjson.pickle._
+import scjson.pickle.protocol.old._
 
 import jackdaw.library.TrackVersion
 import jackdaw.media.Metadata
@@ -24,7 +25,7 @@ object V0 {
 	
 	final case class RhythmV0(anchor:Double, measure:Double, beatsPerMeasure:Int)
 	
-	object LocalProtocol extends FullProtocol {
+	object LocalProtocol extends OldFullProtocol {
 		implicit lazy val MilliInstantF			= viaFormat(MilliInstant.newType)
 		implicit lazy val RhythmF				= caseClassFormat3(RhythmV0.apply,		RhythmV0.unapply)
 		implicit lazy val MetadataF				= caseClassFormat3(Metadata.apply,		Metadata.unapply)

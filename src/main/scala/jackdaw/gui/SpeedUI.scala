@@ -3,7 +3,7 @@ package jackdaw.gui
 import javax.swing._
 import java.awt.event._
 
-import scutil.implicits._
+import scutil.base.implicits._
 import scutil.gui.implicits._
 import scutil.gui.GridBagDSL._
 

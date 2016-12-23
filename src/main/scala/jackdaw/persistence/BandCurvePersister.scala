@@ -2,7 +2,7 @@ package jackdaw.persistence
 
 import java.io._
 
-import scutil.implicits._
+import scutil.base.implicits._
 import scutil.log._
 
 import jackdaw.curve.BandCurve
@@ -26,7 +26,7 @@ final class BandCurvePersister extends Persister[BandCurve] with Logging {
 			}
 		}
 		catch { case e:Exception	=>
-			ERROR("cannot unmarshall file: " + file, e)
+			ERROR("cannot unmarshall file: " + file.toString, e)
 			None
 		}
 	}
@@ -44,7 +44,7 @@ final class BandCurvePersister extends Persister[BandCurve] with Logging {
 			}
 		}
 		catch { case e:Exception	=>
-			ERROR("cannot marshall file: " + file, e)
+			ERROR("cannot marshall file: " + file.toString, e)
 		}
 	}
 	

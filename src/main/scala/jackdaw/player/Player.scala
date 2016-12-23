@@ -4,8 +4,8 @@ import java.io.File
 
 import scala.math._
 
+import scutil.base.implicits._
 import scutil.lang._
-import scutil.implicits._
 import scutil.math._
 
 import scaudio.control._

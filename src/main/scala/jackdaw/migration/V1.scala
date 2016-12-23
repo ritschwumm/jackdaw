@@ -5,7 +5,8 @@ import reflect.runtime.universe.TypeTag
 import scutil.lang._
 import scutil.time._
 
-import scjson.serialization._
+import scjson.pickle._
+import scjson.pickle.protocol.old._
 
 import jackdaw.library.TrackVersion
 import jackdaw.media.Metadata
@@ -22,7 +23,7 @@ object V1 {
 		measure:Option[Stamped[Double]]
 	)
 	
-	object LocalProtocol extends FullProtocol {
+	object LocalProtocol extends OldFullProtocol {
 		implicit lazy val MilliInstantF			= viaFormat(MilliInstant.newType)
 		implicit lazy val SchemaF				= caseClassFormat2(Schema.apply,		Schema.unapply)
 		implicit lazy val RhythmF				= caseClassFormat3(Rhythm.apply,		Rhythm.unapply)

@@ -2,7 +2,8 @@ package jackdaw.library
 
 import java.io.File
 
-import scutil.implicits._
+import scutil.base.implicits._
+import scutil.core.implicits._
 
 import jackdaw.migration.Migration
 

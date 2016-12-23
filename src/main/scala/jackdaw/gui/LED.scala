@@ -43,12 +43,12 @@ object LED {
 	
 	val pointPositions:Map[Point,(Horizontal,Vertical)]	=
 			Map(
-				LT	-> (L,T),
-				RT	-> (R,T),
-				LC	-> (L,C),
-				RC	-> (R,C),
-				LB	-> (L,B),
-				RB	-> (R,B)
+				LT	-> ((L,T)),
+				RT	-> ((R,T)),
+				LC	-> ((L,C)),
+				RC	-> ((R,C)),
+				LB	-> ((L,B)),
+				RB	-> ((R,B))
 			)
 	
 	val segmentPoints:Map[Segment,(Point,Point)]	=

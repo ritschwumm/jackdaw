@@ -2,12 +2,14 @@ package jackdaw.persistence
 
 import java.io.File
 
-import scutil.implicits._
+import scutil.base.implicits._
+import scutil.core.implicits._
+import scutil.lang.Charsets
 import scutil.log._
 
-import scjson._
 import scjson.codec._
-import scjson.serialization._
+import scjson.pickle._
+import scjson.io._
 
 final class JSONPersister[T:Format] extends Persister[T] with Logging {
 	def load(file:File):Option[T]	= {
@@ -24,6 +26,7 @@ final class JSONPersister[T:Format] extends Persister[T] with Logging {
 		value					|>
 		JSONIO.writeAST[T]		|>
 		JSONCodec.encodePretty	|>
-		{ file writeString (JSONIO.charset, _) }
+		// TODO use JSONIO.charset
+		{ file writeString (Charsets.utf_8, _) }
 	}
 }

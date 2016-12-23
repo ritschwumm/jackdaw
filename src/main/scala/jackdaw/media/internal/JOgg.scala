@@ -6,10 +6,11 @@ import java.io.RandomAccessFile
 import de.jarnbjo.ogg._
 import de.jarnbjo.vorbis._
 
+import scutil.base.implicits._
+import scutil.core.implicits._
 import scutil.lang._
-import scutil.implicits._
-import scutil.io.Charsets._
-import scutil.math.ByteArrayUtil
+import scutil.lang.Charsets._
+import scutil.bit.ByteArrayUtil
 import scutil.log._
 
 import jackdaw.util.Checked

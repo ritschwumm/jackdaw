@@ -2,7 +2,9 @@ package jackdaw.migration
 
 import scutil.lang._
 
-import scjson._
+import scjson.ast._
+import scjson.pickle._
+import scjson.io._
 
 import jackdaw.library._
 import jackdaw.data._
@@ -16,7 +18,7 @@ object V2toCurrent extends Migration {
 	val oldVersion	= V2.version
 	val newVersion	= TrackVersion(3)
 	
-	def convert(it:JSONValue):Tried[JSONInputException,JSONValue]	=
+	def convert(it:JSONValue):Tried[JSONUnpickleFailure,JSONValue]	=
 			{
 				import V2.LocalProtocol._
 				JSONIO.readAST[TrackDataV2](it)

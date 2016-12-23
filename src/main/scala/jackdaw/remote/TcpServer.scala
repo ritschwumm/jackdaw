@@ -4,6 +4,7 @@ import java.net._
 
 final class TcpServer {
 	private val serverSocket	= new ServerSocket(0, 1, InetAddress.getLoopbackAddress)
+	
 	val port	= serverSocket.getLocalPort
 	
 	// TODO needs proper exception checks

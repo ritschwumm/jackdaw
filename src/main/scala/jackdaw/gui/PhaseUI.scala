@@ -4,8 +4,8 @@ import javax.swing._
 
 import scala.math._
 
+import scutil.base.implicits._
 import scutil.lang.ISeq
-import scutil.implicits._
 
 import screact._
 import scgeom._

@@ -3,8 +3,8 @@ package jackdaw.data
 import scala.math._
 import scala.collection.mutable
 
+import scutil.base.implicits._
 import scutil.lang.ISeq
-import scutil.implicits._
 import scutil.math._
 
 import jackdaw.range.PitchMath._

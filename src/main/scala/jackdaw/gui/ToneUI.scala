@@ -4,7 +4,7 @@ import java.awt.{ List=>_, _ }
 import java.awt.event._
 import javax.swing._
 
-import scutil.implicits._
+import scutil.base.implicits._
 import scutil.gui.implicits._
 import scutil.gui.GridBagDSL._
 

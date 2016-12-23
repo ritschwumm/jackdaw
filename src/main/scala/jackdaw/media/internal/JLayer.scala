@@ -6,8 +6,9 @@ import javazoom.jl.decoder._
 import javazoom.jl.converter._
 import javazoom.jl.converter.Converter.{ ProgressListener => ConverterProgressListener }
 
-import scutil.lang._
-import scutil.implicits._
+import scutil.base.implicits._
+import scutil.core.implicits._
+import scutil.lang.{ Converter => _, _ }
 import scutil.log._
 
 import jackdaw.util.Checked

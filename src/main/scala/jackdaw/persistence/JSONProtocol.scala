@@ -5,13 +5,14 @@ import reflect.runtime.universe._
 import scutil.lang._
 import scutil.time._
 
-import scjson.serialization._
+import scjson.pickle._
+import scjson.pickle.protocol.old._
 
 import jackdaw.data._
 import jackdaw.media.Metadata
 import jackdaw.key._
 
-object JSONProtocol extends FullProtocol {
+object JSONProtocol extends OldFullProtocol {
 	implicit lazy val MilliInstantF			= viaFormat(MilliInstant.newType)
 	implicit lazy val SchemaF				= caseClassFormat2(Schema.apply,		Schema.unapply)
 	implicit lazy val RhythmF				= caseClassFormat3(Rhythm.apply,		Rhythm.unapply)

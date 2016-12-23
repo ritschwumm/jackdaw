@@ -4,8 +4,9 @@ import java.io.File
 
 import scala.ref.WeakReference
 
+import scutil.base.implicits._
+import scutil.core.implicits._
 import scutil.lang._
-import scutil.implicits._
 import scutil.gui.SwingUtil._
 import scutil.log._
 

@@ -2,8 +2,8 @@ package jackdaw.gui.util
 
 import javax.swing.JComponent
 
+import scutil.core.implicits._
 import scutil.lang._
-import scutil.implicits._
 import scutil.geom._
 import scutil.gui.implicits._
 import scutil.gui.CasterInstances._

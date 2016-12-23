@@ -1,8 +1,8 @@
 package jackdaw
 
+import scutil.core.implicits._
 import scutil.lang.ISeq
-import scutil.implicits._
-import scutil.io.Files._
+import scutil.platform._
 
 import scaudio.output._
 import scaudio.dsp.BiQuadCoeffs
@@ -44,7 +44,7 @@ object Config {
 	val curveRaster		= 256
 	
 	// TODO use a better place on windows systems
-	val dataBase		= HOME / ".jackdaw"
+	val dataBase		= Platform.homeDir / ".jackdaw"
 	
 	// at least the number of decks
 	val minCacheCount	= 3

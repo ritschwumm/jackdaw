@@ -1,7 +1,7 @@
 package jackdaw.remote
 
+import scutil.core.implicits._
 import scutil.lang._
-import scutil.implicits._
 import scutil.time._
 import scutil.log._
 

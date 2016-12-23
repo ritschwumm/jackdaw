@@ -4,8 +4,8 @@ import java.io.File
 
 import com.mpatric.mp3agic._
 
+import scutil.base.implicits._
 import scutil.lang._
-import scutil.implicits._
 import scutil.log._
 
 import jackdaw.util.Checked
