@@ -639,10 +639,19 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		loopDef		= None
 	}
 	
+	// prevent loops being set a hole raster roo early when we're too close to the edge
+	private val loopShift	= {
+		val vsa = 1.0 / 4294967295.0
+		2*vsa
+	}
+	
 	// start is rastered by size.unit only. not scaled
 	private def mkLoop(frame:Double, size:RhythmValue):Option[Span]	=
 			currentRhythmRaster(size.unit) map { raster =>
-				Span(raster floor frame, raster.size * size.steps)
+				Span(
+					raster floor (frame+loopShift),
+					raster.size * size.steps
+				)
 			}
 		
 	/*
