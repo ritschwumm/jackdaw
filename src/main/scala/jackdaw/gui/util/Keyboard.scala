@@ -59,7 +59,7 @@ object Keyboard extends Disposable {
 	//------------------------------------------------------------------------------
 	//## public api
 	
-	val keys	= keysCell.signal
+	val keys:Signal[Set[Key]]	= keysCell.signal
 	
 	def dispose() {
 		timer.stop()

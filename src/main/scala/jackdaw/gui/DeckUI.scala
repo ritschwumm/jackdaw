@@ -22,7 +22,7 @@ import jackdaw.gui.util._
 import GridBagItem.UI_is_GridBagItem
 
 /** gui for a single deck */
-final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with Observing with Logging {
+final class DeckUI(deck:Deck, keyTarget:Signal[Boolean]) extends UI with Observing with Logging {
 	//------------------------------------------------------------------------------
 	//## input
 	
@@ -104,18 +104,16 @@ final class DeckUI(deck:Deck, keyboardEnabled:Signal[Boolean]) extends UI with O
 	//------------------------------------------------------------------------------
 	//## wiring
 	
+	private val border	= keyTarget map { _ cata (Style.deck.border.noFocus, Style.deck.border.inFocus) }
+	border observeNow component.setBorder
+	
+	val hovered			= ComponentUtil underMouseSignal component
 	val grabsKeyboard	= metaUI.grabsKeyboard
 	
 	import KeyEvent._
 	
-	private val focusInput	=
-			KeyInput focusInput (
-				enabled		= keyboardEnabled,
-				component	= component,
-				off			= Style.deck.border.noFocus,
-				on			= Style.deck.border.inFocus
-			)
-	import focusInput._
+	private val keyInput	= KeyInput when keyTarget
+	import keyInput._
 	
 	import ActionUtil._
 	

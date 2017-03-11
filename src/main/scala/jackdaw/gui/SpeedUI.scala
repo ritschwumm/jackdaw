@@ -14,7 +14,7 @@ import jackdaw.gui.util._
 
 import GridBagItem.UI_is_GridBagItem
 
-final class SpeedUI(speed:Speed, keyboardEnabled:Signal[Boolean]) extends UI with Observing {
+final class SpeedUI(speed:Speed, keyTarget:Signal[Boolean]) extends UI with Observing {
 	//------------------------------------------------------------------------------
 	//## input
 	
@@ -61,16 +61,15 @@ final class SpeedUI(speed:Speed, keyboardEnabled:Signal[Boolean]) extends UI wit
 	//------------------------------------------------------------------------------
 	//## wiring
 	
+	private val border	= keyTarget map { _ cata (Style.speed.border.noFocus, Style.speed.border.inFocus) }
+	border observeNow component.setBorder
+	
+	val hovered	= ComponentUtil underMouseSignal component
+	
 	import KeyEvent._
 	
-	private val focusInput	=
-			KeyInput focusInput (
-				enabled		= keyboardEnabled,
-				component	= component,
-				off			= Style.speed.border.noFocus,
-				on			= Style.speed.border.inFocus
-			)
-	import focusInput._
+	private val keyInput	= KeyInput when keyTarget
+	import keyInput._
 	
 	import ActionUtil._
 	

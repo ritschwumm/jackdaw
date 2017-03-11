@@ -13,7 +13,7 @@ import jackdaw.gui.util._
 import GridBagItem.UI_is_GridBagItem
 
 /** mastering volumes and meter */
-final class ChannelUI(strip:Strip, tone:Option[Tone], peak:Signal[Float], phoneEnabled:Boolean, keyboardEnabled:Signal[Boolean]) extends UI with Observing {
+final class ChannelUI(strip:Strip, tone:Option[Tone], peak:Signal[Float], phoneEnabled:Boolean, keyTarget:Signal[Boolean]) extends UI with Observing {
 	//------------------------------------------------------------------------------
 	//## components
 	
@@ -21,11 +21,12 @@ final class ChannelUI(strip:Strip, tone:Option[Tone], peak:Signal[Float], phoneE
 			new DelayUI(
 					tone cata (
 						ToneUI.spacer,
-						tone => new ToneUI(tone, focusInput)
-					))
+						tone => new ToneUI(tone, keyInput)
+					)
+				)
 	
 	private val delayedStripUI	=
-			new DelayUI(new StripUI(strip, peak, phoneEnabled, focusInput))
+			new DelayUI(new StripUI(strip, peak, phoneEnabled, keyInput))
 	
 	private val z		= (Style.linear.knob.size / 2).toInt
 	private val	panel	=
@@ -38,13 +39,13 @@ final class ChannelUI(strip:Strip, tone:Option[Tone], peak:Signal[Float], phoneE
 	//------------------------------------------------------------------------------
 	//## wiring
 	
-	private val focusInput	=
-			KeyInput focusInput (
-				enabled		= keyboardEnabled,
-				component	= component,
-				off			= Style.channel.border.noFocus,
-				on			= Style.channel.border.inFocus
-			)
+	private val border	= keyTarget map { _ cata (Style.channel.border.noFocus, Style.channel.border.inFocus) }
+	border observeNow component.setBorder
+	
+	val hovered	= ComponentUtil underMouseSignal component
+	
+	// // NOTE forward reference works because of the DelayUI
+	private val keyInput	= KeyInput when keyTarget
 
 	delayedToneUI.init()
 	delayedStripUI.init()

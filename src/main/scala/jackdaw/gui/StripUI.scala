@@ -14,7 +14,7 @@ import jackdaw.gui.util._
 
 import GridBagItem.UI_is_GridBagItem
 
-final class StripUI(strip:Strip, peak:Signal[Float], phoneEnabled:Boolean, focusInput:KeyInput) extends UI with Observing {
+final class StripUI(strip:Strip, peak:Signal[Float], phoneEnabled:Boolean, keyInput:KeyInput) extends UI with Observing {
 	//------------------------------------------------------------------------------
 	//## components
 	
@@ -41,7 +41,7 @@ final class StripUI(strip:Strip, peak:Signal[Float], phoneEnabled:Boolean, focus
 	//## wiring
 	
 	import KeyEvent._
-	import focusInput._
+	import keyInput._
 	import ActionUtil._
 	
 	// actions

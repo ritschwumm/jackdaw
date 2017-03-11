@@ -23,7 +23,7 @@ object ToneUI {
 }
 
 /** three knobs for an equalizer */
-final class ToneUI(tone:Tone, focusInput:KeyInput) extends UI with Observing {
+final class ToneUI(tone:Tone, keyInput:KeyInput) extends UI with Observing {
 	//------------------------------------------------------------------------------
 	//## components
 	
@@ -53,7 +53,7 @@ final class ToneUI(tone:Tone, focusInput:KeyInput) extends UI with Observing {
 	//## wiring
 	
 	import KeyEvent._
-	import focusInput._
+	import keyInput._
 	import ActionUtil._
 	
 	// actions

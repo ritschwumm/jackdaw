@@ -15,14 +15,51 @@ final class MainUI(model:Model, windowActive:Signal[Boolean]) extends UI with Ob
 	//------------------------------------------------------------------------------
 	//## feedback
 	
-	private val keyboardEnabled	= cell(true)
+	private val grabsKeyboardFb	= cell(false)
+	
+	private val keyboardEnabled:Signal[Boolean]	=
+			(windowActive zipWith grabsKeyboardFb)(_ && !_)
+		
+	private val deck1HoveredFb		= cell(false)
+	private val deck2HoveredFb		= cell(false)
+	private val deck3HoveredFb		= cell(false)
+	private val channel1HoveredFb	= cell(false)
+	private val channel2HoveredFb	= cell(false)
+	private val channel3HoveredFb	= cell(false)
+	private val masterHoveredFb		= cell(false)
+	private val speedHoveredFb		= cell(false)
+	
+	private def target(hovered:Signal[Boolean]):Signal[Boolean]	=
+			(keyboardEnabled zipWith hovered)(_ && _)
+		
+	private def or(a:Signal[Boolean], b:Signal[Boolean]):Signal[Boolean]	=
+			(a zipWith b)(_ || _)
+	
+	private val deck1Target		= target(or(deck1HoveredFb, channel1HoveredFb))
+	private val deck2Target		= target(or(deck2HoveredFb, channel2HoveredFb))
+	private val deck3Target		= target(or(deck3HoveredFb, channel3HoveredFb))
+	private val channel1Target	= deck1Target
+	private val channel2Target	= deck2Target
+	private val channel3Target	= deck3Target
+	private val masterTarget	= target(masterHoveredFb)
+	private val speedTarget		= target(speedHoveredFb)
+	/*
+	private val deck1Target		= target(deck1HoveredFb)
+	private val deck2Target		= target(deck2HoveredFb)
+	private val deck3Target		= target(deck3HoveredFb)
+	private val channel1Target	= target(channel1HoveredFb)
+	private val channel2Target	= target(channel2HoveredFb)
+	private val channel3Target	= target(channel3HoveredFb)
+	private val masterTarget	= target(masterHoveredFb)
+	private val speedTarget		= target(speedHoveredFb)
+	*/
 	
 	//------------------------------------------------------------------------------
 	//## components
 	
-	private val deck1UI		= new DeckUI(model.deck1, keyboardEnabled)
-	private val deck2UI		= new DeckUI(model.deck2, keyboardEnabled)
-	private val deck3UI		= new DeckUI(model.deck3, keyboardEnabled)
+	private val deck1UI		= new DeckUI(model.deck1, deck1Target)
+	private val deck2UI		= new DeckUI(model.deck2, deck2Target)
+	private val deck3UI		= new DeckUI(model.deck3, deck3Target)
 	
 	private val deckPanel	=
 			GridBagUI(
@@ -31,11 +68,11 @@ final class MainUI(model:Model, windowActive:Signal[Boolean]) extends UI with Ob
 				deck3UI	pos(0,2) size(1,1) weight(1,1)	fill BOTH insetsTLBR(6,0,0,0)
 			)
 	
-	private val channel1UI	= new ChannelUI(model.mix.strip1, Some(model.mix.tone1),	model.masterPeak1,	model.phoneEnabled, keyboardEnabled)
-	private val channel2UI	= new ChannelUI(model.mix.strip2, Some(model.mix.tone2),	model.masterPeak2,	model.phoneEnabled, keyboardEnabled)
-	private val channel3UI	= new ChannelUI(model.mix.strip3, Some(model.mix.tone3),	model.masterPeak3,	model.phoneEnabled, keyboardEnabled)
-	private val masterUI	= new ChannelUI(model.mix.master, None,						model.masterPeak,	model.phoneEnabled, keyboardEnabled)
-	private val speedUI		= new SpeedUI(model.speed, keyboardEnabled)
+	private val channel1UI	= new ChannelUI(model.mix.strip1, Some(model.mix.tone1),	model.masterPeak1,	model.phoneEnabled, channel1Target)
+	private val channel2UI	= new ChannelUI(model.mix.strip2, Some(model.mix.tone2),	model.masterPeak2,	model.phoneEnabled, channel2Target)
+	private val channel3UI	= new ChannelUI(model.mix.strip3, Some(model.mix.tone3),	model.masterPeak3,	model.phoneEnabled, channel3Target)
+	private val masterUI	= new ChannelUI(model.mix.master, None,						model.masterPeak,	model.phoneEnabled, masterTarget)
+	private val speedUI		= new SpeedUI(model.speed, speedTarget)
 	
 	private val	masterPanel	=
 			GridBagUI(
@@ -56,17 +93,20 @@ final class MainUI(model:Model, windowActive:Signal[Boolean]) extends UI with Ob
 	//------------------------------------------------------------------------------
 	//## wiring
 	
+	deck1UI.hovered		observeNow deck1HoveredFb.set
+	deck2UI.hovered		observeNow deck2HoveredFb.set
+	deck3UI.hovered		observeNow deck3HoveredFb.set
+	channel1UI.hovered	observeNow channel1HoveredFb.set
+	channel2UI.hovered	observeNow channel2HoveredFb.set
+	channel3UI.hovered	observeNow channel3HoveredFb.set
+	masterUI.hovered	observeNow masterHoveredFb.set
+	speedUI.hovered		observeNow speedHoveredFb.set
+	
 	private val grabsKeyboard	=
 			signal {
 				deck1UI.grabsKeyboard.current	||
 				deck2UI.grabsKeyboard.current	||
 				deck3UI.grabsKeyboard.current
 			}
-			
-	private val keyboardEnabledFb	=
-			(windowActive zipWith grabsKeyboard) {
-				_ && !_
-			}
-	
-	keyboardEnabledFb observeNow keyboardEnabled.set
+	grabsKeyboard observeNow grabsKeyboardFb.set
 }
