@@ -2,6 +2,7 @@ package jackdaw.remote
 
 import java.io._
 
+import scutil.lang.implicits._
 import jackdaw.player._
 import jackdaw.data._
 	
@@ -10,7 +11,7 @@ final class Input(val st:InputStream) {
 			readByte() match {
 				case 0	=> readStartedStub()
 				case 1	=> readSendStub()
-				case x	=> sys error s"unexpected tag $x"
+				case x	=> sys error show"unexpected tag $x"
 			}
 	def readStartedStub():StartedStub	=
 			StartedStub(
@@ -58,7 +59,7 @@ final class Input(val st:InputStream) {
 			readByte() match {
 				case 0	=> readKillSkeleton()
 				case 1	=> readSendSkeleton()
-				case x	=> sys error s"unexpected tag $x"
+				case x	=> sys error show"unexpected tag $x"
 			}
 	def readKillSkeleton():KillSkeleton.type	=
 			KillSkeleton
@@ -71,7 +72,7 @@ final class Input(val st:InputStream) {
 				case 0	=> readEngineChangeControl()
 				case 1	=> readEngineSetBeatRate()
 				case 2	=> readEngineControlPlayer()
-				case x	=> sys error s"unexpected tag $x"
+				case x	=> sys error show"unexpected tag $x"
 			}
 	def readEngineChangeControl():EngineChangeControl	=
 			EngineChangeControl(
@@ -106,7 +107,7 @@ final class Input(val st:InputStream) {
 				case 14	=> readPlayerScratchEnd()
 				case 15	=> readPlayerLoopEnable()
 				case 16	=> readPlayerLoopDisable()
-				case x	=> sys error s"unexpected tag $x"
+				case x	=> sys error show"unexpected tag $x"
 			}
 	def readPlayerChangeControl():PlayerChangeControl	=
 			PlayerChangeControl(
@@ -202,7 +203,7 @@ final class Input(val st:InputStream) {
 				case 0	=> Phrase
 				case 1	=> Measure
 				case 2	=> Beat
-				case x	=> sys error s"unexpected tag $x"
+				case x	=> sys error show"unexpected tag $x"
 			}
 		
 	//------------------------------------------------------------------------------

@@ -19,7 +19,7 @@ import jackdaw.util.Checked
 object JOgg extends Inspector with Decoder with Logging {
 	def name	= "j-ogg"
 	
-	private implicit val FileStreamResource:Resource[FileStream]	= Resource by (_.close())
+	private implicit val FileStreamResource:Resource[FileStream]	= Resource instance (_.close())
 		
 	private type BufferWriter	= (Array[Byte], Int) => Unit
 	
@@ -28,13 +28,13 @@ object JOgg extends Inspector with Decoder with Logging {
 				_	<- recognizeFile(input)
 				out	<-
 						withVorbisStream(input) { vorbis =>
-							DEBUG(so"reading metadata with ${name}")
+							DEBUG(show"reading metadata with ${name}")
 							val header		= vorbis.getCommentHeader
-							Win(Metadata(
-								title	= header.getTitle.guardNotNull,
-								artist	= header.getArtist.guardNotNull,
-								album	= header.getAlbum.guardNotNull
-								// genre	= header.getGenre.guardNotNull
+							Right(Metadata(
+								title	= header.getTitle.optionNotNull,
+								artist	= header.getArtist.optionNotNull,
+								album	= header.getAlbum.optionNotNull
+								// genre	= header.getGenre.optionNotNull
 							))
 						}		
 			}
@@ -46,13 +46,13 @@ object JOgg extends Inspector with Decoder with Logging {
 				_	<- recognizeFile(input)
 				_	<-
 					withVorbisStream(input) { vorbis =>
-						DEBUG(so"decoding with ${name}")
+						DEBUG(show"decoding with ${name}")
 						val header	= vorbis.getIdentificationHeader
 						for {
 							_		<-
 									writeWavChecked(output, header.getSampleRate, header.getChannels.toShort) { append:BufferWriter =>
 										copyPcm(vorbis, append)
-									} failEffect {
+									} leftEffect {
 										_ => output.delete()
 									}
 						}
@@ -99,8 +99,8 @@ object JOgg extends Inspector with Decoder with Logging {
 					for {
 						logical	<-
 								physical.getLogicalStreams.toIterable.singleOption
-								.map	{ _.asInstanceOf[LogicalOggStream] }
-								.toWin	(Checked problem1 "expected exactly one logical stream")
+								.map		{ _.asInstanceOf[LogicalOggStream] }
+								.toRight	(Checked problem1 "expected exactly one logical stream")
 						out		<- func(logical)
 					}
 					yield out
@@ -110,7 +110,7 @@ object JOgg extends Inspector with Decoder with Logging {
 	private def writeWavChecked(output:File, frameRate:Int, channelCount:Short)(generator:Effect[BufferWriter])	=
 			MediaUtil checkedExceptions {
 				writeWav(output, frameRate, channelCount.toShort)(generator)
-				Win(())
+				Right(())
 			}
 		
 	// generator must provide interleaved little endian signed shorts
@@ -119,7 +119,7 @@ object JOgg extends Inspector with Decoder with Logging {
 			val UIntMaxValue	= 1L<<32-1
 			
 			def writeId(it:String):Unit	= {
-				require(it.length == 4, so"tag id expected to have 4 chars, ${it} has ${it.length.toString}")
+				require(it.length == 4, show"tag id expected to have 4 chars, ${it} has ${it.length}")
 				outFile write (it getBytes us_ascii)
 			}
 			def writeInt(it:Int):Unit						= outFile write (ByteArrayUtil littleEndianInt		it)

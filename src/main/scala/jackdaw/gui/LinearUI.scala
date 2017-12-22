@@ -61,7 +61,7 @@ final class LinearUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 					val	span	= neutralVal spanTo clampMiniMax(valueCur)
 					stripeShape(trackBoundsCur, span, value2guiCur)
 				}
-				val knob	= inMiniMax(valueCur) guard knobShape(componentBoundsCur, valueCur, value2guiCur)
+				val knob	= inMiniMax(valueCur) option knobShape(componentBoundsCur, valueCur, value2guiCur)
 				
 				Vector(
 					Some(			FillShape(track,	Style.linear.track.color)									),

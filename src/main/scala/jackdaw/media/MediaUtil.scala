@@ -15,25 +15,25 @@ import jackdaw.util.Checked
 object MediaUtil extends Logging {
 	/** try one S after another to get a Win */
 	def worker[S,T](all:ISeq[S], name:S=>String, work:S=>Checked[T]):Option[T] = {
-		type Outcome	= Tried[ISeq[Group],T]
+		type Outcome	= Either[ISeq[Group],T]
 		
 		final case class Group(worker:String, messages:Nes[String])
 		
-		val start:Outcome	= Fail(ISeq.empty[Group])
+		val start:Outcome	= Left(ISeq.empty[Group])
 		val outcome:Outcome	=
 				(all foldLeft start) { (outcome:Outcome, item) =>
 					outcome match {
-						case Win(t)	=>
+						case Right(t)	=>
 							// already won, no need to keep on
-							Win(t)
-						case Fail(p)	=>
+							Right(t)
+						case Left(p)	=>
 							// try next worker
 							work(item) match {
-								case Fail(messages)	=>
+								case Left(messages)	=>
 									// record the failure
-									Fail(p :+ Group(name(item), messages))
-								case Win(t)	=>
-									Win(t)
+									Left(p :+ Group(name(item), messages))
+								case Right(t)	=>
+									Right(t)
 							}
 					}
 				}
@@ -60,15 +60,15 @@ object MediaUtil extends Logging {
 				case Some(Linux) | Some(OSX)	=>
 					Checked trueWin1 (
 						(External exec Vector("which", command) result false).rc == 0,
-						so"command ${command} not available"
+						show"command ${command} not available"
 					)
 				case _ =>
 					Checked fail1 "external media converters are only supported on OSX and Linux"
 			}
 			
 	def runCommand(command:String*)(implicit sl:SourceLocation):Checked[ExternalResult]	= {
-		DEBUG(command:_*)
-		External exec command.toVector result false triedBy { _.rc == 0 } mapFail { res =>
+		DEBUG log command.toVector.map(LogString.apply)
+		External exec command.toVector result false eitherBy { _.rc == 0 } mapLeft { res =>
 			val first	= "command failed: " + (command mkString " ")
 			Nes(first, res.err)
 		}
@@ -78,7 +78,7 @@ object MediaUtil extends Logging {
 	
 	def checkedExceptions[T](block: =>Checked[T])(implicit sl:SourceLocation):Checked[T]	=
 			(Catch.exception in block)
-			.mapFail { e =>
+			.mapLeft { e =>
 				ERROR(e)
 				Checked problem1 e.getMessage
 			}

@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 import scala.math._
 
-import scutil.math.ceilDivInt
+import scutil.math.functions._
 
 import scaudio.sample._
 
@@ -49,7 +49,7 @@ final class CacheSample(peer:Sample) extends Sample {
 	private val chunkSamples:Int	= chunkFrames * channelCount
 	private val chunks:Array[Chunk]	= new Array[Chunk](chunkCount)
 	
-	// println(so"buffer: ${scutil.text.Human roundedBinary chunkSamples*bufferCount*4}")
+	// println(show"buffer: ${scutil.text.Human roundedBinary chunkSamples*bufferCount*4}")
 	
 	@inline
 	private def validChannelIndex(channelIndex:Int):Boolean	=
@@ -165,7 +165,7 @@ final class CacheSample(peer:Sample) extends Sample {
 	
 	//------------------------------------------------------------------------------
 	
-	private var barrier:AtomicBoolean	= new AtomicBoolean()
+	private val barrier:AtomicBoolean	= new AtomicBoolean()
 	
 	@inline
 	def readBarrier() {

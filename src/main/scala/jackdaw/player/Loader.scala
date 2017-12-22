@@ -2,7 +2,8 @@ package jackdaw.player
 
 import java.io.File
 
-import scutil.core.implicits._
+import scutil.base.implicits._
+import scutil.io.implicits._
 import scutil.lang._
 import scutil.time._
 import scutil.log._
@@ -51,7 +52,7 @@ final class Loader(engineTarget:Target[LoaderFeedback]) extends Logging {
 		DEBUG("loader loading", file)
 		val sample	=
 				(Wav load file)
-				.failEffect	{ it => ERROR("cannot load file", it) }
+				.leftEffect	{ it => ERROR("cannot load file", it) }
 				.toOption
 				.map { new CacheSample(_) }
 		doInEngine(thunk {
@@ -70,7 +71,7 @@ final class Loader(engineTarget:Target[LoaderFeedback]) extends Logging {
 		}
 	}
 	
-	private def doInEngine(task:Task) {
+	private def doInEngine(task:Thunk[Unit]) {
 		 engineTarget send LoaderExecute(task)
 	}
 }

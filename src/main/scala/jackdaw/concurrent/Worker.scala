@@ -3,7 +3,7 @@ package jackdaw.concurrent
 import scutil.lang._
 
 object Worker {
-	def apply(name:String, priority:Int, body:Thunk[Boolean]):Worker	=
+	def apply(name:String, priority:Int, body:Io[Boolean]):Worker	=
 			new WorkerThread(name, priority, body)
 }
 
@@ -12,7 +12,7 @@ sealed trait Worker extends Disposable {
 	def dispose():Unit
 }
 
-private final class WorkerThread(name:String, priority:Int,  body:Thunk[Boolean]) extends Thread with Worker {
+private final class WorkerThread(name:String, priority:Int,  body:Io[Boolean]) extends Thread with Worker {
 	setName(name)
 	setPriority(priority)
 	
@@ -28,7 +28,7 @@ private final class WorkerThread(name:String, priority:Int,  body:Thunk[Boolean]
 	override protected def run() {
 		try {
 			while (keepAlive) {
-				if (!body())	return
+				if (!body.unsafeRun())	return
 			}
 		}
 		catch { case e:InterruptedException =>

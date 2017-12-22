@@ -1,7 +1,5 @@
 package jackdaw.migration
 
-import scutil.lang._
-
 import scjson.ast._
 import scjson.io._
 import scjson.pickle._
@@ -15,13 +13,13 @@ object V0toV1 extends Migration {
 	val oldVersion	= V0.version
 	val newVersion	= V1.version
 	
-	def convert(it:JSONValue):Tried[JSONUnpickleFailure,JSONValue]	=
+	def convert(it:JsonValue):Either[JsonUnpickleFailure,JsonValue]	=
 			{
 				import V0.LocalProtocol._
-				JSONIO.readAST[TrackDataV0](it)
+				JsonIo.readAST[TrackDataV0](it)
 			} map { it =>
 				import V1.LocalProtocol._
-				JSONIO.writeAST[TrackDataV1](convertValue(it))
+				JsonIo.writeAST[TrackDataV1](convertValue(it))
 			}
 	
 	private def convertValue(it:TrackDataV0):TrackDataV1	=

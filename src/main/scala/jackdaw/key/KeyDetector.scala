@@ -6,7 +6,7 @@ import jkeyfinder._
 import scaudio.sample._
 
 object KeyDetector {
-	private val scaling	= 8
+	//private val scaling	= 8
 	
 	def findKey(sample:Sample):MusicKey	= {
 		val channels		= sample.channels

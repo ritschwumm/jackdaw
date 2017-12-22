@@ -1,6 +1,6 @@
 package jackdaw
 
-import scutil.core.implicits._
+import scutil.base.implicits._
 import scutil.lang.ISeq
 
 import scaudio.output._

@@ -1,7 +1,6 @@
 package jackdaw.gui.util
 
 import scutil.base.implicits._
-import scutil.core.implicits._
 import scutil.lang._
 
 import screact._
@@ -75,8 +74,8 @@ object ActionUtil {
 			up cata (-1, +1)
 	
 	private def directionValue(up:Boolean, down:Boolean):Option[Boolean]	=
-			(up		guard true) orElse
-			(down	guard false)
+			(up		option true) orElse
+			(down	option false)
 	
 	private def mergeDirections(a:Option[Boolean], b:Option[Boolean]):Option[Boolean]	=
 			(a, b) match {

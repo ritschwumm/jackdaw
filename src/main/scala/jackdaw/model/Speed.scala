@@ -13,7 +13,7 @@ import jackdaw.range._
 import jackdaw.range.PitchMath._
 import jackdaw.data._
 import jackdaw.persistence._
-import jackdaw.persistence.JSONProtocol._
+import jackdaw.persistence.JsonProtocol._
 
 object Speed {
 	private val step:Boolean=>Double	= _ cata (bpm(1),		bpm(0.05))
@@ -54,7 +54,7 @@ final class Speed extends Observing {
 			}
 			
 	def persist(file:File) {
-		val persister	= new JSONPersister[Double]
+		val persister	= new JsonPersister[Double]
 		
 		persister load file foreach {
 			setValueRastered (_, true)

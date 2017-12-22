@@ -8,7 +8,6 @@ import javazoom.jl.converter.Converter.{ ProgressListener => ConverterProgressLi
 
 import scutil.base.implicits._
 import scutil.core.implicits._
-import scutil.lang.{ Converter => _, _ }
 import scutil.log._
 
 import jackdaw.util.Checked
@@ -21,15 +20,15 @@ object JLayer extends Decoder with Logging {
 				_	<- recognizeFile(input)
 				_ 	<-
 					input withInputStream { ist =>
-						DEBUG(so"decoding with ${name}")
+						DEBUG(show"decoding with ${name}")
 						
 						try {
 							new Converter convert (ist, output.getAbsolutePath, pl, null)
-							Win(())
+							Right(())
 						}
 						catch { case e:JavaLayerException =>
-							ERROR(so"${name} failed", e)
-							Checked fail1 so"${name} failed: ${e.getMessage}"
+							ERROR(show"${name} failed", e)
+							Checked fail1 show"${name} failed: ${e.getMessage}"
 						}
 					}
 			}

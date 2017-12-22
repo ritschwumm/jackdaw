@@ -39,7 +39,7 @@ object V2 {
 					"major"	-> Major,
 					"minor"	-> Minor
 				))
-		implicit lazy val MusicPitchF			= viaFormat(Bijector[MusicPitch])
+		implicit lazy val MusicPitchF			= viaFormat(Bijection.Gen[MusicPitch])
 		implicit lazy val MusicKeyV2F	=
 			caseClassSumFormat[MusicKeyV2](
 				"silence"	-> caseObjectFormat(SilenceV2),

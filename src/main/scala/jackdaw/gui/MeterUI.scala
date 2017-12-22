@@ -73,8 +73,8 @@ final class MeterUI(value:Signal[Float], meterRange:MeterRange, vertical:Boolean
 			canvas.bounds map { it =>
 				val size	=
 						IntPoint(
-							it.x.size.toInt guardBy { _ > 0 } getOrElse 1,
-							it.y.size.toInt guardBy { _ > 0 } getOrElse 1
+							it.x.size.toInt optionBy { _ > 0 } getOrElse 1,
+							it.y.size.toInt optionBy { _ > 0 } getOrElse 1
 						)
 				
 				// NOTE for y start and end are swapped

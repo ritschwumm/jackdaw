@@ -1,5 +1,6 @@
 package jackdaw.player
 
+import scutil.lang.implicits._
 import scutil.lang._
 import scutil.log._
 

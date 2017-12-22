@@ -2,8 +2,8 @@ package jackdaw.migration
 
 import java.io._
 
+import scutil.base.implicits._
 import scutil.core.implicits._
-import scutil.lang._
 import scutil.log._
 
 import scjson.ast._
@@ -44,32 +44,33 @@ object Migration extends Logging {
 		val result	=
 				for {
 					strO	<- readFile(oldFile)
-					astO	<- JSONCodec decode strO
+					astO	<- JsonCodec decode strO
 					astN	<- step convert astO
-					strN	= JSONCodec encodePretty astN
+					strN	= JsonCodec encodePretty astN
 					_		= writeFile(newFile, strN)
 				}
 				yield ()
-		result failEffect { e =>
-			ERROR("cannot migrate", oldFile, e)
+		result leftEffect { e =>
+			// TODO e has a weird type - why?
+			ERROR("cannot migrate", oldFile, e.toString)
 		}
 	}
 	
-	private def readFile(file:File):Tried[JSONIOExceptionFailure,String]	=
+	private def readFile(file:File):Either[JsonIoExceptionFailure,String]	=
 			try {
-				Win(file readString JSONIO.charset)
+				Right(file readString JsonIo.charset)
 			}
 			catch { case e:IOException =>
-				Fail(JSONIOExceptionFailure(e))
+				Left(JsonIoExceptionFailure(e))
 			}
 			
 	private def writeFile(file:File, content:String):Unit	=
-			file writeString (JSONIO.charset, content)
+			file writeString (JsonIo.charset, content)
 }
 
 trait Migration {
 	val oldVersion:TrackVersion
 	val newVersion:TrackVersion
 	
-	def convert(old:JSONValue):Tried[JSONUnpickleFailure,JSONValue]
+	def convert(old:JsonValue):Either[JsonUnpickleFailure,JsonValue]
 }

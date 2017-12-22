@@ -2,6 +2,8 @@ package jackdaw.media
 
 import java.io.File
 
+import scutil.core.implicits._
+
 import jackdaw.util.Checked
 
 object Vorbiscomment extends Inspector {
@@ -20,10 +22,10 @@ object Vorbiscomment extends Inspector {
 			yield {
 				val extract	= MediaUtil extractFrom result.out
 				Metadata(
-					title	= extract("""TITLE=(.*)""".r),
-					artist	= extract("""ARTIST=(.*)""".r),
-					album	= extract("""ALBUM=(.*)""".r)
-					// genre	= extract("""GENRE=(.*)""".r)
+					title	= extract(re"""TITLE=(.*)"""),
+					artist	= extract(re"""ARTIST=(.*)"""),
+					album	= extract(re"""ALBUM=(.*)""")
+					// genre	= extract(re"""GENRE=(.*)""")
 				)
 			}
 	

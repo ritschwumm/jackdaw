@@ -28,7 +28,7 @@ final class ChannelUI(strip:Strip, tone:Option[Tone], peak:Signal[Float], phoneE
 	private val delayedStripUI	=
 			new DelayUI(new StripUI(strip, peak, phoneEnabled, keyInput))
 	
-	private val z		= (Style.linear.knob.size / 2).toInt
+	//private val z		= (Style.linear.knob.size / 2).toInt
 	private val	panel	=
 			GridBagUI(
 				delayedToneUI	pos(0,0) size(1,1) weight(1,0) fill NONE		anchor CENTER	insetsTLBR(0,0,6,0),

@@ -7,7 +7,7 @@ import scala.math._
 
 import scutil.base.implicits._
 import scutil.geom._
-import scutil.math._
+import scutil.math.functions._
 
 import jackdaw.curve.BandCurve
 import jackdaw.util.LRU
@@ -21,8 +21,8 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 		val image	= provideFullImage(size)
 		g drawImage (
 			image,
-			target.x.start,
-			target.y.start,
+			target.left,
+			target.top,
 			null
 		)
 	}
@@ -50,10 +50,10 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 	private var tileImageCache:Option[(Int,LRU[Int,BufferedImage])]	= None
 	
 	def drawPartial(g:Graphics2D, target:IntRect, offset:Int) {
-		val x		= target.x.start
-		val y		= target.y.start
-		val width	= target.x.size
-		val height	= target.y.size
+		val x		= target.left
+		val y		= target.top
+		val width	= target.width
+		val height	= target.height
 		
 		// which tile first
 		var ti	=
@@ -84,7 +84,7 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 	}
 	
 	private def provideTileImage(height:Int, index:Int):Option[BufferedImage]	=
-			index guardBy { it => it >= 0 && it < tileCount } map { index =>
+			index optionBy { it => it >= 0 && it < tileCount } map { index =>
 				// first: provide the map
 				// second: provide tiles in the map
 				val lru:LRU[Int,BufferedImage]	=
@@ -208,6 +208,7 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 		)
 	}
 	
+	/*
 	// overwritten band energies variant
 	@inline
 	private def renderLineOverlapBands(
@@ -226,6 +227,7 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 		g setPaint	Style.wave.overlap.high
 		g drawLine	(x, bottomY-yHigh,		x, bottomY)
 	}
+	*/
 	
 	//------------------------------------------------------------------------------
 	

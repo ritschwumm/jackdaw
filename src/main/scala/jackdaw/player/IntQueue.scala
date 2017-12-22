@@ -1,7 +1,7 @@
 package jackdaw.player
 
 final class IntQueue(maxSize:Int) {
-	private var items:Array[Int]	= new Array[Int](maxSize)
+	private val items:Array[Int]	= new Array[Int](maxSize)
 	private var curSize:Int			= 0
 	
 	def size:Int 		= curSize

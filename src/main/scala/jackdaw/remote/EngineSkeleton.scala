@@ -1,6 +1,6 @@
 package jackdaw.remote
 
-import scutil.core.implicits._
+import scutil.base.implicits._
 import scutil.lang._
 import scutil.time._
 import scutil.log._
@@ -32,8 +32,8 @@ final class EngineSkeleton(port:Int) extends Logging {
 				}
 			)
 			
-	private val engine			= new Engine(sender)
-	private val tcpClient		= new TcpClient(port)
+	private val engine		= new Engine(sender)
+	private val tcpClient	= new TcpClient(port)
 	private val tcpConnection:TcpConnection[ToSkeleton,ToStub]	= tcpClient.connect()
 	
 	def start() {
@@ -61,7 +61,7 @@ final class EngineSkeleton(port:Int) extends Logging {
 			Worker(
 				"skeleton receiver",
 				Thread.NORM_PRIORITY,
-				thunk {
+				Io delay {
 					receiveAndAct()
 				}
 			)

@@ -2,7 +2,7 @@ package jackdaw.key
 
 import scala.math._
 
-import scutil.math._
+import scutil.math.functions._
 
 final case class MusicChord(root:MusicPitch, scale:MusicScale) {
 	def detuned(semitoneOffset:Double):DetunedChord	= {

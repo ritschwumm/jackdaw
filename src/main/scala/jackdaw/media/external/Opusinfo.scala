@@ -2,6 +2,8 @@ package jackdaw.media
 
 import java.io.File
 
+import scutil.core.implicits._
+
 import jackdaw.util.Checked
 
 object Opusinfo extends Inspector {
@@ -20,10 +22,10 @@ object Opusinfo extends Inspector {
 			yield {
 				val extract	= MediaUtil extractFrom result.out
 				Metadata(
-					title	= extract("""\ttitle=(.*)""".r),
-					artist	= extract("""\tartist=(.*)""".r),
-					album	= extract("""\talbum=(.*)""".r)
-					// genre	= extract("""\tgenre=(.*)""".r)
+					title	= extract(re"""\ttitle=(.*)"""),
+					artist	= extract(re"""\tartist=(.*)"""),
+					album	= extract(re"""\talbum=(.*)""")
+					// genre	= extract(re"""\tgenre=(.*)""")
 				)
 			}
 	

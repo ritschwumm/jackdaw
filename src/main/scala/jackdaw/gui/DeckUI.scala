@@ -302,7 +302,7 @@ final class DeckUI(deck:Deck, keyTarget:Signal[Boolean]) extends UI with Observi
 		_	=> Some {
 			(files:Validated[Nes[Exception],Nes[File]]) => {
 				files
-				.badEffect	{ es => ERROR((es.toISeq):_*)	}
+				.badEffect	{ es => ERROR log es.toISeq.map(LogThrowable.apply)	}
 				.toOption
 				.map		{ _.head }
 				.foreach	(deck.loadTrack)

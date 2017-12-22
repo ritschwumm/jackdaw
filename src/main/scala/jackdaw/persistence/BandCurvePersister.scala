@@ -3,6 +3,7 @@ package jackdaw.persistence
 import java.io._
 
 import scutil.base.implicits._
+import scutil.core.implicits._
 import scutil.log._
 
 import jackdaw.curve.BandCurve
@@ -11,7 +12,7 @@ import jackdaw.curve.BandCurve
 final class BandCurvePersister extends Persister[BandCurve] with Logging {
 	def load(file:File):Option[BandCurve] = {
 		try {
-			new ObjectInputStream(new FileInputStream(file)) use { in =>
+			new ObjectInputStream(file.newInputStream()) use { in =>
 				val	fragmentRate	= in.readDouble
 				val	rasterFrames	= in.readInt
 				val	chunkCount		= in.readInt
@@ -26,14 +27,14 @@ final class BandCurvePersister extends Persister[BandCurve] with Logging {
 			}
 		}
 		catch { case e:Exception	=>
-			ERROR("cannot unmarshall file: " + file.toString, e)
+			ERROR("cannot unmarshall file", file, e)
 			None
 		}
 	}
 	
 	def save(file:File)(curve:BandCurve) {
 		try {
-			new ObjectOutputStream(new FileOutputStream(file)) use { out =>
+			new ObjectOutputStream(file.newOutputStream()) use { out =>
 				out writeDouble	curve.fragmentRate
 				out writeInt	curve.rasterFrames
 				out writeInt	curve.chunkCount
@@ -44,7 +45,7 @@ final class BandCurvePersister extends Persister[BandCurve] with Logging {
 			}
 		}
 		catch { case e:Exception	=>
-			ERROR("cannot marshall file: " + file.toString, e)
+			ERROR("cannot marshall file", file, e)
 		}
 	}
 	

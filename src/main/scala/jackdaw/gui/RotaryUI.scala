@@ -9,7 +9,7 @@ import scala.math._
 
 import scutil.base.implicits._
 import scutil.lang.ISeq
-import scutil.math._
+import scutil.math.functions._
 
 import screact._
 import scgeom._
@@ -58,7 +58,7 @@ final class RotaryUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 						boundsCur,
 						valueToAngle(neutral) spanTo valueToAngle(valueCur))
 								
-				val knob	= inValueSpan(valueCur) guard {
+				val knob	= inValueSpan(valueCur) option {
 					/*
 					// rectangle at the top of the track (that is at 90 degrees)
 					val knobRect	= SgRectangle(
@@ -141,7 +141,7 @@ final class RotaryUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 	// mouse actions modify the value
 	private val mouseModify:Events[Double] =
 			mousePress orElse mouseDrag filterMap { ev =>
-				calculateValue(ev.getPoint) combineWith (_ flatPrevent _)
+				calculateValue(ev.getPoint) combineWith (_ flatOptionNot _)
 			}
 	
 	private val mouseReset:Events[Double]	=
@@ -187,7 +187,7 @@ final class RotaryUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 	
 			// half opening overshot is allowed and limited
 			(angle3 >= Style.rotary.angle.max - Style.rotary.angle.opening/2) &&
-			(angle3 <= Style.rotary.angle.min + Style.rotary.angle.opening/2) guard {
+			(angle3 <= Style.rotary.angle.min + Style.rotary.angle.opening/2) option {
 				val angle	= clampDouble(angle3, Style.rotary.angle.max, Style.rotary.angle.min)
 				valueToAngle inverse angle
 			}

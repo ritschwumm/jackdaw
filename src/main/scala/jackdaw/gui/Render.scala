@@ -5,7 +5,7 @@ import java.util.Locale
 import scala.math._
 
 import scutil.base.implicits._
-import scutil.math._
+import scutil.math.functions._
 
 import scaudio.math._
 

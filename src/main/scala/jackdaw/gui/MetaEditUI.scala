@@ -36,7 +36,7 @@ final class MetaEditUI(value:Signal[Option[String]], strong:Boolean) extends UI 
 	//## keyboard
 	
 	(component:KeyCaster) connect { ev =>
-		component.getParent.guardNotNull foreach { parent =>
+		component.getParent.optionNotNull foreach { parent =>
 			import KeyEvent._
 			(ev.getID, ev.getKeyCode) match {
 				case (KEY_PRESSED, 	VK_ESCAPE)	=> parent.requestFocusInWindow()
@@ -51,10 +51,11 @@ final class MetaEditUI(value:Signal[Option[String]], strong:Boolean) extends UI 
 
 	private val textChanges:Events[String]	=
 			SwingWidget transformer (
-					display,
-					(field.getDocument:DocumentCaster).connect,
-					thunk { field.getText },
-					field.setText)
+				display,
+				(field.getDocument:DocumentCaster).connect,
+				thunk { field.getText },
+				field.setText
+			)
 		
 	editable observeNow { it =>
 		field setEditable	it
@@ -79,8 +80,9 @@ final class MetaEditUI(value:Signal[Option[String]], strong:Boolean) extends UI 
 	
 	val focussed:Signal[Boolean]	=
 			SwingWidget signal (
-					(component:FocusCaster).connect,
-					thunk { component.hasFocus })
+				(component:FocusCaster).connect,
+				thunk { component.hasFocus }
+			)
 			
 	val changes:Events[String]	=
 			textChanges gate editable

@@ -21,7 +21,7 @@ import jackdaw.media._
 import jackdaw.curve._
 import jackdaw.key._
 import jackdaw.persistence._
-import jackdaw.persistence.JSONProtocol._
+import jackdaw.persistence.JsonProtocol._
 
 object Track extends Logging {
 	private var cache:Map[File,WeakReference[Track]]	= Map.empty
@@ -91,7 +91,7 @@ final class Track private(val file:File) extends Observing with Logging {
 	//------------------------------------------------------------------------------
 	
 	def setAnnotation(it:String) {
-		modifyData(TrackData.L.annotation putter it)
+		modifyData(TrackData.L.annotation set it)
 	}
 	
 	def addCuePoint(nearFrame:Double, rhythmUnit:RhythmUnit) {
@@ -121,7 +121,7 @@ final class Track private(val file:File) extends Observing with Logging {
 					None,
 					detectedRhythm(position) orElse fakeRhythm(position)
 				)
-		modifyData(TrackData.L.rhythm putter it)
+		modifyData(TrackData.L.rhythm set it)
 	}
 	
 	private def fakeRhythm(position:Double):Option[Rhythm]	=
@@ -153,7 +153,7 @@ final class Track private(val file:File) extends Observing with Logging {
 	
 	/** does not modify if the rhythm would not be useful afterwards */
 	private def modifyRhythm(func:Rhythm=>Rhythm) {
-		modifyData(TrackData.L.rhythm modifier { curr	=>
+		modifyData(TrackData.L.rhythm mod { curr	=>
 			val valid	=
 					for {
 						base	<- curr
@@ -171,7 +171,7 @@ final class Track private(val file:File) extends Observing with Logging {
 	
 	//------------------------------------------------------------------------------
 	
-	private val dataPersister	= new JSONPersister[TrackData]
+	private val dataPersister	= new JsonPersister[TrackData]
 	private val curvePersister	= new BandCurvePersister
 	
 	// NOTE using swing here is ugly
@@ -187,7 +187,7 @@ final class Track private(val file:File) extends Observing with Logging {
 				// load cached data
 				val dataVal:TrackData	=
 						trackFiles.data.exists
-						.flatGuard {
+						.flatOption {
 							dataPersister load trackFiles.data
 						}
 						.someEffect	{ _ =>
@@ -217,7 +217,7 @@ final class Track private(val file:File) extends Observing with Logging {
 						}
 				edtWait {
 					modifyData(
-						TrackData.L.metadata putter metadataVal
+						TrackData.L.metadata set metadataVal
 					)
 				}
 				
@@ -231,7 +231,7 @@ final class Track private(val file:File) extends Observing with Logging {
 						trackFiles.wav.exists &&
 						trackFiles.wav.lastModifiedMilliInstant >= fileModified
 				val wavVal:Option[File]	=
-						(wavFresh guard trackFiles.wav)
+						(wavFresh option trackFiles.wav)
 						.someEffect { _ =>
 							INFO("using cached wav")
 						}
@@ -244,7 +244,7 @@ final class Track private(val file:File) extends Observing with Logging {
 										Track.preferredFrameRate,
 										Track.preferredChannelCount
 									)
-							success guard trackFiles.wav
+							success option trackFiles.wav
 						}
 						.noneEffect {
 							WARN("cannot decode wav")
@@ -256,7 +256,7 @@ final class Track private(val file:File) extends Observing with Logging {
 						wavVal flatMap { wavFile =>
 							INFO("getting sample")
 							(Wav load wavFile)
-							.failEffect	{	e =>
+							.leftEffect	{	e =>
 								ERROR("cannot get sample", e)
 							}
 							.toOption
@@ -272,7 +272,7 @@ final class Track private(val file:File) extends Observing with Logging {
 						trackFiles.curve.lastModifiedMilliInstant >= trackFiles.wav.lastModifiedMilliInstant
 				val curveVal:Option[BandCurve]	=
 						curveFresh
-						.flatGuard	{
+						.flatOption	{
 							curvePersister load trackFiles.curve
 						}
 						.someEffect	{ _ =>
@@ -318,7 +318,7 @@ final class Track private(val file:File) extends Observing with Logging {
 						}
 				edtWait {
 					modifyData(
-						TrackData.L.measure putter measureVal
+						TrackData.L.measure set measureVal
 					)
 				}
 				
@@ -343,7 +343,7 @@ final class Track private(val file:File) extends Observing with Logging {
 						}
 				edtWait {
 					modifyData(
-						TrackData.L.key putter keyVal
+						TrackData.L.key set keyVal
 					)
 				}
 				

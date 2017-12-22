@@ -12,7 +12,7 @@ import jackdaw.data._
 import jackdaw.media.Metadata
 import jackdaw.key._
 
-object JSONProtocol extends OldFullProtocol {
+object JsonProtocol extends OldFullProtocol {
 	implicit lazy val MilliInstantF			= viaFormat(MilliInstant.newType)
 	implicit lazy val SchemaF				= caseClassFormat2(Schema.apply,		Schema.unapply)
 	implicit lazy val RhythmF				= caseClassFormat3(Rhythm.apply,		Rhythm.unapply)
@@ -22,7 +22,7 @@ object JSONProtocol extends OldFullProtocol {
 				"major"	-> Major,
 				"minor"	-> Minor
 			))
-	implicit lazy val MusicPitchF			= viaFormat(Bijector[MusicPitch])
+	implicit lazy val MusicPitchF			= viaFormat(Bijection.Gen[MusicPitch])
 	implicit lazy val MusicChordF			= caseClassFormat2(MusicChord.apply,	MusicChord.unapply)
 	implicit lazy val MusicKeyF	=
 			caseClassSumFormat[MusicKey](

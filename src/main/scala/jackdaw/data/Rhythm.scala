@@ -5,7 +5,7 @@ import scala.collection.mutable
 
 import scutil.base.implicits._
 import scutil.lang.ISeq
-import scutil.math._
+import scutil.math.functions._
 
 import jackdaw.range.PitchMath._
 

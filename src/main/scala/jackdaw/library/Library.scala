@@ -80,16 +80,16 @@ object Library extends Logging {
 		// inform user
 		if (deleteTracks.nonEmpty) {
 			INFO(
-				so"cleaned library",
-				so"was ${info(allTracks)}",
-				so"kept ${info(keepTracks)}",
-				so"deleted ${info(deleteTracks)}"
+				show"cleaned library",
+				show"was ${info(allTracks)}",
+				show"kept ${info(keepTracks)}",
+				show"deleted ${info(deleteTracks)}"
 			)
 		}
 		else {
 			INFO(
-				so"library untouched",
-				so"was ${info(allTracks)}"
+				show"library untouched",
+				show"was ${info(allTracks)}"
 			)
 		}
 	}
@@ -98,7 +98,7 @@ object Library extends Logging {
 		val count	= tracks.size
 		val space	= (tracks map spaceNeeded).sum
 		(Human roundedBinary space) + "B for " +
-		count + " " + (count == 1 cata ("tracks", "track"))
+		count.toString + " " + (count == 1 cata ("tracks", "track"))
 	}
 	
 	/** first the ones where metadata was modified first */
@@ -137,7 +137,7 @@ object Library extends Logging {
 			.reverse
 			.zipWithIndex
 			.collapseMap { case (file, index) =>
-				val name	= file.getName.guardNonEmpty
+				val name	= file.getName.optionNonEmpty
 				if (index == 0)	name orElse prefixPath(file.getPath)
 				else			name
 			}
@@ -148,7 +148,7 @@ object Library extends Logging {
 			else if (path == """\\""")				Some("UNC")
 			else if (path matches """[A-Z]:\\""")	Some(path substring (0,1))
 			else {
-				ERROR(so"unexpected root path ${path}")
+				ERROR(show"unexpected root path ${path}")
 				None
 			}
 }

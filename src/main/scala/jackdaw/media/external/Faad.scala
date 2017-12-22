@@ -2,6 +2,8 @@ package jackdaw.media
 
 import java.io.File
 
+import scutil.core.implicits._
+
 import jackdaw.util.Checked
 
 object Faad extends Inspector with Decoder {
@@ -21,11 +23,11 @@ object Faad extends Inspector with Decoder {
 			yield {
 				val extract	= MediaUtil extractFrom result.err
 				Metadata(
-					title	= extract("""title: (.*)""".r),
-					artist	= extract("""artist: (.*)""".r),
-					album	= extract("""album: (.*)""".r)
-					// genre		= extract("""genre: (.*)""".r)
-					// albumArtist	= extract("""album_artist: (.*)""".r),
+					title	= extract(re"""title: (.*)"""),
+					artist	= extract(re"""artist: (.*)"""),
+					album	= extract(re"""album: (.*)""")
+					// genre		= extract(re"""genre: (.*)""")
+					// albumArtist	= extract(re"""album_artist: (.*)"""),
 				)
 			}
 	

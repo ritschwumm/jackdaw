@@ -64,7 +64,7 @@ final class WaveUI(
 				(bandCurve.current cata (Config.curveRaster, _.rasterFrames)).toDouble
 			},
 			signal {
-				innerRect.current.x.size guardBy { _ != 0 } cata (1, frameCount.current / _)
+				innerRect.current.width optionBy { _ != 0 } cata (1, frameCount.current / _)
 			})
 	
 	private val coords:Signal[Coords]	=
@@ -73,13 +73,12 @@ final class WaveUI(
 			}
 	
 	private sealed case class Coords(val inner:IntRect, zoomFactor:Double, frameOrig:Double) {
-		val leftX	= inner.x.start
-		val rightX	= inner.x.end
-		val topY	= inner.y.start
-		val bottomY	= inner.y.end
-		
-		val sizeX	= inner.x.size
-		val sizeY	= inner.y.size
+		val leftX	= inner.left
+		val rightX	= inner.right
+		val topY	= inner.top
+		val bottomY	= inner.bottom
+		val sizeX	= inner.width
+		val sizeY	= inner.height
 		
 		def src(pixel:Int):Int	= round(pixel2frame(pixel) / Config.curveRaster).toInt
 		
@@ -89,16 +88,16 @@ final class WaveUI(
 		def value2y(value:Double):Int		= (bottomY - value * sizeY).toInt
 		
 		def frame2pixelGuarded(frame:Double):Option[Int]	=
-				frame2pixel(frame) guardBy display
+				frame2pixel(frame) optionBy display
 				
 		// NOTE clipping fails for extreme values
-		// pixel > -16384 && pixel < 16384 guard {
+		// pixel > -16384 && pixel < 16384 option {
 		private def display(pixel:Int):Boolean	=
 				pixel >= (leftX		- WaveUI.maxFigureWidth) &&
 				pixel <= (rightX	+ WaveUI.maxFigureWidth)
 				
 		def span2pixelsGuarded(span:Span):Option[(Int,Int)]	=
-				(frame2pixel(span.start), frame2pixel(span.end)) guardBy (display2 _).tupled
+				(frame2pixel(span.start), frame2pixel(span.end)) optionBy (display2 _).tupled
 				
 		private def display2(startPixel:Int, endPixel:Int):Boolean	=
 				startPixel	<= leftX	&&
@@ -183,17 +182,17 @@ final class WaveUI(
 	typed[Signal[ISeq[Jump]]](jumps)
 			
 	private def flatSeq[T](its:ISeq[T]*):ISeq[T]	=
-			its.toISeq.flatten
+			its.toVector.flatten
 			
 	private final class Decorator(coords:Coords) {
 		def preRollFigure:Option[Figure]	=
-				coords frame2pixel 0 guardBy { _ > coords.leftX } map { before =>
+				coords frame2pixel 0 optionBy { _ > coords.leftX } map { before =>
 					val shape	= new Rectangle2D.Double(coords.leftX, coords.bottomY-Style.wave.roll.height, before-coords.leftX, Style.wave.roll.height)
 					FillShape(shape, Style.wave.roll.paint)
 				}
 			
 		def postRollFigure:Option[Figure]	=
-				coords frame2pixel frameCount.current guardBy { _ < coords.rightX } map { after =>
+				coords frame2pixel frameCount.current optionBy { _ < coords.rightX } map { after =>
 					val shape	= new Rectangle2D.Double(after, coords.bottomY-Style.wave.roll.height, coords.rightX-after, Style.wave.roll.height)
 					FillShape(shape, Style.wave.roll.paint)
 				}
@@ -331,7 +330,7 @@ final class WaveUI(
 	private val jumpFlag:Events[Double]	=
 			((mouse.leftPress snapshotWith jumps) { (ev, jumps) =>
 				jumps collapseMapFirst { case (figure, frame) =>
-					figure pick ev.getPoint guard frame
+					figure pick ev.getPoint option frame
 				}
 			})
 			.filterOption

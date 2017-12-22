@@ -19,7 +19,7 @@ object TrackData {
 				key			= None
 			)
 			
-	val L	= Lenser[TrackData]
+	val L	= Lens.Gen[TrackData]
 }
 
 final case class TrackData(

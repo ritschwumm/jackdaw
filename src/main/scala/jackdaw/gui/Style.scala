@@ -59,7 +59,7 @@ object Style {
 	// for items with a track
 	// between WEAK_FOREGROUND and NORMAL_BACKGROUND
 	private val WEAK_OUTLINE		= Color.GRAY
-	private val WEAK_BORDER			= BorderFactory createLineBorder STRONG_OUTLINE
+	//private val WEAK_BORDER			= BorderFactory createLineBorder STRONG_OUTLINE
 	
 	private val STRONG_FONT			= new Font("sansserif", Font.BOLD,	11)
 	private val WEAK_FONT			= new Font("sansserif", Font.PLAIN,	9)
@@ -97,7 +97,7 @@ object Style {
 	}
 	
 	object window {
-		val title	= so"${BuildInfo.name} ${BuildInfo.version}"
+		val title	= show"${BuildInfo.name} ${BuildInfo.version}"
 		val icon	= bufferedImage("/logo.png") // imageIcon("/logo.png").getImage
 		val size	= new Dimension(682, 640)
 	}
@@ -326,6 +326,6 @@ object Style {
 	//------------------------------------------------------------------------------
 	
 	private def bufferedImage(path:String):BufferedImage	= ImageIO read resource(path)
-	private def imageIcon(path:String):ImageIcon			= new ImageIcon(resource(path))
+	//private def imageIcon(path:String):ImageIcon			= new ImageIcon(resource(path))
 	private def resource(path:String):URL					= getClass getResource path
 }

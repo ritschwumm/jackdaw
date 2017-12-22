@@ -19,6 +19,6 @@ final case class LoaderPreload(
 extends LoaderAction
 
 final case class LoaderNotifyEngine(
-	done:Task
+	done:Thunk[Unit]
 )
 extends LoaderAction

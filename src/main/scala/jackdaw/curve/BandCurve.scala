@@ -2,7 +2,7 @@ package jackdaw.curve
 
 import scala.math._
 
-import scutil.math._
+import scutil.math.functions._
 
 import scaudio.sample.Sample
 import scaudio.dsp.Equalizer

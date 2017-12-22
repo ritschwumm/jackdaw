@@ -2,7 +2,9 @@ package jackdaw.media
 
 import java.io.File
 
-import scutil.math.clampInt
+import scutil.core.implicits._
+import scutil.lang.implicits._
+import scutil.math.functions._
 
 import jackdaw.util.Checked
 
@@ -23,12 +25,12 @@ object Madplay extends Inspector with Decoder {
 			yield {
 				val extract	= MediaUtil extractFrom result.err
 				Metadata(
-					title	= extract("""\s*Title: (.*)""".r),
-					artist	= extract("""\s*Artist: (.*)""".r),
-					album	= extract("""\s*Album: (.*)""".r)
-					// genre		= extract("""\s*Genre: (.*)""".r)
-					// publisher	= extract("""\s*Publisher: (.*)""".r),
-					// comment		= extract("""\s*Comment: (.*)""".r),
+					title	= extract(re"""\s*Title: (.*)"""),
+					artist	= extract(re"""\s*Artist: (.*)"""),
+					album	= extract(re"""\s*Album: (.*)""")
+					// genre		= extract(re"""\s*Genre: (.*)""")
+					// publisher	= extract(re"""\s*Publisher: (.*)"""),
+					// comment		= extract(re"""\s*Comment: (.*)"""),
 				)
 			}
 	
@@ -59,7 +61,7 @@ object Madplay extends Inspector with Decoder {
 						(Checked trueWin1 (
 							output.length > 44,
 							"output file broken"
-						)) failEffect {
+						)) leftEffect {
 							_ => output.delete()
 						}
 			}

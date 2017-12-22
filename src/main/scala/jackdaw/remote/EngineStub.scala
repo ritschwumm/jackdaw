@@ -13,6 +13,7 @@ import jackdaw.player._
 import jackdaw.concurrent._
 
 object EngineStub {
+	// TODO find a better way of forking
 	private object vm {
 		val binary	=
 				(new File(SystemProperties.java.home) / "bin" / "java").getCanonicalPath
@@ -65,7 +66,7 @@ final class EngineStub extends Logging {
 	val (outputRate, phoneEnabled)	=	
 			tcpConnection.receive() match {
 				case StartedStub(outputRate, phoneEnabled)	=> (outputRate, phoneEnabled)
-				case x@SendStub(_)							=> sys error so"unexpected message ${x.toString}"
+				case x@SendStub(_)							=> sys error show"unexpected message ${x.toString}"
 			}
 	DEBUG("output rate", outputRate)
 	DEBUG("phone enabled", phoneEnabled)
@@ -118,7 +119,7 @@ final class EngineStub extends Logging {
 			Worker(
 				"stub receiver",
 				Thread.NORM_PRIORITY,
-				thunk {
+				Io delay {
 					receiveAndAct()
 				}
 			)
@@ -126,8 +127,8 @@ final class EngineStub extends Logging {
 	private def receiveAndAct():Boolean	=
 			try {
 				tcpConnection.receive() match {
-					case SendStub(feedback)		=> feedbackTarget send feedback;	true
-					case x@StartedStub(_, _)	=> ERROR("unexpected message", x);	false
+					case SendStub(feedback)		=> feedbackTarget send feedback;			true
+					case x@StartedStub(_, _)	=> ERROR("unexpected message", x.toString);	false
 				}
 			}
 			catch { case e:Exception =>

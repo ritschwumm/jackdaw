@@ -2,7 +2,8 @@ package jackdaw.media
 
 import java.io.File
 
-import scutil.math.clampInt
+import scutil.core.implicits._
+import scutil.math.functions._
 
 import jackdaw.util.Checked
 
@@ -25,10 +26,10 @@ object Mpg123 extends Inspector with Decoder {
 			yield {
 				val extract	= MediaUtil extractFrom result.err
 				Metadata(
-					title	= extract("""Title:\s+(.*?)\s+Artist:\s+(?:.*)""".r),
-					artist	= extract("""Title:\s+(?:.*?)\s+Artist:\s+(.*)""".r),
-					album	= extract("""Album:\s+(.*)""".r)
-					// genre	= extract("""Genre:\s+(.*)""".r)
+					title	= extract(re"""Title:\s+(.*?)\s+Artist:\s+(?:.*)"""),
+					artist	= extract(re"""Title:\s+(?:.*?)\s+Artist:\s+(.*)"""),
+					album	= extract(re"""Album:\s+(.*)""")
+					// genre	= extract(re"""Genre:\s+(.*)""")
 					// MPEG 1.0 layer III, 192 kbit/s, 44100 Hz stereo
 				)
 			}

@@ -6,7 +6,7 @@ import scala.math._
 
 import scutil.base.implicits._
 import scutil.lang._
-import scutil.math._
+import scutil.math.functions._
 
 import scaudio.control._
 import scaudio.output._
@@ -111,8 +111,8 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	private var fadeProgress	= false
 	private var fadeLater:Option[Fade]	= None
 	
-	private var jumpLater:Option[Task]	= None
-	private var jumpProgress:Boolean	= false
+	private var jumpLater:Option[Thunk[Unit]]	= None
+	private var jumpProgress:Boolean			= false
 	
 	private var loopSpan:Option[Span]	= None
 	private var loopDef:Option[LoopDef]	= None
@@ -631,7 +631,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	
 	private def doLoopEnable(preset:LoopDef) {
 		loopSpan	= mkLoop(headFrame, preset.size)
-		loopDef		= loopSpan.isDefined guard preset
+		loopDef		= loopSpan.isDefined option preset
 	}
 	
 	private def doLoopDisable() {

@@ -11,7 +11,7 @@ import scutil.gui.implicits._
 object ImageUtil {
 	def forComponent(component:Component):ImageUtil	=
 			new ImageUtil(
-				component.getGraphicsConfiguration.guardNotNull getOrElse
+				component.getGraphicsConfiguration.optionNotNull getOrElse
 				defaultGraphicsConfiguration
 			)
 			

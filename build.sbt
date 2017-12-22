@@ -1,8 +1,8 @@
 name			:= "jackdaw"
 organization	:= "de.djini"
-version			:= "1.34.0"
+version			:= "1.35.0"
 
-scalaVersion	:= "2.12.1"
+scalaVersion	:= "2.12.4"
 scalacOptions	++= Seq(
 	"-deprecation",
 	"-unchecked",
@@ -15,25 +15,25 @@ scalacOptions	++= Seq(
 	// "-language:experimental.macros"
 	"-feature",
 	// attention: requires build and runtime library version never differ
-	"-opt:l:classpath",
-	"-Ywarn-unused-import",
+	"-opt:l:inline",
+	"-opt-inline-from:**",
 	"-Xfatal-warnings",
 	"-Xlint"
 )
 
 conflictManager	:= ConflictManager.strict
 libraryDependencies	++= Seq(
-	"de.djini"		%%	"scutil-core"	% "0.96.0"	% "compile",
-	"de.djini"		%%	"scutil-swing"	% "0.96.0"	% "compile",
-	"de.djini"		%%	"scaudio"		% "0.84.0"	% "compile",
-	"de.djini"		%%	"scjson-io"		% "0.106.0"	% "compile",
-	"de.djini"		%%	"screact"		% "0.105.0"	% "compile",
-	"de.djini"		%%	"scgeom"		% "0.37.0"	% "compile",
-	"de.djini"		%%	"sc2d"			% "0.28.0"	% "compile",
-	"de.djini"					% "jkeyfinder"	% "0.3.0"	% "compile",
+	"de.djini"		%%	"scutil-core"	% "0.132.0"	% "compile",
+	"de.djini"		%%	"scutil-swing"	% "0.132.0"	% "compile",
+	"de.djini"		%%	"scaudio"		% "0.122.0"	% "compile",
+	"de.djini"		%%	"scjson-io"		% "0.145.0"	% "compile",
+	"de.djini"		%%	"screact"		% "0.143.0"	% "compile",
+	"de.djini"		%%	"scgeom"		% "0.39.0"	% "compile",
+	"de.djini"		%%	"sc2d"			% "0.30.0"	% "compile",
+	"de.djini"					% "jkeyfinder"	% "0.4.1"	% "compile",
 	"org.simplericity.macify"	% "macify"		% "1.6"		% "compile",
 	"javazoom"					% "jlayer"		% "1.0.1"	% "compile",
-	"com.mpatric"				% "mp3agic"		% "0.8.4"	% "compile",
+	"com.mpatric"				% "mp3agic"		% "0.9.1"	% "compile",
 	"de.jarnbjo"				% "j-ogg-all"	% "1.0.0"	% "compile"
 )
 
@@ -63,7 +63,6 @@ val vmOptions	= Seq(
 	"-server",
 	"-Xms64m",
 	"-Xmx64m"
-	// "-Xincgc"
 	// full (mixed?) collections in G1 take far too long
 	// "-XX:+UnlockExperimentalVMOptions",
 	// "-XX:+UseG1GC",
