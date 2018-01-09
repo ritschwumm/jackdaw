@@ -1,6 +1,6 @@
 name			:= "jackdaw"
 organization	:= "de.djini"
-version			:= "1.35.0"
+version			:= "1.36.0"
 
 scalaVersion	:= "2.12.4"
 scalacOptions	++= Seq(
@@ -23,11 +23,11 @@ scalacOptions	++= Seq(
 
 conflictManager	:= ConflictManager.strict
 libraryDependencies	++= Seq(
-	"de.djini"		%%	"scutil-core"	% "0.132.0"	% "compile",
-	"de.djini"		%%	"scutil-swing"	% "0.132.0"	% "compile",
-	"de.djini"		%%	"scaudio"		% "0.122.0"	% "compile",
-	"de.djini"		%%	"scjson-io"		% "0.145.0"	% "compile",
-	"de.djini"		%%	"screact"		% "0.143.0"	% "compile",
+	"de.djini"		%%	"scutil-core"	% "0.133.0"	% "compile",
+	"de.djini"		%%	"scutil-swing"	% "0.133.0"	% "compile",
+	"de.djini"		%%	"scaudio"		% "0.123.0"	% "compile",
+	"de.djini"		%%	"scjson-io"		% "0.146.0"	% "compile",
+	"de.djini"		%%	"screact"		% "0.144.0"	% "compile",
 	"de.djini"		%%	"scgeom"		% "0.39.0"	% "compile",
 	"de.djini"		%%	"sc2d"			% "0.30.0"	% "compile",
 	"de.djini"					% "jkeyfinder"	% "0.4.1"	% "compile",

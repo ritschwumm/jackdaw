@@ -17,7 +17,7 @@ object Mp3agic extends Inspector with Logging {
 			for {
 				_		<- recognizeFile(input)
 				mp3file	<-
-						Catch.exception in new Mp3File(input.getAbsolutePath) mapLeft { e =>
+						Catch.exception in new Mp3File(input.getAbsolutePath) leftMap { e =>
 							ERROR("cannot create Mp3File", e)
 							Checked problem1 "cannot create Mp3File"
 						}

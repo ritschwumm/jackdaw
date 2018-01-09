@@ -68,7 +68,7 @@ object MediaUtil extends Logging {
 			
 	def runCommand(command:String*)(implicit sl:SourceLocation):Checked[ExternalResult]	= {
 		DEBUG log command.toVector.map(LogString.apply)
-		External exec command.toVector result false eitherBy { _.rc == 0 } mapLeft { res =>
+		External exec command.toVector result false eitherBy { _.rc == 0 } leftMap { res =>
 			val first	= "command failed: " + (command mkString " ")
 			Nes(first, res.err)
 		}
@@ -78,7 +78,7 @@ object MediaUtil extends Logging {
 	
 	def checkedExceptions[T](block: =>Checked[T])(implicit sl:SourceLocation):Checked[T]	=
 			(Catch.exception in block)
-			.mapLeft { e =>
+			.leftMap { e =>
 				ERROR(e)
 				Checked problem1 e.getMessage
 			}
