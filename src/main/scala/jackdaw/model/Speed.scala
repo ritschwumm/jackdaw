@@ -25,23 +25,23 @@ final class Speed extends Observing {
 	// in beats per second, SpeedRange
 	private val valueCell:Cell[Double]				= cell(Rhythm.defaultBeatsPerSecond)
 	val dragging:Cell[Option[(Boolean,Boolean)]]	= cell(None)
-	
+
 	// in beats per second
 	val value:Signal[Double]	= valueCell
-	
-	def setValueRastered(it:Double, fine:Boolean) {
+
+	def setValueRastered(it:Double, fine:Boolean):Unit	= {
 		val step		= Speed step fine
 		val rastered	= rint(it / step) * step
 		valueCell set rastered
 	}
-	
-	def moveSteps(steps:Int, fine:Boolean) {
+
+	def moveSteps(steps:Int, fine:Boolean):Unit	= {
 		valueCell modify modifier(steps, fine)
 	}
-	
+
 	private def modifier(steps:Int, fine:Boolean):Endo[Double]	=
 			it => SpeedRange clamp (it + steps * (Speed step fine))
-	
+
 	val beatRate:Signal[Double]	=
 			signal {
 				value.current * (
@@ -52,14 +52,14 @@ final class Speed extends Observing {
 					}
 				)
 			}
-			
-	def persist(file:File) {
+
+	def persist(file:File):Unit	= {
 		val persister	= new JsonPersister[Double]
-		
+
 		persister load file foreach {
 			setValueRastered (_, true)
 		}
-		
+
 		value observe {
 			persister save file
 		}

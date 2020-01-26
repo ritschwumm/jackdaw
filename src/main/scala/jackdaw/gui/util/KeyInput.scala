@@ -8,41 +8,41 @@ import screact._
 
 object KeyInput {
 	def when(target:Signal[Boolean]):KeyInput	=
-			new KeyInput(target, Keyboard.keys)
+		new KeyInput(target, Keyboard.keys)
 }
 
 final class KeyInput(target:Signal[Boolean], keys:Signal[Set[Key]]) {
 	private val fineModifier:Signal[Boolean]	=
-			keys map { _ exists { _.code == KeyEvent.VK_SHIFT } }
-		
+		keys map { _ exists { _.code == KeyEvent.VK_SHIFT } }
+
 	private def keyDown(key:Key):Signal[Boolean]	=
-			keys map { _ contains key }
+		keys map { _ contains key }
 
 	//------------------------------------------------------------------------------
-	
+
 	implicit class RichKey(peer:Key) {
 		def asModifier:Signal[Boolean]	=
-				(keyDown(peer) zipWith target) { _ && _ }
-			
+			(keyDown(peer) zipWith target) { _ && _ }
+
 		def asAction:Events[Unit]	=
-				keyDown(peer).edge.trueUnit gate target
+			keyDown(peer).edge.trueUnit gate target
 	}
-	
+
 	//------------------------------------------------------------------------------
-	
+
 	// NOTE this is special because of the sequenceOptionSecond
 	implicit class RichDirectionModifier1(peer:Signal[Option[Boolean]]) {
 		def withFine:Signal[Option[(Boolean,Boolean)]]	=
-				peer zip fineModifier map { _.first.sequenceOption }
+			peer zip fineModifier map { _.first.sequenceOption }
 	}
-	
+
 	implicit class RichAction1(peer:Events[Unit]) {
 		def withFine:Events[Boolean]	=
-				peer snapshotOnly fineModifier
+			peer snapshotOnly fineModifier
 	}
-	
+
 	implicit class RichAction2[T](peer:Events[T]) {
 		def withFine:Events[(T,Boolean)]	=
-				peer snapshot fineModifier
+			peer snapshot fineModifier
 	}
 }

@@ -21,23 +21,23 @@ sealed trait Actor[T] extends Target[T] with Disposable {
 private final class ActorThread[T](name:String, priority:Int, parking:MilliDuration, body:T=>Boolean) extends Thread with Actor[T] {
 	setName(name)
 	setPriority(priority)
-	
+
 	private val queue	= new LinkedTransferQueue[T]
-	
+
 	@volatile
 	private var keepAlive	= true
 
-	def dispose() {
+	def dispose():Unit	= {
 		keepAlive	= false
 		interrupt()
 		join()
 	}
-	
-	final def send(message:T) {
+
+	final def send(message:T):Unit	= {
 		queue offer message
 	}
-	
-	override protected def run() {
+
+	override protected def run():Unit	= {
 		try {
 			while (keepAlive) {
 				if (!drain())	return
@@ -47,7 +47,7 @@ private final class ActorThread[T](name:String, priority:Int, parking:MilliDurat
 			// just exit
 		}
 	}
-	
+
 	private def drain():Boolean	= {
 		while (true) {
 			val message	= queue poll (parking.millis, TimeUnit.MILLISECONDS)

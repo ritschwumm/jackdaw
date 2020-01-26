@@ -4,40 +4,39 @@ import scala.math._
 import scala.collection.mutable
 
 import scutil.base.implicits._
-import scutil.lang.ISeq
 import scutil.math.functions._
 
 import jackdaw.range.PitchMath._
 
 object Rhythm {
 	def default(anchor:Double, measure:Double):Rhythm	=
-			Rhythm(
-				anchor		= anchor,
-				measure		= measure,
-				schema		= Schema.default
-			)
-			
+		Rhythm(
+			anchor		= anchor,
+			measure		= measure,
+			schema		= Schema.default
+		)
+
 	val defaultBeatsPerSecond	= bpm(120.0)
-	
+
 	def fake(anchor:Double, sampleRate:Double):Rhythm	=
-			default(
-				anchor	= anchor,
-				measure	= sampleRate * Schema.default.beatsPerMeasure / defaultBeatsPerSecond
-			)
+		default(
+			anchor	= anchor,
+			measure	= sampleRate * Schema.default.beatsPerMeasure / defaultBeatsPerSecond
+		)
 }
 
 // BETTER use BigFraction here?
 final case class Rhythm(anchor:Double, measure:Double, schema:Schema) {
 	val beat	= measure / schema.beatsPerMeasure
 	val phrase	= measure * schema.measuresPerPhrase
-	
+
 	//------------------------------------------------------------------------------
-	
+
 	def withAnchor(anchor:Double):Rhythm	= copy(anchor = anchor)
-	
+
 	def moveBy(offset:Double):Rhythm	= copy(anchor	= anchor	+ offset)
 	def resizeBy(factor:Double):Rhythm	= copy(measure	= measure	* factor)
-	
+
 	/** the raster tick under the cursor shall move with the same speed, independent of the distance from the raster's offset */
 	def resizeAt(position:Double, offset:Double):Rhythm = {
 		// if within the first beat treat it as at the first beat
@@ -54,57 +53,57 @@ final case class Rhythm(anchor:Double, measure:Double, schema:Schema) {
 	//------------------------------------------------------------------------------
 
 	def raster(rhythmUnit:RhythmUnit):Raster	=
-			rhythmUnit match {
-				case Phrase		=> phraseRaster
-				case Measure	=> measureRaster
-				case Beat		=> beatRaster
-			}
-	
+		rhythmUnit match {
+			case RhythmUnit.Phrase	=> phraseRaster
+			case RhythmUnit.Measure	=> measureRaster
+			case RhythmUnit.Beat	=> beatRaster
+		}
+
 	lazy val phraseRaster:Raster	= Raster(phrase,	anchor)
 	lazy val measureRaster:Raster	= Raster(measure,	anchor)
 	lazy val beatRaster:Raster		= Raster(beat,		anchor)
-	
+
 	def sizeOf(value:RhythmValue):Double	=
-			raster(value.unit).size * value.steps
-	
+		raster(value.unit).size * value.steps
+
 	//------------------------------------------------------------------------------
-	
+
 	def index(position:Double):RhythmIndex	=
-			RhythmIndex(
-				beat	= moduloInt(fixFloor(beatRaster		normalize position),	schema.beatsPerMeasure),
-				measure	= moduloInt(fixFloor(measureRaster	normalize position),	schema.measuresPerPhrase),
-				phrase	= 			fixFloor(phraseRaster	normalize position)
-			)
-	
+		RhythmIndex(
+			beat	= moduloInt(fixFloor(beatRaster		normalize position),	schema.beatsPerMeasure),
+			measure	= moduloInt(fixFloor(measureRaster	normalize position),	schema.measuresPerPhrase),
+			phrase	= 			fixFloor(phraseRaster	normalize position)
+		)
+
 	private val small	= {
 		val	epsilon	= 1.0/1000
 		Raster(epsilon, 0)
 	}
-	
+
 	/** floor ignoring small errors */
 	private def fixFloor(value:Double):Int	=
-			floor(small round value).toInt
-		
+		floor(small round value).toInt
+
 	//------------------------------------------------------------------------------
-	
-	def lines(start:Double, end:Double):ISeq[RhythmLine] = {
+
+	def lines(start:Double, end:Double):Seq[RhythmLine] = {
 		val	firstValue	= beatRaster ceil start
 		val firstIndex	= rint((firstValue - anchor) / beat).toInt
-		
+
 		val out		= new mutable.ArrayBuffer[RhythmLine]
 		var index	= firstIndex
 		var value	= firstValue
 		while (value < end) {
 			out		+= (
 				// if (index == 0)	AnchorLine(value)
-				     if (index % schema.beatsPerPhrase  == 0)	RhythmLine(value, Phrase)
-				else if (index % schema.beatsPerMeasure == 0)	RhythmLine(value, Measure)
-				else											RhythmLine(value, Beat)
+				     if (index % schema.beatsPerPhrase  == 0)	RhythmLine(value, RhythmUnit.Phrase)
+				else if (index % schema.beatsPerMeasure == 0)	RhythmLine(value, RhythmUnit.Measure)
+				else											RhythmLine(value, RhythmUnit.Beat)
 			)
 			value	+= beat
 			index	+= 1
 		}
-		
+
 		out.toVector
 	}
 }

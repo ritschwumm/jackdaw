@@ -7,7 +7,7 @@ import scaudio.sample._
 
 object KeyDetector {
 	//private val scaling	= 8
-	
+
 	def findKey(sample:Sample):MusicKey	= {
 		val channels		= sample.channels
 		val channelCount	= sample.channels.size
@@ -35,23 +35,23 @@ object KeyDetector {
 			def frameRate	= sample.frameRate
 			def get(frame:Int):Float	= mono get frame
 		}
-		
+
 		val result	= KeyFinder examine audio
 		convertKey(result.key)
 	}
-	
+
 	private def convertKey(it:Optional[Key]):MusicKey	=
-			if (it.isPresent) {
-				val orig	= it.get
-				Chord(
-					MusicChord(
-						MusicPitch(orig.root.ordinal),
-						orig.mode match {
-							case Mode.MAJOR	=> Major
-							case Mode.MINOR	=> Minor
-						}
-					)
+		if (it.isPresent) {
+			val orig	= it.get
+			MusicKey.Chord(
+				MusicChord(
+					MusicPitch(orig.root.ordinal),
+					orig.mode match {
+						case Mode.MAJOR	=> MusicScale.Major
+						case Mode.MINOR	=> MusicScale.Minor
+					}
 				)
-			}
-			else Silence
+			)
+		}
+		else MusicKey.Silence
 }

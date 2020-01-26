@@ -13,13 +13,13 @@ final class TcpConnection[I,O](
 	def receive():I	= {
 		inputFunc(input)
 	}
-	
-	def send(msg:O) {
+
+	def send(msg:O):Unit	= {
 		outputFunc(output, msg)
 		output.st.flush()
 	}
-	
-	def dispose() {
+
+	def dispose():Unit	= {
 		socket.close()
 	}
 }

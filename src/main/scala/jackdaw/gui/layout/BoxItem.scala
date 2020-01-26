@@ -1,7 +1,7 @@
 package jackdaw.gui
 
 object BoxItem {
-	implicit def UI_is_BoxItem[T<%UI](ui:T):BoxItem	= BoxComponent(ui)
+	implicit def UI_is_BoxItem[T](ui:T)(implicit ev:T=>UI):BoxItem	= BoxComponent(ui)
 }
 
 sealed trait BoxItem

@@ -2,7 +2,9 @@ package jackdaw.remote
 
 import jackdaw.player._
 
-sealed trait ToSkeleton
+object ToSkeleton {
+	case object Kill							extends ToSkeleton
+	final case class Send(action:EngineAction)	extends ToSkeleton
+}
 
-case object KillSkeleton							extends ToSkeleton
-final case class SendSkeleton(action:EngineAction)	extends ToSkeleton
+sealed trait ToSkeleton

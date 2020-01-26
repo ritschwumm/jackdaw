@@ -31,8 +31,8 @@ final class BandCurvePersister extends Persister[BandCurve] with Logging {
 			None
 		}
 	}
-	
-	def save(file:File)(curve:BandCurve) {
+
+	def save(file:File)(curve:BandCurve):Unit	= {
 		try {
 			new ObjectOutputStream(file.newOutputStream()) use { out =>
 				out writeDouble	curve.fragmentRate
@@ -48,7 +48,7 @@ final class BandCurvePersister extends Persister[BandCurve] with Logging {
 			ERROR("cannot marshall file", file, e)
 		}
 	}
-	
+
 	private def readFloatArray(in:ObjectInputStream, size:Int):Array[Float] = {
 		val array	= Array.ofDim[Float](size)
 		var i	= 0
@@ -58,8 +58,8 @@ final class BandCurvePersister extends Persister[BandCurve] with Logging {
 		}
 		array
 	}
-	
-	private def writeFloatArray(out:ObjectOutputStream, array:Array[Float]) {
+
+	private def writeFloatArray(out:ObjectOutputStream, array:Array[Float]):Unit	= {
 		var i = 0
 		while (i < array.length) {
 			out writeFloat array(i)

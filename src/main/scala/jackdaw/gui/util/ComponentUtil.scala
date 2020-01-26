@@ -18,23 +18,23 @@ import screact.swing._
 /** swing component utility functions */
 object ComponentUtil extends Logging {
 	private val componentUnderMouse	=
-			new ComponentUnderMouse(
-				100.millis,
-				(message,exception)	=> ERROR(message, exception)
-			)
-	
+		new ComponentUnderMouse(
+			100.millis,
+			(message,exception)	=> ERROR(message, exception)
+		)
+
 	def innerIntRectSignal(component:JComponent):Signal[IntRect]	=
-			SwingWidget signal (
-				(component:ComponentCaster).connect,
-				thunk { component.innerRectangle.toIntRect }
-			)
-					
+		SwingWidget signal (
+			(component:ComponentCaster).connect,
+			thunk { component.innerRectangle.toIntRect }
+		)
+
 	def innerSgRectangleSignal(component:JComponent):Signal[SgRectangle]	=
-			SwingWidget signal (
-				(component:ComponentCaster).connect,
-				thunk { component.innerRectangle.toSgRectangle }
-			)
-	
+		SwingWidget signal (
+			(component:ComponentCaster).connect,
+			thunk { component.innerRectangle.toSgRectangle }
+		)
+
 	def underMouseSignal(component:JComponent):Signal[Boolean]	= {
 		val out	= cell(component.underMousePointer)
 		val set	= out.set _

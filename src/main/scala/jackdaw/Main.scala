@@ -18,25 +18,25 @@ import jackdaw.gui._
 /** main class initializing backend and gui */
 object Main extends Observing {
 	Style.setupLnF()
-	
+
 	private val windowActive	= cell(false)
-	
+
 	private val	model	= new Model
 	private val ui		= new MainUI(model, windowActive)
 	private val	frame	= new JFrame
-	
+
 	private val windowActiveFb:Events[Boolean]	=
-			SwingWidget
-			.events	((frame:WindowCaster).connect)
-			.map	{ _.getWindow.isActive }
-	
+		SwingWidget
+		.events	((frame:WindowCaster).connect)
+		.map	{ _.getWindow.isActive }
+
 	windowActiveFb observe windowActive.set
-	
-	def start() {
+
+	def start():Unit	= {
 		Library.init()
-		
+
 		model.start()
-		
+
 		val content	= frame.getContentPane
 		content setLayout new BorderLayout
 		content add (ui.component, BorderLayout.CENTER)
@@ -46,10 +46,10 @@ object Main extends Observing {
 		frame setDefaultCloseOperation	WindowConstants.DO_NOTHING_ON_CLOSE
 		frame onWindowClosing { _ => dispose() }
 		frame setVisible true
-		
+
 		val macifyApplication	= new DefaultApplication
 		macifyApplication addApplicationListener new ApplicationAdapter {
-			override def handleQuit(ev:ApplicationEvent) {
+			override def handleQuit(ev:ApplicationEvent):Unit	= {
 				dispose()
 			}
 		}
@@ -57,16 +57,16 @@ object Main extends Observing {
 		macifyApplication.removeAboutMenuItem()
 		macifyApplication.removePreferencesMenuItem()
 	}
-	
-	private def dispose() {
+
+	private def dispose():Unit	= {
 		model.dispose()
 		frame.dispose()
-		
+
 		// NOTE ugly, but necessary because Main$ is referenced from Thread#contextClassLoader and there are some additional GC roots still alive in swing
 		sys exit 0
 	}
-	
+
 	model.speed persist (Config.dataBase / "speed.json")
-	
+
 	start()
 }

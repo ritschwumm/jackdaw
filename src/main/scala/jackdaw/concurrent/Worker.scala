@@ -15,17 +15,17 @@ sealed trait Worker extends Disposable {
 private final class WorkerThread(name:String, priority:Int,  body:Io[Boolean]) extends Thread with Worker {
 	setName(name)
 	setPriority(priority)
-	
+
 	@volatile
 	private var keepAlive	= true
 
-	def dispose() {
+	def dispose():Unit	= {
 		keepAlive	= false
 		interrupt()
 		join()
 	}
-	
-	override protected def run() {
+
+	override protected def run():Unit	= {
 		try {
 			while (keepAlive) {
 				if (!body.unsafeRun())	return

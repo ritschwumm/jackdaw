@@ -11,19 +11,19 @@ import scgeom._
 package object shape {
 	def poly(drafts:Draft*)						= Poly(drafts.toVector)
 	def draft(point:SgPoint, points:SgPoint*)	= Draft(Nes(point, points.toVector))
-	
+
 	//------------------------------------------------------------------------------
-	
+
 	def polyShape(poly:Poly):Shape	=
-			new Path2D.Double doto polyAppend(poly)
-			
+		new Path2D.Double doto polyAppend(poly)
+
 	//------------------------------------------------------------------------------
-	
-	private def polyAppend(poly:Poly)(out:Path2D.Double) {
+
+	private def polyAppend(poly:Poly)(out:Path2D.Double):Unit	= {
 		poly.drafts foreach draftAppend(out)
 	}
-	
-	private def draftAppend(out:Path2D.Double)(draft:Draft) {
+
+	private def draftAppend(out:Path2D.Double)(draft:Draft):Unit	= {
 		val closed	= draft.points.head == draft.points.last
 		val last	= draft.points.size - 1
 		draft.points.zipWithIndex foreach {

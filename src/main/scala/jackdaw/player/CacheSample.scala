@@ -18,88 +18,88 @@ object CacheSample {
 
 final class CacheSample(peer:Sample) extends Sample {
 	import CacheSample._
-	
+
 	val frameRate:Int	= peer.frameRate
 	val frameCount:Int	= peer.frameCount
 	val sampleBytes:Int	= peer.sampleBytes
-	
+
 	//------------------------------------------------------------------------------
-	
+
 	private type Chunk	= Array[Float]
-	
+
 	private val spreadFrames:Int	=
-			ceil(Config.preloadSpread.millis * frameRate / 1000).toInt
-	
+		ceil(Config.preloadSpread.millis * frameRate / 1000).toInt
+
 	private val bufferFrames:Int	=
-			spreadFrames + Player.maxDistance
-		
+		spreadFrames + Player.maxDistance
+
 	// enough chunks to fill at least bufferFrames for each head
 	// scratching and fading will not occur at the same time
 	// TODO this might not work with the preloadCurrent-hack
 	// in the player's fadeNowOrLater
 	private val bufferCount:Int	=
-			ceilDivInt(bufferFrames, chunkFrames) * Player.headCount * 3 / 2
-		
+		ceilDivInt(bufferFrames, chunkFrames) * Player.headCount * 3 / 2
+
 	private val lru:IntQueue		= new IntQueue(bufferCount)
-	
+
 	private val bufferChunks:Int	= ceilDivInt(bufferFrames, chunkFrames)
-	
+
 	private val chunkCount:Int		= ceilDivInt(frameCount, chunkFrames)
 	private val channelCount:Int	= peer.channels.size
 	private val chunkSamples:Int	= chunkFrames * channelCount
 	private val chunks:Array[Chunk]	= new Array[Chunk](chunkCount)
-	
+
 	// println(show"buffer: ${scutil.text.Human roundedBinary chunkSamples*bufferCount*4}")
-	
+
 	@inline
 	private def validChannelIndex(channelIndex:Int):Boolean	=
-			channelIndex >= 0	&&
-			channelIndex < channelCount
-			
+		channelIndex >= 0	&&
+		channelIndex < channelCount
+
 	@inline
 	private def validChunkIndex(chunkIndex:Int):Boolean	=
-			chunkIndex >= 0	&&
-			chunkIndex < chunkCount
-			
+		chunkIndex >= 0	&&
+		chunkIndex < chunkCount
+
 	@inline
 	private def chunkIndexByFrame(frame:Int):Int	=
-			if (frame >= 0)	frame / chunkFrames
-			else			frame / chunkFrames - 1
-			
+		if (frame >= 0)	frame / chunkFrames
+		else			frame / chunkFrames - 1
+
 	@inline
 	private def firstFrameByChunk(chunkIndex:Int):Int	=
-			chunkIndex * chunkFrames
-			
+		chunkIndex * chunkFrames
+
 	//------------------------------------------------------------------------------
-	
+
 	val channels:Seq[Channel]	=
-			(0 until channelCount)
-			.map { channelIndex =>
-				new CacheChannel(channelIndex)
-			}
-			.toArray
-			.toSeq
-			
+		(0 until channelCount)
+		.map { channelIndex =>
+			new CacheChannel(channelIndex)
+		}
+		.toArray
+		.toSeq
+
 	private final class CacheChannel(channelIndex:Int) extends Channel {
 		val frameCount:Int			= CacheSample.this.frameCount
 		def get(frame:Int):Float	= CacheSample.this getSample (frame, channelIndex)
 	}
-	
+
 	private def getSample(frame:Int, channelIndex:Int):Float	= {
 		if (!validChannelIndex(channelIndex))	return 0f
-		
+
 		val chunkIndex	= chunkIndexByFrame(frame)
 		if (!validChunkIndex(chunkIndex))		return 0f
-		
+
 		val chunk	= chunks(chunkIndex)
 		if (chunk eq null)						return 0f
-		
+
 		val sampleIndex	= (frame & chunkMask) * channelCount + channelIndex
 		chunk(sampleIndex)
 	}
-	
+
 	//------------------------------------------------------------------------------
-	
+
 	/** returns whether we had actual changes */
 	def provide(centerFrame:Int):Boolean	= {
 		// TODO what's actually loaded should depend on kind of head and ggf Player.springPitchLimit
@@ -116,7 +116,7 @@ final class CacheSample(peer:Sample) extends Sample {
 		}
 		changed
 	}
-	
+
 	@inline
 	private def provideChunk(index:Int):Boolean	= {
 		if (chunks(index) ne null) {
@@ -145,11 +145,11 @@ final class CacheSample(peer:Sample) extends Sample {
 			true
 		}
 	}
-	
-	private def load(chunkIndex:Int, chunk:Chunk) {
+
+	private def load(chunkIndex:Int, chunk:Chunk):Unit	= {
 		var inFrame		= firstFrameByChunk(chunkIndex)
 		var outSample	= 0
-		
+
 		var frameIndex	= 0
 		while (frameIndex < chunkFrames) {
 			var channelIndex	= 0
@@ -162,18 +162,18 @@ final class CacheSample(peer:Sample) extends Sample {
 			inFrame		+= 1
 		}
 	}
-	
+
 	//------------------------------------------------------------------------------
-	
+
 	private val barrier:AtomicBoolean	= new AtomicBoolean()
-	
+
 	@inline
-	def readBarrier() {
+	def readBarrier():Unit	= {
         barrier.get
     }
 
 	@inline
-	def writeBarrier() {
+	def writeBarrier():Unit	= {
         barrier lazySet false
     }
 }

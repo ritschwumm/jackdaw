@@ -19,7 +19,7 @@ import jackdaw.BuildInfo
 
 /** constants for gui elements */
 object Style {
-	def setupLnF() {
+	def setupLnF():Unit	= {
 		UIManager setLookAndFeel new MetalLookAndFeel
 		/*
 		// set nimbus laf
@@ -36,74 +36,74 @@ object Style {
 		UIManager.getDefaults put ("TextField.selectionForeground",	STRONG_BACKGROUND)
 		UIManager.getDefaults put ("TextField.caretForeground",		FOCUS_COLOR)
 	}
-	
+
 	//------------------------------------------------------------------------------
-	
+
 	private val NO_COLOR			= Colors.transparentBlack
-	
+
 	private val DISABLED_BACKGROUND	= Color.GRAY.darker
-	
+
 	// private val NORMAL_FOREGROUND	= rgb"eeeeee".toColor	// light grey
 	private val NORMAL_BACKGROUND	= rgb"262626".toColor	// dark grey
-	
+
 	private val STRONG_BACKGROUND	= Color.BLACK
 	// NOTE Color.WHITE leads to a black speedDisplay on java 8
 	private val STRONG_FOREGROUND	= rgb"fefefe".toColor
 	private val WEAK_FOREGROUND		= rgb"d2d2d2".toColor
-	
+
 	// for components with STRONG_BACKGROUND
 	// between STRONG_BACKGROUND and NORMAL_BACKGROUND
 	private val STRONG_OUTLINE		= Color.GRAY.darker.darker
 	private val STRONG_BORDER		= BorderFactory createLineBorder STRONG_OUTLINE
-	
+
 	// for items with a track
 	// between WEAK_FOREGROUND and NORMAL_BACKGROUND
 	private val WEAK_OUTLINE		= Color.GRAY
 	//private val WEAK_BORDER			= BorderFactory createLineBorder STRONG_OUTLINE
-	
+
 	private val STRONG_FONT			= new Font("sansserif", Font.BOLD,	11)
 	private val WEAK_FONT			= new Font("sansserif", Font.PLAIN,	9)
-	
+
 	private val STRONG_HIGHLIGHT	= rgb"ffd200".toColor	// yellow
 	private val WEAK_HIGHLIGHT		= rgb"5399cf".toColor	// blue
-	
+
 	private val SIMPLE_STROKE		= new BasicStroke(1)
 	private val FAT_STROKE			= new BasicStroke(3)
-	
+
 	private val FOCUS_COLOR			= Color.RED
-	
+
 	/** focus off, focus on */
 	private def focusBorders(top:Boolean, left:Boolean, bottom:Boolean, right:Boolean, outer:Int, inner:Int):(Border,Border)	= {
 		def make(size:Int, factory:(Int,Int,Int,Int)=>Border):Border	=
-				factory(
-					top		cata (0, size),
-					left	cata (0, size),
-					bottom	cata (0, size),
-					right	cata (0, size)
-				)
+			factory(
+				top		cata (0, size),
+				left	cata (0, size),
+				bottom	cata (0, size),
+				right	cata (0, size)
+			)
 		val off	= make(inner+outer, BorderFactory.createEmptyBorder)
 		val on	=
-				BorderFactory createCompoundBorder (
-					make(outer, BorderFactory createMatteBorder (_,_,_,_,FOCUS_COLOR)),
-					make(inner, BorderFactory.createEmptyBorder)
-				)
+			BorderFactory createCompoundBorder (
+				make(outer, BorderFactory createMatteBorder (_,_,_,_,FOCUS_COLOR)),
+				make(inner, BorderFactory.createEmptyBorder)
+			)
 		(off, on)
 	}
-	
+
 	//------------------------------------------------------------------------------
-	
+
 	object application {
 		val osxIcon	= bufferedImage("/logo.png")
 	}
-	
+
 	object window {
 		val title	= show"${BuildInfo.name} ${BuildInfo.version}"
 		val icon	= bufferedImage("/logo.png") // imageIcon("/logo.png").getImage
 		val size	= new Dimension(682, 640)
 	}
-	
+
 	//------------------------------------------------------------------------------
-	
+
 	object button {
 		object shape {
 			object disabled {
@@ -122,7 +122,7 @@ object Style {
 				val color	= inactive.color.darker
 				val stroke	= FAT_STROKE
 			}
-			
+
 		}
 		object label {
 			val color	= STRONG_BACKGROUND
@@ -138,10 +138,10 @@ object Style {
 			val stroke	= SIMPLE_STROKE
 		}
 	}
-	
+
 	object meta {
 		val border	= STRONG_BORDER
-		
+
 		object background {
 			val color	= STRONG_BACKGROUND
 		}
@@ -164,10 +164,10 @@ object Style {
 			}
 		}
 	}
-	
+
 	object rotary {
 		val	size	= new Dimension(28, 28)
-		
+
 		// track and knob
 		object outline {
 			val color	= WEAK_OUTLINE
@@ -184,17 +184,17 @@ object Style {
 			val size	= 6.0
 			val color	= STRONG_HIGHLIGHT
 		}
-		
+
 		object angle {
 			val opening	= 30.0	// 45.0/2.0
 			val min		= (270 - opening)
 			val max		= (-90 + opening)
 		}
 	}
-	
+
 	object linear {
 		val size	= new Dimension(14,14)
-		
+
 		// track and knob
 		object outline {
 			val color	= WEAK_OUTLINE
@@ -212,11 +212,11 @@ object Style {
 			val color	= STRONG_HIGHLIGHT
 		}
 	}
-	
+
 	object meter {
 		val size	= new Dimension(6,6)
 		val border	= STRONG_BORDER
-		
+
 		object track {
 			val color	= STRONG_BACKGROUND
 		}
@@ -227,11 +227,11 @@ object Style {
 			val over	= Color.RED
 		}
 	}
-	
+
 	object phase {
 		val size	= new Dimension(14,14)
 		val border	= STRONG_BORDER
-		
+
 		object background {
 			val color	= STRONG_BACKGROUND
 		}
@@ -247,10 +247,10 @@ object Style {
 			val color	= WEAK_HIGHLIGHT
 		}
 	}
-	
+
 	object wave {
 		val border	= STRONG_BORDER
-		
+
 		object background {
 			val color	= STRONG_BACKGROUND
 		}
@@ -298,22 +298,22 @@ object Style {
 			}
 		}
 	}
-	
+
 	object deck {
 		object border {
 			val (noFocus, inFocus)	= focusBorders(false, true, false, false, 4, 6)
 		}
 	}
-	
+
 	object channel {
 		object border {
 			val (noFocus, inFocus)	= focusBorders(true, false, false, false, 4, 6)
 		}
 	}
-	
+
 	object speed {
 		val width	= 44
-		
+
 		object border {
 			val (noFocus, inFocus)	= focusBorders(false, false, true, false, 4, 6)
 		}
@@ -324,7 +324,7 @@ object Style {
 	}
 
 	//------------------------------------------------------------------------------
-	
+
 	private def bufferedImage(path:String):BufferedImage	= ImageIO read resource(path)
 	//private def imageIcon(path:String):ImageIcon			= new ImageIcon(resource(path))
 	private def resource(path:String):URL					= getClass getResource path

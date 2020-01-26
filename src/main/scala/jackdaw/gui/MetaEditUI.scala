@@ -15,16 +15,16 @@ import screact.swing._
 final class MetaEditUI(value:Signal[Option[String]], strong:Boolean) extends UI with Observing {
 	//------------------------------------------------------------------------------
 	//## input
-	
+
 	private val display:Signal[String]	=
-			value map { _ getOrElse "" }
-	
+		value map { _ getOrElse "" }
+
 	private val editable:Signal[Boolean]	=
-			value map { _.isDefined }
-		
+		value map { _.isDefined }
+
 	//------------------------------------------------------------------------------
 	//## components
-	
+
 	private val field	= new JTextField
 	field	setFont			(strong	cata (Style.meta.edit.weak.font,	Style.meta.edit.strong.font))
 	field	setBorder		null
@@ -34,7 +34,7 @@ final class MetaEditUI(value:Signal[Option[String]], strong:Boolean) extends UI 
 
 	//------------------------------------------------------------------------------
 	//## keyboard
-	
+
 	(component:KeyCaster) connect { ev =>
 		component.getParent.optionNotNull foreach { parent =>
 			import KeyEvent._
@@ -45,45 +45,45 @@ final class MetaEditUI(value:Signal[Option[String]], strong:Boolean) extends UI 
 			}
 		}
 	}
-	
+
 	//------------------------------------------------------------------------------
 	//## wiring
 
 	private val textChanges:Events[String]	=
-			SwingWidget transformer (
-				display,
-				(field.getDocument:DocumentCaster).connect,
-				thunk { field.getText },
-				field.setText
-			)
-		
+		SwingWidget transformer (
+			display,
+			(field.getDocument:DocumentCaster).connect,
+			thunk { field.getText },
+			field.setText
+		)
+
 	editable observeNow { it =>
 		field setEditable	it
 		field setFocusable	it
 	}
-	
+
 	field onFocusGained	{ _ =>
 		edt {
 			field.selectAll()
 		}
 	}
-	
+
 	//------------------------------------------------------------------------------
 	//## actions
-	
-	def startEditing() {
+
+	def startEditing():Unit	= {
 		field.requestFocusInWindow()
 	}
-	
+
 	//------------------------------------------------------------------------------
 	//## output
-	
+
 	val focussed:Signal[Boolean]	=
-			SwingWidget signal (
-				(component:FocusCaster).connect,
-				thunk { component.hasFocus }
-			)
-			
+		SwingWidget signal (
+			(component:FocusCaster).connect,
+			thunk { component.hasFocus }
+		)
+
 	val changes:Events[String]	=
-			textChanges gate editable
+		textChanges gate editable
 }

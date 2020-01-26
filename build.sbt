@@ -1,8 +1,8 @@
 name			:= "jackdaw"
 organization	:= "de.djini"
-version			:= "1.36.0"
+version			:= "1.37.0"
 
-scalaVersion	:= "2.12.4"
+scalaVersion	:= "2.13.1"
 scalacOptions	++= Seq(
 	"-deprecation",
 	"-unchecked",
@@ -11,7 +11,6 @@ scalacOptions	++= Seq(
 	// "-language:higherKinds",
 	// "-language:reflectiveCalls",
 	// "-language:dynamics",
-	// "-language:postfixOps",
 	// "-language:experimental.macros"
 	"-feature",
 	// attention: requires build and runtime library version never differ
@@ -21,15 +20,15 @@ scalacOptions	++= Seq(
 	"-Xlint"
 )
 
-conflictManager	:= ConflictManager.strict
+conflictManager		:= ConflictManager.strict withOrganization "^(?!(org\\.scala-lang|org\\.scala-js)(\\..*)?)$"
 libraryDependencies	++= Seq(
-	"de.djini"		%%	"scutil-core"	% "0.133.0"	% "compile",
-	"de.djini"		%%	"scutil-swing"	% "0.133.0"	% "compile",
-	"de.djini"		%%	"scaudio"		% "0.123.0"	% "compile",
-	"de.djini"		%%	"scjson-io"		% "0.146.0"	% "compile",
-	"de.djini"		%%	"screact"		% "0.144.0"	% "compile",
-	"de.djini"		%%	"scgeom"		% "0.39.0"	% "compile",
-	"de.djini"		%%	"sc2d"			% "0.30.0"	% "compile",
+	"de.djini"		%%	"scutil-core"		% "0.170.0"	% "compile",
+	"de.djini"		%%	"scutil-swing"		% "0.170.0"	% "compile",
+	"de.djini"		%%	"scaudio"			% "0.161.0"	% "compile",
+	"de.djini"		%%	"scjson-io-pickle"	% "0.189.0"	% "compile",
+	"de.djini"		%%	"screact"			% "0.182.0"	% "compile",
+	"de.djini"		%%	"scgeom"			% "0.44.0"	% "compile",
+	"de.djini"		%%	"sc2d"				% "0.33.0"	% "compile",
 	"de.djini"					% "jkeyfinder"	% "0.4.1"	% "compile",
 	"org.simplericity.macify"	% "macify"		% "1.6"		% "compile",
 	"javazoom"					% "jlayer"		% "1.0.1"	% "compile",
@@ -62,7 +61,11 @@ val bootClass	= "jackdaw.Boot"
 val vmOptions	= Seq(
 	"-server",
 	"-Xms64m",
-	"-Xmx64m"
+	"-Xmx64m",
+	"-XX:+UseG1GC",
+	// switch off access to /tmp/hsperfdata_$USER
+	"-XX:-UsePerfData",
+	"-XX:+PerfDisableSharedMem"
 	// full (mixed?) collections in G1 take far too long
 	// "-XX:+UnlockExperimentalVMOptions",
 	// "-XX:+UseG1GC",
@@ -78,28 +81,28 @@ val systemProperties	= Map(
 	// @see http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7193557
 	// @see http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7173464
 	"java.util.Arrays.useLegacyMergeSort"	-> "true",
-	
+
 	//	prevents memleaks for windows
 	"swing.bufferPerWindow"					-> "false"
-	
+
 	//	debug rendering
 	//		@see http://download.oracle.com/javase/1.5.0/docs/guide/2d/flags.html
 	//		"sun.java2d.trace"	-> "log"
-	
+
 	//	new xrender pipeline
 	//		"sun.java2d.xrender"	-> "True"
-	
+
 	//	crashes on too many systems, fbobject=false helps
 	//		"sun.java2d.opengl"	-> "True",
 	//		"sun.java2d.opengl.fbobject"	-> "false"
-	
+
 	//	allows jvisualvm
 	//		"com.sun.management.jmxremote.local.only"	-> "false"
 )
 
 // osxappBundleName		:= name.value
 osxappBundleIcons		:= baseDirectory.value / "src/main/osxapp/default.icns"
-osxappVm				:= OracleJava()
+osxappVm				:= JavaHomeVersion("1.8+")
 osxappMainClass			:= Some(bootClass)
 osxappVmOptions			:= vmOptions
 osxappSystemProperties	:= systemProperties

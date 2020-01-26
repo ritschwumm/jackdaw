@@ -7,7 +7,7 @@ import scutil.core.implicits._
 import scutil.log._
 
 import scjson.pickle._
-import scjson.io._
+import scjson.io.pickle._
 
 final class JsonPersister[T:Format] extends Persister[T] with Logging {
 	def load(file:File):Option[T]	= {
@@ -17,11 +17,11 @@ final class JsonPersister[T:Format] extends Persister[T] with Logging {
 		}
 		.toOption
 	}
-		
-	def save(file:File)(value:T) {
+
+	def save(file:File)(value:T):Unit	= {
 		file.parentOption.foreach { _.mkdirs() }
-		JsonIo saveFile1 (file, value, true) foreach { e =>
-			ERROR("failed to write", file, e)
+		JsonIo saveFile (file, value, true) leftEffect {
+			case JsonSaveFailure.IoException(e) => ERROR("failed to write", file, e)
 		}
 	}
 }

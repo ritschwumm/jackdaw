@@ -3,11 +3,11 @@ package jackdaw.player
 final class IntQueue(maxSize:Int) {
 	private val items:Array[Int]	= new Array[Int](maxSize)
 	private var curSize:Int			= 0
-	
+
 	def size:Int 		= curSize
-	
+
 	def full:Boolean	= curSize >= maxSize
-	
+
 	def shift():Int	= {
 		val out	= items(0)
 		var ptr	= 0
@@ -18,13 +18,13 @@ final class IntQueue(maxSize:Int) {
 		curSize	= ptr
 		out
 	}
-	
-	def push(item:Int) {
+
+	def push(item:Int):Unit	= {
 		items(curSize)	= item
 		curSize		+= 1
 	}
-	
-	def removeEqual(toRemove:Int) {
+
+	def removeEqual(toRemove:Int):Unit	= {
 		var inPtr	= 0
 		var outPtr	= 0
 		while (inPtr < curSize) {

@@ -4,10 +4,10 @@ package jackdaw.player
 final class PeakDetector {
 	private val decayMul	= 0.002f	// 0.015f	for 50ms
 	private val decayAdd	= 0.004f	// 0.02f	for 50ms
-	
+
 	private var current	= 0f
 	private var peak	= 0f
-	
+
 	/** lowpass-filtered peak value with different filter coefficient for raising and falling peak values */
 	def decay:Float = {
 		val lower	= current * (1-decayMul) - decayAdd
@@ -15,8 +15,8 @@ final class PeakDetector {
 		peak		= 0
 		current
 	}
-	
-	def put(next:Float) {
+
+	def put(next:Float):Unit	= {
 		val abs	= if (next >= 0) 	next	else -next
 		peak	= if (abs > peak)	abs		else peak
 	}

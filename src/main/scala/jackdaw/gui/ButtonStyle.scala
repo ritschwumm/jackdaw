@@ -1,12 +1,10 @@
 package jackdaw.gui
 
-import scutil.lang.ISeq
-
 import sc2d._
 
 final case class ButtonStyle(
-	disabled:ISeq[Figure],
-	inactive:ISeq[Figure],
-	hovered:ISeq[Figure],
-	pressed:ISeq[Figure]
+	disabled:Seq[Figure],
+	inactive:Seq[Figure],
+	hovered:Seq[Figure],
+	pressed:Seq[Figure]
 )

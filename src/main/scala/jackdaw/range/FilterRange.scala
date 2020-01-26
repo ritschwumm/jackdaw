@@ -7,7 +7,7 @@ object FilterRange {
 	val neutral	= 0.0
 	val max		= +1.0
 	val size	= max - min
-	
+
 	def clamp(it:Double):Double	=
 			clampDouble(
 				it,

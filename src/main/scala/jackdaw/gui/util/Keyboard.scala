@@ -15,53 +15,53 @@ import screact._
 object Keyboard extends Disposable {
 	//------------------------------------------------------------------------------
 	//## implementation
-	
+
 	private val maxAge		= 10
-	
+
 	private val keysCell	= cell(Set.empty[Key])
-	
+
 	// None means pressed, Some means released at that time
 	private var state		= Map.empty[Key,Option[Long]]
-	
-	private def update(now:Long) {
+
+	private def update(now:Long):Unit	= {
 		state	= state filter {
 			case (key, Some(when))	=> now - when < maxAge
 			case (key, None)		=> true
 		}
 		keysCell set state.keySet
 	}
-	
+
 	private val connection	=
-			(GlobalAWTEvent connect AWTEvent.KEY_EVENT_MASK) {
-				_ match {
-					case ev:KeyEvent	=>
-						val when	= ev.getWhen
-						val key		= Key(ev.getKeyCode, ev.getKeyLocation)
-						if (ev.getID == KeyEvent.KEY_PRESSED) {
-							state	+= (key -> None)
-						}
-						else if (ev.getID == KeyEvent.KEY_RELEASED) {
-							state	+= (key -> Some(when))
-						}
-						update(when)
-					case _	=>
-						// ignored
-				}
+		(GlobalAWTEvent connect AWTEvent.KEY_EVENT_MASK) {
+			_ match {
+				case ev:KeyEvent	=>
+					val when	= ev.getWhen
+					val key		= Key(ev.getKeyCode, ev.getKeyLocation)
+					if (ev.getID == KeyEvent.KEY_PRESSED) {
+						state	+= (key -> None)
+					}
+					else if (ev.getID == KeyEvent.KEY_RELEASED) {
+						state	+= (key -> Some(when))
+					}
+					update(when)
+				case _	=>
+					// ignored
 			}
-	
+		}
+
 	private val timer	=
-			new Timer(maxAge/2, mkActionListener { ev =>
-				val when	= ev.getWhen
-				update(when)
-			})
+		new Timer(maxAge/2, mkActionListener { ev =>
+			val when	= ev.getWhen
+			update(when)
+		})
 	timer.start()
-	
+
 	//------------------------------------------------------------------------------
 	//## public api
-	
+
 	val keys:Signal[Set[Key]]	= keysCell.signal
-	
-	def dispose() {
+
+	def dispose():Unit	= {
 		timer.stop()
 		connection.dispose()
 		// NOTE are those necessary?

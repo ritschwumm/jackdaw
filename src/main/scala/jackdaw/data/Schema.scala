@@ -7,7 +7,7 @@ object Schema {
 
 final case class Schema(measuresPerPhrase:Int, beatsPerMeasure:Int) {
 	val beatsPerPhrase:Int		= beatsPerMeasure * measuresPerPhrase
-	
+
 	/*
 	def factor(from:RhythmUnit, to:RhythmUnit):Double	=
 			(from, to) match {

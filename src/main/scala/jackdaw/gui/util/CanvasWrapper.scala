@@ -2,8 +2,6 @@ package jackdaw.gui.util
 
 import java.awt.{ List=>_, Canvas=>_, _ }
 
-import scutil.lang.ISeq
-
 import screact._
 import sc2d._
 
@@ -11,7 +9,7 @@ final class CanvasWrapper(background:Option[Paint], hints:Hints) extends Observi
 	val component	= new Canvas(background, hints)
 	val mouse		= new Mouse(component)
 	val bounds		= ComponentUtil innerSgRectangleSignal component
-	val figures		= cell(ISeq.empty[Figure])
-	
+	val figures		= cell(Seq.empty[Figure])
+
 	figures observeNow component.setFigures
 }

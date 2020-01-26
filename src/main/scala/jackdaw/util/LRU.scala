@@ -9,7 +9,7 @@ import scala.collection.mutable
 final class LRU[S,T](size:Int, create:S=>T, touch:Effect[T] = (t:T)=>(), delete:Effect[T] = (t:T)=>()) extends Disposable {
 	private val keys	= mutable.Queue.empty[S]
 	private val cache	= mutable.Map.empty[S,T]
-	
+
 	/** get some value, if possible form the cache */
 	def load(s:S):T = cache get s match {
 		case Some(t)	=>
@@ -31,16 +31,16 @@ final class LRU[S,T](size:Int, create:S=>T, touch:Effect[T] = (t:T)=>(), delete:
 				cache(s)	= t
 			}
 	}
-	
+
 	/** remove items matching a predicate */
-	def pruneIf(predicate:Predicate[S]) {
+	def pruneIf(predicate:Predicate[S]):Unit	= {
 		val	ks	= keys dequeueAll predicate
 		val vs	= ks map cache
 		cache --= ks
 		vs foreach delete
 	}
-	
-	def dispose() {
+
+	def dispose():Unit	= {
 		cache.values foreach delete
 	}
 }

@@ -19,36 +19,36 @@ object Loader {
 
 final class Loader(engineTarget:Target[LoaderFeedback]) extends Logging {
 	private val actor	=
-			Actor[LoaderAction](
-				"sample preloader",
-				Loader.actorPriority,
-				Loader.cycleDelay,
-				message	=> {
-					reactAction(message)
-					true
-				}
-			)
+		Actor[LoaderAction](
+			"sample preloader",
+			Loader.actorPriority,
+			Loader.cycleDelay,
+			message	=> {
+				reactAction(message)
+				true
+			}
+		)
 	val target	= actor.asTarget
-	
-	def start() {
+
+	def start():Unit	= {
 		actor.start()
 	}
-	
-	def dispose() {
+
+	def dispose():Unit	= {
 		actor.dispose()
 	}
-	
+
 	//------------------------------------------------------------------------------
-	
+
 	private val reactAction:Effect[LoaderAction]	=
-			_ match {
-				// BETTER don't close over the player, we already know it
-				case LoaderDecode(file, callback)		=> doDecode(file, callback)
-				case LoaderPreload(sample, centerFrame)	=> doPreload(sample, centerFrame)
-				case LoaderNotifyEngine(task)			=> doInEngine(task)
-			}
-	
-	private def doDecode(file:File, callback:Effect[Option[CacheSample]]) {
+		_ match {
+			// BETTER don't close over the player, we already know it
+			case LoaderAction.Decode(file, callback)		=> doDecode(file, callback)
+			case LoaderAction.Preload(sample, centerFrame)	=> doPreload(sample, centerFrame)
+			case LoaderAction.NotifyEngine(task)			=> doInEngine(task)
+		}
+
+	private def doDecode(file:File, callback:Effect[Option[CacheSample]]):Unit	= {
 		DEBUG("loader loading", file)
 		val sample	=
 				(Wav load file)
@@ -59,8 +59,8 @@ final class Loader(engineTarget:Target[LoaderFeedback]) extends Logging {
 			callback(sample)
 		})
 	}
-	
-	private def doPreload(sample:CacheSample, centerFrame:Int) {
+
+	private def doPreload(sample:CacheSample, centerFrame:Int):Unit	= {
 		val changed		= sample provide centerFrame
 		if (changed) {
 			sample.writeBarrier()
@@ -70,8 +70,8 @@ final class Loader(engineTarget:Target[LoaderFeedback]) extends Logging {
 			})
 		}
 	}
-	
-	private def doInEngine(task:Thunk[Unit]) {
+
+	private def doInEngine(task:Thunk[Unit]):Unit	= {
 		 engineTarget send LoaderExecute(task)
 	}
 }
