@@ -8,13 +8,13 @@ import scutil.log._
 
 import scjson.ast._
 import scjson.codec._
-import scjson.pickle._
-import scjson.io.pickle._
+import scjson.converter._
+import scjson.io.converter._
 
 import jackdaw.library._
 
 object Migration extends Logging {
-	private val steps	= Vector(V0toV1, V1toV2, V2toV3, V3toCurrent)
+	private val steps	= Vector(V4toCurrent)
 
 	val latestVersion	= steps.last.newVersion
 
@@ -64,5 +64,5 @@ trait Migration {
 	val oldVersion:TrackVersion
 	val newVersion:TrackVersion
 
-	def convert(old:JsonValue):Either[JsonUnpickleFailure,JsonValue]
+	def convert(old:JsonValue):Either[JsonError,JsonValue]
 }
