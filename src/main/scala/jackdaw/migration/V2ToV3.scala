@@ -4,17 +4,16 @@ import scjson.ast._
 import scjson.pickle._
 import scjson.io.pickle._
 
-import jackdaw.library._
 import jackdaw.data._
 import jackdaw.key._
 import jackdaw.persistence.JsonProtocol
 
-object V2toCurrent extends Migration {
+object V2toV3 extends Migration {
 	import V2._
 	// import V3._
 
 	val oldVersion	= V2.version
-	val newVersion	= TrackVersion(3)
+	val newVersion	= V3.version
 
 	def convert(it:JsonValue):Either[JsonUnpickleFailure,JsonValue]	=
 		{

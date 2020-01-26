@@ -6,13 +6,13 @@ import scutil.lang._
 import scutil.time._
 
 import scjson.pickle._
-import scjson.pickle.protocol.old._
+import scjson.pickle.protocol._
 
 import jackdaw.data._
 import jackdaw.media.Metadata
 import jackdaw.key._
 
-object JsonProtocol extends OldStandardProtocol2 {
+object JsonProtocol extends StandardProtocol2 {
 	implicit lazy val MilliInstantF			= viaFormat(MilliInstant.newType)
 	implicit lazy val SchemaF				= caseClassFormat2(Schema.apply,		Schema.unapply)
 	implicit lazy val RhythmF				= caseClassFormat3(Rhythm.apply,		Rhythm.unapply)

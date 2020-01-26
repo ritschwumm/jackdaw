@@ -14,7 +14,7 @@ import scjson.io.pickle._
 import jackdaw.library._
 
 object Migration extends Logging {
-	private val steps	= Vector(V0toV1, V1toV2, V2toCurrent)
+	private val steps	= Vector(V0toV1, V1toV2, V2toV3, V3toCurrent)
 
 	val latestVersion	= steps.last.newVersion
 
