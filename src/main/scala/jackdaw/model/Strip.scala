@@ -1,7 +1,6 @@
 package jackdaw.model
 
-import scutil.base.implicits._
-import scutil.lang._
+import scutil.core.implicits._
 
 import screact._
 
@@ -13,9 +12,9 @@ object Strip {
 	def forMaster	= new Strip(VolumeRange.alot,	VolumeRange.alot,	MasterRange)
 	def forDeck		= new Strip(VolumeRange.max,	VolumeRange.min,	DeckRange)
 
-	val step:Boolean=>Double	= _ cata (VolumeRange.size/40, VolumeRange.size/100)
+	val step:Boolean=>Double	= _.cata(VolumeRange.size/40, VolumeRange.size/100)
 
-	val strip2gain:Endo[Double]	= gammaFade(+0.66)
+	val strip2gain:Double=>Double	= gammaFade(+0.66)
 }
 
 /** distribute signal to speaker and master */
@@ -34,6 +33,6 @@ final class Strip(initialSpeaker:Double, initialPhone:Double, val meterRange:Met
 		phone modify modifier(steps, fine)
 	}
 
-	private def modifier(steps:Int, fine:Boolean):Endo[Double]	=
+	private def modifier(steps:Int, fine:Boolean):Double=>Double	=
 			it => VolumeRange clamp (it + steps * (Strip step fine))
 }

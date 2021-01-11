@@ -13,9 +13,9 @@ final class VBoxUI(subs:Seq[BoxItem]) extends UI {
 
 	private val items	=
 		subs map {
-			case BoxComponent(ui)	=> ui.component
-			case BoxGlue			=> Box.createVerticalGlue()
-			case BoxStrut(size)		=> Box createVerticalStrut size
+			case BoxItem.Component(ui)	=> ui.component
+			case BoxItem.Glue			=> Box.createVerticalGlue()
+			case BoxItem.Strut(size)	=> Box createVerticalStrut size
 		}
 	items foreach panel.add
 

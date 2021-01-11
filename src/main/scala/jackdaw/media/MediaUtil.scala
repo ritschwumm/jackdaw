@@ -4,7 +4,7 @@ import java.io.File
 
 import scala.util.matching.Regex
 
-import scutil.base.implicits._
+import scutil.core.implicits._
 import scutil.lang._
 import scutil.platform._
 import scutil.log._
@@ -49,7 +49,7 @@ object MediaUtil extends Logging {
 
 	def requireFileSuffixIn(suffixes:String*):File=>Checked[Unit]	=
 		file =>
-		Checked trueWin1 (
+		Checked.trueWin1(
 			suffixes exists { file.getName.toLowerCase endsWith _ },
 			"expected suffix in " + (suffixes mkString ", ")
 		)
@@ -57,7 +57,7 @@ object MediaUtil extends Logging {
 	def requireCommand(command:String):Checked[Unit]	=
 		OperatingSystem.current match {
 			case Some(Linux) | Some(OSX)	=>
-				Checked trueWin1 (
+				Checked.trueWin1(
 					(External exec Vector("which", command) result false).rc == 0,
 					show"command ${command} not available"
 				)
@@ -86,5 +86,5 @@ object MediaUtil extends Logging {
 	//------------------------------------------------------------------------------
 
 	def extractFrom(lines:Seq[String]):Regex=>Option[String]	=
-		lines collapseMapFirst _.unapplySeq flatMap { _.headOption }
+		lines collectFirstSome _.unapplySeq flatMap { _.headOption }
 }

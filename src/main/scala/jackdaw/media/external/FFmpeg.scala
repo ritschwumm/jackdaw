@@ -11,7 +11,7 @@ object FFmpeg extends Decoder {
 		for {
 			// no suffix check
 			_	<-	MediaUtil requireCommand "ffmpeg"
-			_	<-	MediaUtil runCommand (
+			_	<-	MediaUtil.runCommand(
 						"ffmpeg",	"-y",
 						"-i",		input.getPath,
 						"-vn",

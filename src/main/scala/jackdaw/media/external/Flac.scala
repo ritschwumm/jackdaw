@@ -11,7 +11,7 @@ object Flac extends Decoder {
 		for {
 			_	<-	recognizeFile(input)
 			_	<-	MediaUtil requireCommand "flac"
-			_	<-	MediaUtil runCommand (
+			_	<-	MediaUtil.runCommand(
 						"flac",
 						"-o",				output.getPath,
 						"--decode",			// decode
@@ -27,10 +27,10 @@ object Flac extends Decoder {
 						input.getPath
 					)
 			// NOTE flac rc is 0 regardless of whether it worked or not
-			_	<-	Checked trueWin1 (output.exists, "output file not generated")
+			_	<-	Checked.trueWin1(output.exists, "output file not generated")
 		}
 		yield ()
 
 	private val recognizeFile:File=>Checked[Unit]	=
-		MediaUtil requireFileSuffixIn (".flac", ".flc")
+		MediaUtil.requireFileSuffixIn(".flac", ".flc")
 }

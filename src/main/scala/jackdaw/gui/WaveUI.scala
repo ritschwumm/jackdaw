@@ -6,8 +6,8 @@ import java.awt.image.BufferedImage
 
 import scala.math._
 
-import scutil.base.implicits._
 import scutil.core.implicits._
+import scutil.jdk.implicits._
 import scutil.lang._
 import scutil.geom._
 import scutil.gui.implicits._
@@ -56,16 +56,18 @@ final class WaveUI(
 		signal { bandCurve.current map { new WaveRenderer(_, imageUtil) } }
 
 	private val frameCount:Signal[Int]	=
-		signal { bandCurve.current cata (0, _.frameCount) }
+		signal { bandCurve.current.cata (0, _.frameCount) }
 
 	// NOTE hacks for zero sized component and missing curve
-	private val zoom:Signal[Double]	= shrink cata (
-		signal {
-			(bandCurve.current cata (Config.curveRaster, _.rasterFrames)).toDouble
-		},
-		signal {
-			innerRect.current.width optionBy { _ != 0 } cata (1, frameCount.current / _)
-		})
+	private val zoom:Signal[Double]	=
+		shrink.cata(
+			signal {
+				(bandCurve.current.cata(Config.curveRaster, _.rasterFrames)).toDouble
+			},
+			signal {
+				innerRect.current.width.optionBy(_ != 0).cata (1, frameCount.current / _)
+			}
+		)
 
 	private val coords:Signal[Coords]	=
 		signal {
@@ -123,7 +125,7 @@ final class WaveUI(
 				decorator.postRollFigure.toVector
 
 			val loopFigures:Seq[Figure]	=
-				loop.current.toSeq collapseMap decorator.loopSpanFigure
+				loop.current.toSeq mapFilter decorator.loopSpanFigure
 
 			val playerPositionFigures:Seq[Figure]	=
 				(decorator positionLineFigure playerPosition.current).toSeq
@@ -157,9 +159,9 @@ final class WaveUI(
 
 			val cuePointClickables:Seq[(Seq[Figure],Option[Jump])]	=
 				cuePoints.current.zipWithIndex map { case (frame, index) =>
-					val line	= decorator markerLineFigure		frame
-					val boppel	= decorator rectangleBoppelFigure	frame
-					val label	= decorator numberLabelFigure		(frame, index)
+					val line	= decorator.markerLineFigure		(frame)
+					val boppel	= decorator.rectangleBoppelFigure	(frame)
+					val label	= decorator.numberLabelFigure		(frame, index)
 					val figures	= flatSeq(line.toVector, boppel.toVector, label.toVector)
 					val action	= boppel map { _ -> frame }
 					(figures, action)
@@ -169,7 +171,7 @@ final class WaveUI(
 				(cuePointClickables map { _._1 }).flatten
 
 			val cuePointJumps:Seq[Jump]	=
-				(cuePointClickables map { _._2 }).collapse
+				(cuePointClickables map { _._2 }).flattenOption
 
 			val figures:Seq[Figure]	= rollFigures ++ loopFigures ++ rhythmLineFigures ++ rhythmAnchorFigures ++ cuePointFigures ++ playerPositionFigures
 			val jumps:Seq[Jump]		= rhythmAnchorJumps ++ cuePointJumps
@@ -177,7 +179,7 @@ final class WaveUI(
 			(figures, jumps)
 		}
 
-	private val (figures, jumps)	= figuresAndJumps.unzip
+	private val (figures, jumps)	= figuresAndJumps.untuple
 	typed[Signal[Seq[Figure]]](figures)
 	typed[Signal[Seq[Jump]]](jumps)
 
@@ -296,7 +298,7 @@ final class WaveUI(
 		val bounds	= SgRectangle topLeftZeroBy SgPoint(end.x, end.y)
 		LEDShape shapes bounds map { shape	=>
 			val figure	= StrokeShape(shape, Style.wave.marker.number.color, Style.wave.marker.number.stroke)
-			imageUtil renderImage (size, true, figure.paint)
+			imageUtil.renderImage(size, true, figure.paint)
 		}
 	}
 
@@ -329,11 +331,11 @@ final class WaveUI(
 
 	private val jumpFlag:Events[Double]	=
 		((mouse.leftPress snapshotWith jumps) { (ev, jumps) =>
-			jumps collapseMapFirst { case (figure, frame) =>
+			jumps collectFirstSome { case (figure, frame) =>
 				figure pick ev.getPoint option frame
 			}
 		})
-		.filterOption
+		.flattenOption
 
 	private val jumpOutside:Events[Double]	=
 		(mouse.leftPress orElse mouse.leftDrag snapshotWith coords) {
@@ -396,7 +398,7 @@ final class WaveUI(
 	}
 
 	private def renderUsingImage(coord:Coords, g:Graphics2D):Unit	= {
-		g drawImage (renderToImage(coord), 0, 0, null)
+		g.drawImage(renderToImage(coord), 0, 0, null)
 	}
 
 	private var bufferImage:BufferedImage	= null
@@ -405,7 +407,7 @@ final class WaveUI(
 		import coord._
 
 		if (bufferImage == null || bufferImage.getWidth != sizeX || bufferImage.getHeight != sizeY) {
-			bufferImage	= imageUtil createImage (inner.size, false)
+			bufferImage	= imageUtil.createImage (inner.size, false)
 		}
 		bufferImage.createGraphics.asInstanceOf[Graphics2D] use { bg =>
 			renderToGraphics(coord, bg)
@@ -425,8 +427,8 @@ final class WaveUI(
 		*/
 
 		// background
-		bg setPaint Style.wave.background.color
-		bg fillRect (leftX, topY, sizeX, sizeY)
+		bg.setPaint(Style.wave.background.color)
+		bg.fillRect(leftX, topY, sizeX, sizeY)
 
 		// curves
 		// val beginX	= clipBounds.x
@@ -436,8 +438,8 @@ final class WaveUI(
 			// g setRenderingHint (RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC)
 			// g setRenderingHint (RenderingHints.KEY_RENDER_QUALITY, RenderingHints.VALUE_RENDER_QUALITY)
 
-			if (shrink)	waveRenderer drawFully		(bg, inner)
-			else		waveRenderer drawPartial	(bg, inner, src(leftX))
+			if (shrink)	waveRenderer.drawFully		(bg, inner)
+			else		waveRenderer.drawPartial	(bg, inner, src(leftX))
 		}
 
 		// figures

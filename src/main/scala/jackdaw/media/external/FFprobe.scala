@@ -2,7 +2,7 @@ package jackdaw.media
 
 import java.io.File
 
-import scutil.core.implicits._
+import scutil.jdk.implicits._
 
 import jackdaw.util.Checked
 
@@ -13,7 +13,7 @@ object FFprobe extends Inspector {
 		for {
 			// no suffix check
 			_		<-	MediaUtil requireCommand "ffprobe"
-			result	<-	MediaUtil runCommand (
+			result	<-	MediaUtil.runCommand(
 							"ffprobe",	input.getPath
 							/*
 							// this no longer works (?)

@@ -20,13 +20,13 @@ final class Model extends Observing {
 	private val clock	= SwingClock(Config.guiUpdateInterval, Config.guiUpdateInterval)
 
 	private val nanoChange:Events[Long]	=
-			((clock tag System.nanoTime) stateful System.nanoTime) { (old,cur) =>
-				(cur, cur - old)
-			}
+		((clock tag System.nanoTime) stateful System.nanoTime) { (old,cur) =>
+			(cur, cur - old)
+		}
 
 	private val timedFeedback	= nanoChange map engine.feedbackTimed
 
-	private val engineFeedback	= timedFeedback.filterOption hold EngineFeedback.empty
+	private val engineFeedback	= timedFeedback.flattenOption hold EngineFeedback.empty
 
 	// private val engineFeedback	= (clock tag engine.feedbackAll).filterOption hold EngineFeedback.empty
 	private val playerFeedback1	= engineFeedback map { _.player1 }
@@ -60,12 +60,12 @@ final class Model extends Observing {
 	speed.beatRate	map EngineAction.SetBeatRate.apply	observeNow engine.enqueueAction
 
 	private val changeControl:Signal[EngineAction]	=
-			signal {
-				EngineAction.ChangeControl(
-					speaker	= mix.master.speakerGain.current,
-					phone	= mix.master.phoneGain.current
-				)
-			}
+		signal {
+			EngineAction.ChangeControl(
+				speaker	= mix.master.speakerGain.current,
+				phone	= mix.master.phoneGain.current
+			)
+		}
 	changeControl	observeNow engine.enqueueAction
 
 	//------------------------------------------------------------------------------
@@ -75,9 +75,9 @@ final class Model extends Observing {
 		engine.start()
 	}
 
-	def dispose():Unit	= {
-		engine.dispose()
-		clock.dispose()
+	def close():Unit	= {
+		engine.close()
+		clock.close()
 		// NOTE Model$ keeps being referenced by Thread#contextClassLoader
 		// clock	= null
 	}

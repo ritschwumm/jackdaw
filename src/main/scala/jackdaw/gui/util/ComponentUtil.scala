@@ -2,7 +2,7 @@ package jackdaw.gui.util
 
 import javax.swing.JComponent
 
-import scutil.base.implicits._
+import scutil.core.implicits._
 import scutil.lang._
 import scutil.geom._
 import scutil.gui.implicits._
@@ -24,13 +24,13 @@ object ComponentUtil extends Logging {
 		)
 
 	def innerIntRectSignal(component:JComponent):Signal[IntRect]	=
-		SwingWidget signal (
+		SwingWidget.signal(
 			(component:ComponentCaster).connect,
 			thunk { component.innerRectangle.toIntRect }
 		)
 
 	def innerSgRectangleSignal(component:JComponent):Signal[SgRectangle]	=
-		SwingWidget signal (
+		SwingWidget.signal(
 			(component:ComponentCaster).connect,
 			thunk { component.innerRectangle.toSgRectangle }
 		)
@@ -39,8 +39,8 @@ object ComponentUtil extends Logging {
 		val out	= cell(component.underMousePointer)
 		val set	= out.set _
 		// NOTE ugly backref to keep ComponentUnderMouse from dropping the connection
-		component putClientProperty ("UNDER_MOUSE", set)
-		componentUnderMouse listen (component, set)
+		component.putClientProperty("UNDER_MOUSE", set)
+		componentUnderMouse.listen(component, set)
 		out
 	}
 }

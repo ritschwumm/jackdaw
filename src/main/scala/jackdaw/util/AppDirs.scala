@@ -1,7 +1,7 @@
 package jackdaw.util
 
 import java.io.File
-import scutil.core.implicits._
+import scutil.jdk.implicits._
 import scutil.platform._
 
 object AppDirs {

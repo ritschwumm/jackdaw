@@ -2,8 +2,8 @@ package jackdaw.migration
 
 import java.io._
 
-import scutil.base.implicits._
 import scutil.core.implicits._
+import scutil.jdk.implicits._
 import scutil.log._
 
 import scjson.ast._
@@ -57,7 +57,7 @@ object Migration extends Logging {
 	}
 
 	private def writeFile(file:File, content:String):Unit	=
-		file writeString (JsonIo.charset, content)
+		file.writeString(JsonIo.charset, content)
 }
 
 trait Migration {

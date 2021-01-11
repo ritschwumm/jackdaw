@@ -2,8 +2,8 @@ package jackdaw.model
 
 import java.io.File
 
-import scutil.base.implicits._
 import scutil.core.implicits._
+import scutil.jdk.implicits._
 import scutil.lang._
 import scutil.log._
 
@@ -27,12 +27,12 @@ object Deck {
 	import Config.{ curveRaster => cr }
 	import PitchMath.cents
 
-	private val pitchFactor:Boolean=>Double				= _ cata (cents(5),		cents(2))
-	private val stopDragSpeed:Boolean=>Double			= _ cata (1.0/4,		1.0/8)
-	private val playDragSpeed:Boolean=>Double			= _ cata (cents(200),	cents(100))
-	private val independentRhythmFactor:Boolean=>Double	= _ cata (2.0,			1.5)
-	private val cursorRhythmFactor:Boolean=>Double		= _ cata (cr,			cr/2)
-	private val phaseMoveOffset:Boolean=>Double			= _ cata (1.0/16,		1.0/384)
+	private val pitchFactor:Boolean=>Double				= _.cata(cents(5),		cents(2))
+	private val stopDragSpeed:Boolean=>Double			= _.cata(1.0/4,			1.0/8)
+	private val playDragSpeed:Boolean=>Double			= _.cata(cents(200),	cents(100))
+	private val independentRhythmFactor:Boolean=>Double	= _.cata(2.0,			1.5)
+	private val cursorRhythmFactor:Boolean=>Double		= _.cata(cr,			cr/2)
+	private val phaseMoveOffset:Boolean=>Double			= _.cata(1.0/16,		1.0/384)
 }
 
 /** model for a single deck */
@@ -67,12 +67,12 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 	}
 
 	def jumpFrame(frame:Double, fine:Boolean):Unit	= {
-		val rhythmUnit	= fine cata (RhythmUnit.Measure, RhythmUnit.Beat)
+		val rhythmUnit	= fine.cata(RhythmUnit.Measure, RhythmUnit.Beat)
 		otherEmitter emit PlayerAction.PlayerPositionJump(frame, rhythmUnit)
 	}
 
 	def seek(steps:Int, fine:Boolean):Unit	= {
-		val offset	= RhythmValue(steps, fine cata (RhythmUnit.Measure, RhythmUnit.Beat))
+		val offset	= RhythmValue(steps, fine.cata(RhythmUnit.Measure, RhythmUnit.Beat))
 		otherEmitter emit PlayerAction.PlayerPositionSeek(offset)
 	}
 
@@ -97,7 +97,7 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 
  	private def emitLooping(size:Option[LoopDef]):Unit	= {
  		otherEmitter emit (
- 			size cata (PlayerAction.PlayerLoopDisable, PlayerAction.PlayerLoopEnable)
+ 			size.cata(PlayerAction.PlayerLoopDisable, PlayerAction.PlayerLoopEnable)
  		)
  	}
 
@@ -179,7 +179,7 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 				rhythm	<- rhythm.current
 				sample	<- sample.current
 			}
-			yield rhythm lines (0, sample.frameCount)
+			yield rhythm.lines(0, sample.frameCount)
 		}
 
 	/*
@@ -228,7 +228,7 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 	private val dragSpeed:Signal[Option[Double]]	=
 		signal {
 			dragging.current map { case (forward, fine) =>
-				running.current cata (
+				running.current.cata(
 					additive(
 						forward, zeroFrequency,
 						Deck stopDragSpeed fine
@@ -247,15 +247,15 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 	private val scratchMode	= state(scratching,	PlayerAction.PlayerScratchRelative,	PlayerAction.PlayerScratchEnd)
 
 	private def state[S,T](input:Signal[Option[S]], move:S=>T, end:T):Events[T]	=
-		(input.edge.filterOption map move)	orElse
+		(input.edge.flattenOption map move)	orElse
 		(input.edge map { it => !it.isEmpty } tag end)
 
 	//------------------------------------------------------------------------------
 	//## autocue
 
 	private val newTrack:Events[Unit]	= {
-		val switchedToLoadedTrack:Events[Unit]	= (track.edge.filterOption snapshotOnly dataLoaded).trueUnit
-		val existingTrackGotLoaded:Events[Unit]	= track flatMapEvents { _ cata (never, _.dataLoaded.edge.trueUnit) }
+		val switchedToLoadedTrack:Events[Unit]	= (track.edge.flattenOption snapshotOnly dataLoaded).trueUnit
+		val existingTrackGotLoaded:Events[Unit]	= track flatMapEvents { _.cata(never, _.dataLoaded.edge.trueUnit) }
 		switchedToLoadedTrack orElse existingTrackGotLoaded
 	}
 
@@ -305,9 +305,9 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 
 	def addCue(fine:Boolean):Unit	= {
 		changeTrack {
-			_ addCuePoint (
+			_.addCuePoint(
 				position.current,
-				fine cata (RhythmUnit.Measure, RhythmUnit.Beat)
+				fine.cata(RhythmUnit.Measure, RhythmUnit.Beat)
 			)
 		}
 	}
@@ -373,7 +373,7 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 
 	def resizeRhythmAt(positive:Boolean, fine:Boolean):Unit	= {
 		changeTrack {
-			_ resizeRhythmAt (
+			_.resizeRhythmAt(
 				position.current,
 				additive(
 					positive, 0,
@@ -391,10 +391,10 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 	//## helper
 
 	private def multiplicative(positive:Boolean, base:Double, change:Double):Double =
-		positive cata (base / change, base * change)
+		positive.cata(base / change, base * change)
 
 	private def additive(positive:Boolean, base:Double, change:Double):Double =
-		positive cata (base - change, base + change)
+		positive.cata(base - change, base + change)
 
 	//------------------------------------------------------------------------------
 	//## player control

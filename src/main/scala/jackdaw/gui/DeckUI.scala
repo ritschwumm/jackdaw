@@ -4,7 +4,7 @@ import java.io.File
 import java.awt.event._
 import javax.swing._
 
-import scutil.base.implicits._
+import scutil.core.implicits._
 import scutil.lang._
 import scutil.gui.implicits._
 import scutil.gui.DndFileImport
@@ -90,20 +90,20 @@ final class DeckUI(deck:Deck, keyTarget:Signal[Boolean]) extends UI with Observi
 
 	private val panel	=
 		GridBagUI(
-			phaseUI		pos(0,0) size(1,1) weight(1,0)		fill BOTH				insetsTLBR(0,0,2,2),
-			metaUI		pos(0,1) size(1,1) weight(1,0)		fill BOTH				insetsTLBR(2,0,2,2),
-			detailUI	pos(0,2) size(1,1) weight(1,1)		fill BOTH				insetsTLBR(2,0,2,2),
-			overviewUI	pos(0,3) size(1,1) weight(1,.33)	fill BOTH				insetsTLBR(2,0,2,2),
-			transportUI	pos(0,4) size(1,1) weight(1,0)		fill BOTH				insetsTLBR(2,2,0,2),
-			pitchSlider	pos(1,0) size(1,4) weight(0,1)		fill BOTH				insetsTLBR(0,2,2,2),
-			matchUI		pos(2,0) size(1,4) weight(0,1)		fill NONE anchor CENTER	insetsTLBR(2,2,6,0)
+			phaseUI		.pos(0,0) .size(1,1) .weight(1,0)	.fill (BOTH)					.insetsTLBR(0,0,2,2),
+			metaUI		.pos(0,1) .size(1,1) .weight(1,0)	.fill (BOTH)					.insetsTLBR(2,0,2,2),
+			detailUI	.pos(0,2) .size(1,1) .weight(1,1)	.fill (BOTH)					.insetsTLBR(2,0,2,2),
+			overviewUI	.pos(0,3) .size(1,1) .weight(1,.33)	.fill (BOTH)					.insetsTLBR(2,0,2,2),
+			transportUI	.pos(0,4) .size(1,1) .weight(1,0)	.fill (BOTH)					.insetsTLBR(2,2,0,2),
+			pitchSlider	.pos(1,0) .size(1,4) .weight(0,1)	.fill (BOTH)					.insetsTLBR(0,2,2,2),
+			matchUI		.pos(2,0) .size(1,4) .weight(0,1)	.fill (NONE) .anchor (CENTER)	.insetsTLBR(2,2,6,0)
 		)
 	val component:JComponent	= panel.component
 
 	//------------------------------------------------------------------------------
 	//## wiring
 
-	private val border	= keyTarget map { _ cata (Style.deck.border.noFocus, Style.deck.border.inFocus) }
+	private val border	= keyTarget map { _.cata(Style.deck.border.noFocus, Style.deck.border.inFocus) }
 	border observeNow component.setBorder
 
 	val hovered			= ComponentUtil underMouseSignal component
@@ -136,25 +136,25 @@ final class DeckUI(deck:Deck, keyTarget:Signal[Boolean]) extends UI with Observi
 		phaseSyncKey	orElse
 		phaseUI.jump
 	phaseSync observe { phase =>
-		deck syncPhase (RhythmUnit.Measure, phase)
+		deck.syncPhase(RhythmUnit.Measure, phase)
 	}
 
 	// TODO crude hack
 	private val pushing16Key:Events[Double]	=
 		Key(VK_COMMA,	KEY_LOCATION_STANDARD).asModifier
-		.edge map { _ cata (-1.0/4, +1.0/4) }
+		.edge map { _.cata(-1.0/4, +1.0/4) }
 	private val dragging8Key:Events[Double]	=
 		Key(VK_PERIOD,	KEY_LOCATION_STANDARD).asModifier
-		.edge map { _ cata (+1.0/2, -1.0/2) }
+		.edge map { _.cata(+1.0/2, -1.0/2) }
 	private val phasingKey:Events[Double]	=
 		pushing16Key orElse
 		dragging8Key
 	phasingKey observe { fraction =>
-		deck modifyPhase (RhythmUnit.Beat, fraction)
+		deck.modifyPhase(RhythmUnit.Beat, fraction)
 	}
 
 	phaseUI.mouseWheel.withFine	trigger	{ (steps, fine)	=>
-		deck movePhase	(RhythmUnit.Measure, steps, fine)
+		deck.movePhase(RhythmUnit.Measure, steps, fine)
 	}
 
 	private val ejectTrackKey:Events[Unit]	=
@@ -296,21 +296,21 @@ final class DeckUI(deck:Deck, keyTarget:Signal[Boolean]) extends UI with Observi
 	// dnd
 
 	// NOTE this has to be done _before_ adding the DropTargetListener or the gui doesn't start any more. why?
-	DndFileImport install (
+	DndFileImport.install(
 		component,
 		_	=> Some {
 		(files:Validated[Nes[Exception],Nes[File]]) => {
 			files
-			.badEffect	{ es => ERROR log es.toSeq.map(LogValue.throwable)	}
+			.invalidEffect	{ es => ERROR log es.toSeq.map(LogValue.throwable)	}
 			.toOption
-			.map		{ _.head }
-			.foreach	(deck.loadTrack)
+			.map			{ _.head }
+			.foreach		(deck.loadTrack)
 		}
 		}
 	)
 
-	DndFileExport install (
+	DndFileExport.install(
 		component,
-		_ => deck.trackSignal.current map { it => Nes single it.file }
+		_ => deck.trackSignal.current map { it => Nes one it.file }
 	)
 }

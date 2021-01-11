@@ -2,8 +2,8 @@ package jackdaw.library
 
 import java.io.File
 
-import scutil.base.implicits._
 import scutil.core.implicits._
+import scutil.jdk.implicits._
 import scutil.text.Human
 import scutil.log._
 import scutil.time._
@@ -25,7 +25,7 @@ object Library extends Logging {
 		// this is done once a startup because scanning the filesystem later
 		// will wreck havoc with the os scheduler
 		content	= findTrackFiles()
-				.sortBy	{ _.meta.lastModifiedMilliInstant }
+				.sortBy	{ _.meta.lastModifiedMilliInstant() }
 				.reverse
 
 		INFO("migrating library")
@@ -41,7 +41,7 @@ object Library extends Logging {
 	def touch(tf:TrackFiles):Unit	= synchronized {
 		// provide directory
 		tf.meta.mkdirs()
-		tf.meta setLastModifiedMilliInstant MilliInstant.now
+		tf.meta setLastModifiedMilliInstant MilliInstant.now()
 
 		// migrate if necessary
 		autoMigrate(tf)
@@ -97,7 +97,7 @@ object Library extends Logging {
 		val count	= tracks.size
 		val space	= (tracks map spaceNeeded).sum
 		(Human roundedBinary space) + "B for " +
-		count.toString + " " + (count == 1 cata ("tracks", "track"))
+		count.toString + " " + (count == 1).cata("tracks", "track")
 	}
 
 	/** first the ones where metadata was modified first */
@@ -135,7 +135,7 @@ object Library extends Logging {
 		.selfAndParentChain
 		.reverse
 		.zipWithIndex
-		.collapseMap { case (file, index) =>
+		.mapFilter { case (file, index) =>
 			val name	= file.getName.optionNonEmpty
 			if (index == 0)	name orElse prefixPath(file.getPath)
 			else			name
@@ -145,7 +145,7 @@ object Library extends Logging {
 	private def prefixPath(path:String):Option[String]	=
 			 if (path == "/")					None
 		else if (path == """\\""")				Some("UNC")
-		else if (path matches """[A-Z]:\\""")	Some(path substring (0,1))
+		else if (path matches """[A-Z]:\\""")	Some(path.substring(0,1))
 		else {
 			ERROR(show"unexpected root path ${path}")
 			None

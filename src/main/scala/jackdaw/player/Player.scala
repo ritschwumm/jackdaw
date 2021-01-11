@@ -4,9 +4,10 @@ import java.io.File
 
 import scala.math._
 
-import scutil.base.implicits._
+import scutil.core.implicits._
 import scutil.lang._
 import scutil.math.functions._
+import scutil.bit._
 
 import scaudio.control._
 import scaudio.output._
@@ -39,7 +40,7 @@ object Player {
 	private val	positionEpsilon	= 1.0E-4
 	private val filterEpsilon	= 1.0E-5
 
-	private val interpolation	= Config.sincEnabled cata (Linear, Sinc)
+	private val interpolation	= Config.sincEnabled.cata(Linear, Sinc)
 
 	// in frames
 	val maxDistance	= interpolation overshot springPitchLimit
@@ -49,9 +50,9 @@ object Player {
 }
 
 /**
-one audio line outputting audio data for one Deck using a MixHalf
-public methods must never be called outside the engine thread
-*/
+ * one audio line outputting audio data for one Deck using a MixHalf
+ * public methods must never be called outside the engine thread
+ */
 final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean, loaderTarget:Target[LoaderAction]) {
 	private val equalizerL	= new Equalizer(Config.lowEq, Config.highEq, outputRate)
 	private val equalizerR	= new Equalizer(Config.lowEq, Config.highEq, outputRate)
@@ -65,16 +66,16 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	private var inputR:Channel				= Channel.empty
 
 	// 0..1 range
-	private val trim		= DamperDouble forRates (unitGain,	Player.dampTime, outputRate)
+	private val trim		= DamperDouble.forRates(unitGain,	Player.dampTime, outputRate)
 	// -1..+1
-	private val filter		= DamperDouble forRates (0.0,		Player.dampTime, outputRate)
+	private val filter		= DamperDouble.forRates(0.0,		Player.dampTime, outputRate)
 	// 0..1 range
-	private val low			= DamperDouble forRates (unitGain,	Player.dampTime, outputRate)
-	private val middle		= DamperDouble forRates (unitGain,	Player.dampTime, outputRate)
-	private val high		= DamperDouble forRates (unitGain,	Player.dampTime, outputRate)
+	private val low			= DamperDouble.forRates(unitGain,	Player.dampTime, outputRate)
+	private val middle		= DamperDouble.forRates(unitGain,	Player.dampTime, outputRate)
+	private val high		= DamperDouble.forRates(unitGain,	Player.dampTime, outputRate)
 	// 0..1 range
-	private val speaker		= DamperDouble forRates (unitGain,	Player.dampTime, outputRate)
-	private val phone		= DamperDouble forRates (unitGain,	Player.dampTime, outputRate)
+	private val speaker		= DamperDouble.forRates(unitGain,	Player.dampTime, outputRate)
+	private val phone		= DamperDouble.forRates(unitGain,	Player.dampTime, outputRate)
 
 	private val peakDetector	= new PeakDetector
 
@@ -190,9 +191,9 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	private def setSample(sample:Option[CacheSample]):Unit	= {
 		this.sample	= sample
 
-		inputL	= sample cata (Channel.empty, _ channelOrEmpty 0)
-		inputR	= sample cata (Channel.empty, _ channelOrEmpty 1)
-		rate	= sample cata (1, _.frameRate.toDouble)
+		inputL	= sample.cata(Channel.empty, _ channelOrEmpty 0)
+		inputR	= sample.cata(Channel.empty, _ channelOrEmpty 1)
+		rate	= sample.cata(1, _.frameRate.toDouble)
 
 		doLoopDisable()
 		updateVelocity()
@@ -447,7 +448,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	}
 
 	// TODO raster ugly
-	private  def fakeRhythm	= Rhythm fake (0, rate)
+	private  def fakeRhythm	= Rhythm.fake(0, rate)
 
 	//------------------------------------------------------------------------------
 	//## motor scratch
@@ -618,14 +619,14 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	// value in 0..1
 	@inline
 	private def filterFreq(offset:Double):Double	=
-			exp2(offset * filterSize + filterLow)
+		exp2(offset * filterSize + filterLow)
 
 	// returns a filter mode
 	@inline
 	private def filterMode(value:Double):Int	=
-				 if (value < -Player.filterEpsilon)	Player.filterLP
-			else if (value > +Player.filterEpsilon)	Player.filterHP
-			else									Player.filterOff
+			 if (value < -Player.filterEpsilon)	Player.filterLP
+		else if (value > +Player.filterEpsilon)	Player.filterHP
+		else									Player.filterOff
 
 	//------------------------------------------------------------------------------
 	//## loop calculation
@@ -668,15 +669,15 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	private def moveInLoop(offset:Double):Unit	= {
 		val rawFrame	= headFrame + offset
 		val newFrame	=
-				loopSpan match {
-					case Some(loopGot) =>
-						if (loopGot contains headFrame) {
-							loopGot lock rawFrame
-						}
-						else rawFrame
-					case None	=>
-						rawFrame
-				}
+			loopSpan match {
+				case Some(loopGot) =>
+					if (loopGot contains headFrame) {
+						loopGot lock rawFrame
+					}
+					else rawFrame
+				case None	=>
+					rawFrame
+			}
 		startFade(newFrame)
 	}
 
@@ -703,9 +704,9 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 
 	private def updateEndFrame():Unit	= {
 		val frameCount	=
-			sample cata (0, _.frameCount)
+			sample.cata(0, _.frameCount)
 		endFrame	=
-			rhythm cata (
+			rhythm.cata(
 				frameCount + outputRate*Player.endDelay,
 				_.measureRaster ceil frameCount
 			)
@@ -721,15 +722,15 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 
 		// current head
 		val headSpeed	= abs(velocity) * deltaTime
-		val fadeinL		= Player.interpolation interpolate (inputL, headFrame, headSpeed)
-		val fadeinR		= Player.interpolation interpolate (inputR, headFrame, headSpeed)
+		val fadeinL		= Player.interpolation.interpolate(inputL, headFrame, headSpeed)
+		val fadeinR		= Player.interpolation.interpolate(inputR, headFrame, headSpeed)
 
 		// optionally fade out pre-jump head
 		var audioL	= 0d
 		var audioR	= 0d
 		if (fadeProgress) {
-			val fadeoutL	= Player.interpolation interpolate (inputL, fadeFrame, headSpeed)
-			val fadeoutR	= Player.interpolation interpolate (inputR, fadeFrame, headSpeed)
+			val fadeoutL	= Player.interpolation.interpolate(inputL, fadeFrame, headSpeed)
+			val fadeoutR	= Player.interpolation.interpolate(inputR, fadeFrame, headSpeed)
 			audioL	= fadeinL * fadeValue + fadeoutL * (1-fadeValue)
 			audioR	= fadeinR * fadeValue + fadeoutR * (1-fadeValue)
 		}
@@ -742,8 +743,8 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		val lowValue	= low.current
 		val middleValue	= middle.current
 		val highValue	= high.current
-		val equalizedL	= equalizerL process (audioL, lowValue, middleValue, highValue)
-		val equalizedR	= equalizerR process (audioR, lowValue, middleValue, highValue)
+		val equalizedL	= equalizerL.process(audioL, lowValue, middleValue, highValue)
+		val equalizedR	= equalizerR.process(audioR, lowValue, middleValue, highValue)
 
 		// filter
 		val filterValue		= filter.current
@@ -759,15 +760,15 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		var filteredR	= 0.0
 		if (filterModeNow == Player.filterLP) {
 			val freq	= filterFreq(filterValue + 1)
-			val	coeffs	= BiQuadCoeffs lp (freq, Config.filterQ)
-			filteredL	= filterL process (equalizedL, coeffs)
-			filteredR	= filterR process (equalizedR, coeffs)
+			val	coeffs	= BiQuadCoeffs.lp(freq, Config.filterQ)
+			filteredL	= filterL.process(equalizedL, coeffs)
+			filteredR	= filterR.process(equalizedR, coeffs)
 		}
 		else if (filterModeNow == Player.filterHP) {
 			val freq	= filterFreq(filterValue + 0)
-			val coeffs	= BiQuadCoeffs hp (freq, Config.filterQ)
-			filteredL	= filterL process (equalizedL, coeffs)
-			filteredR	= filterR process (equalizedR, coeffs)
+			val coeffs	= BiQuadCoeffs.hp(freq, Config.filterQ)
+			filteredL	= filterL.process(equalizedL, coeffs)
+			filteredR	= filterR.process(equalizedR, coeffs)
 		}
 		else {
 			filteredL	= equalizedL
@@ -782,7 +783,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 			val speakerL		= (filteredL * combinedGain).toFloat
 			val speakerR		= (filteredR * combinedGain).toFloat
 
-			speakerBuffer add (speakerL, speakerR)
+			speakerBuffer.add(speakerL, speakerR)
 
 			peakDetector put speakerL
 			peakDetector put speakerR
@@ -792,7 +793,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 				val phoneL		= (audioL * phoneValue).toFloat
 				val phoneR		= (audioR * phoneValue).toFloat
 
-				phoneBuffer add (phoneL, phoneR)
+				phoneBuffer.add(phoneL, phoneR)
 			}
 		}
 
@@ -800,9 +801,9 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 			val	c				= Player.springDamping * 2 * sqrt(Player.springHardness * Player.springMass)
 			// spring is assumed to have zero length when not stretched
 			val springStretch	= headFrame - springOriginFrame
-			acceleration		= (-Player.springHardness*springStretch - c*velocity) / Player.springMass
-			val v1	= velocity + acceleration * deltaTime
-			velocity	= clampDouble(v1, -springSpeedLimit, springSpeedLimit)
+			acceleration		= DoubleUtil.ftz((-Player.springHardness*springStretch - c*velocity) / Player.springMass)
+			val v1				= velocity + acceleration * deltaTime
+			velocity			= clampDouble(v1, -springSpeedLimit, springSpeedLimit)
 		}
 
 		val oldFrame	= headFrame

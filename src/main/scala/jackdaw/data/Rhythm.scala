@@ -3,7 +3,7 @@ package jackdaw.data
 import scala.math._
 import scala.collection.mutable
 
-import scutil.base.implicits._
+import scutil.core.implicits._
 import scutil.math.functions._
 
 import jackdaw.range.PitchMath._
@@ -42,7 +42,7 @@ final case class Rhythm(anchor:Double, measure:Double, schema:Schema) {
 		// if within the first beat treat it as at the first beat
 		val raw			= position - anchor
 		val dir			= signum(raw)
-		val distance	= max(abs(raw), beat) * (dir == 0.0 cata (dir, 1.0))
+		val distance	= max(abs(raw), beat) * (dir == 0.0).cata (dir, 1.0)
 		val	change		= offset / distance
 		val changed		= measure * (change + 1)
 		// don't let the size come near zero

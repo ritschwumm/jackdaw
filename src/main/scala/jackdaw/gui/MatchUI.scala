@@ -19,15 +19,15 @@ final class MatchUI(synced:Signal[Option[Boolean]], pitched:Signal[Boolean]) ext
 	private val panel	=
 		VBoxUI(
 			syncUI,
-			BoxStrut(4+4),
+			BoxItem.Strut(4+4),
 			resetButton,
-			BoxStrut(4+4),
+			BoxItem.Strut(4+4),
 			upButton,
-			BoxStrut(4),
+			BoxItem.Strut(4),
 			downButton,
-			BoxStrut(4),
+			BoxItem.Strut(4),
 			pushButton,
-			BoxStrut(4+4),
+			BoxItem.Strut(4+4),
 			pullButton
 		)
 	val component	= panel.component

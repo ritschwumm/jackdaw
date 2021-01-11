@@ -4,7 +4,7 @@ import javax.swing._
 
 import scala.math._
 
-import scutil.base.implicits._
+import scutil.core.implicits._
 
 import screact._
 import scgeom._
@@ -17,7 +17,7 @@ object PhaseUI {
 	private val subDivide	= Schema.default.beatsPerMeasure
 
 	// TODO hardcoded insets
-	private val lineInsets	= SgSpanInsets startEnd (2, 3)
+	private val lineInsets	= SgSpanInsets.startEnd(2, 3)
 }
 
 /** values are linear [-.5..+.5] */
@@ -35,7 +35,7 @@ final class PhaseUI(value:Signal[Option[Double]], rhythm:Signal[Option[Rhythm]])
 
 	private val value2gui	=
 		canvas.bounds map { it =>
-			SgSpanTransform fromTo (PhaseRange.span, it.x)
+			SgSpanTransform.fromTo(PhaseRange.span, it.x)
 		}
 
 	//------------------------------------------------------------------------------
@@ -79,8 +79,8 @@ final class PhaseUI(value:Signal[Option[Double]], rhythm:Signal[Option[Rhythm]])
 					index		<- -max to +max
 				}
 				yield {
-					val shape	= (SgLine vertical (value2guiCur(index.toDouble / subRaster), lineSpan)).toAwtLine2D
-					(index % PhaseUI.subDivide) == 0 cata (
+					val shape	= SgLine.vertical(value2guiCur(index.toDouble / subRaster), lineSpan).toAwtLine2D
+					((index % PhaseUI.subDivide) == 0).cata(
 						StrokeShape(shape, Style.phase.tick.color, Style.phase.tick.stroke),
 						StrokeShape(shape, Style.phase.beat.color, Style.phase.beat.stroke)
 					)

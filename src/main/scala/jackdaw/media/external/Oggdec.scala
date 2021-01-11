@@ -11,7 +11,7 @@ object Oggdec extends Decoder {
 		for {
 			_	<-	recognizeFile(input)
 			_	<-	MediaUtil requireCommand "oggdec"
-			_	<-	MediaUtil runCommand (
+			_	<-	MediaUtil.runCommand(
 						"oggdec", 	// or ogg123
 						"-o",	output.getPath,
 						"-b",	"16",			// 16 bit
@@ -25,5 +25,5 @@ object Oggdec extends Decoder {
 		yield ()
 
 	private val recognizeFile:File=>Checked[Unit]	=
-		MediaUtil requireFileSuffixIn (".ogg")
+		MediaUtil.requireFileSuffixIn(".ogg")
 }

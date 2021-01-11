@@ -5,7 +5,7 @@ import javax.swing._
 
 import org.simplericity.macify.eawt._
 
-import scutil.core.implicits._
+import scutil.jdk.implicits._
 import scutil.gui.CasterInstances._
 
 import screact._
@@ -39,18 +39,18 @@ object Main extends Observing {
 
 		val content	= frame.getContentPane
 		content setLayout new BorderLayout
-		content add (ui.component, BorderLayout.CENTER)
+		content.add(ui.component, BorderLayout.CENTER)
 		frame setTitle					Style.window.title
 		frame setIconImage				Style.window.icon
 		frame setSize					Style.window.size
 		frame setDefaultCloseOperation	WindowConstants.DO_NOTHING_ON_CLOSE
-		frame onWindowClosing { _ => dispose() }
+		frame onWindowClosing { _ => close() }
 		frame setVisible true
 
 		val macifyApplication	= new DefaultApplication
 		macifyApplication addApplicationListener new ApplicationAdapter {
 			override def handleQuit(ev:ApplicationEvent):Unit	= {
-				dispose()
+				close()
 			}
 		}
 		macifyApplication setApplicationIconImage Style.application.osxIcon
@@ -58,8 +58,8 @@ object Main extends Observing {
 		macifyApplication.removePreferencesMenuItem()
 	}
 
-	private def dispose():Unit	= {
-		model.dispose()
+	private def close():Unit	= {
+		model.close()
 		frame.dispose()
 
 		// NOTE ugly, but necessary because Main$ is referenced from Thread#contextClassLoader and there are some additional GC roots still alive in swing

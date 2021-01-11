@@ -14,10 +14,10 @@ final class DelayUI(child: =>UI) extends UI {
 		// avoid GC for the child UI as long as the Component is still alive
 		val real	= child
 		val realC	= real.component
-		realC putClientProperty ("SELF", real)
+		realC.putClientProperty("SELF", real)
 
 		panel.removeAll()
-		panel add (realC, BorderLayout.CENTER)
+		panel.add(realC, BorderLayout.CENTER)
 		panel.invalidate()
 		panel.revalidate()
 		panel.repaint()

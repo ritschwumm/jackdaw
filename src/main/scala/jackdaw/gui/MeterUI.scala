@@ -6,8 +6,7 @@ import java.awt.image._
 
 import scala.math._
 
-import scutil.base.implicits._
-import scutil.lang._
+import scutil.core.implicits._
 import scutil.geom._
 
 import screact._
@@ -24,12 +23,12 @@ final class MeterUI(value:Signal[Float], meterRange:MeterRange, vertical:Boolean
 	//------------------------------------------------------------------------------
 	//## value
 
-	private val linear2norm:Endo[Double]	=
+	private val linear2norm:Double=>Double	=
 		it =>
 			(it					- meterRange.zero) /
 			(meterRange.over	- meterRange.zero)
 
-	private val linear2fraction:Endo[Double]	=
+	private val linear2fraction:Double=>Double	=
 		linear2norm andThen gammaFade(-0.66)
 
 	private val active	=
@@ -64,8 +63,8 @@ final class MeterUI(value:Signal[Float], meterRange:MeterRange, vertical:Boolean
 
 	private val fraction2gui:Signal[SgSpanTransform]	=
 		canvas.bounds map { it =>
-			SgSpanTransform fromTo (
-				orientation cata (miniMax, miniMax.swap),
+			SgSpanTransform.fromTo(
+				orientation.cata(miniMax, miniMax.swap),
 				it get orientation
 			)
 		}
@@ -82,16 +81,16 @@ final class MeterUI(value:Signal[Float], meterRange:MeterRange, vertical:Boolean
 			val gradient	=
 				new LinearGradientPaint(
 					0,
-					size.y,
-					size.x,
+					size.y.toFloat,
+					size.x.toFloat,
 					0,
 					gradientFractions,
 					gradientColors
 				)
 
-			ImageUtil forComponent component renderImage (size, false, g => {
+			(ImageUtil forComponent component).renderImage(size, false, g => {
 				g setPaint gradient
-				g fillRect	(0,0, size.x, size.y)
+				g .fillRect	(0,0, size.x, size.y)
 			})
 		}
 
@@ -115,8 +114,8 @@ final class MeterUI(value:Signal[Float], meterRange:MeterRange, vertical:Boolean
 				val mini		= fraction2guiCur(0)
 				val maxi		= fraction2guiCur(1)
 
-				val miniFader	= SgSpan startEnd (mini, fader)
-				val faderMax	= SgSpan startEnd (fader, maxi)
+				val miniFader	= SgSpan.startEnd(mini, fader)
+				val faderMax	= SgSpan.startEnd(fader, maxi)
 
 				val inactive	= stripeShape(componentBoundsCur, faderMax)
 				val active		= stripeShape(componentBoundsCur, miniFader)
@@ -152,7 +151,7 @@ final class MeterUI(value:Signal[Float], meterRange:MeterRange, vertical:Boolean
 
 	private def stripeShape(bounds:SgRectangle, span:SgSpan):Shape	=
 		GeomUtil normalRectangle (
-			bounds set (
+			bounds.set(
 				orientation,
 				span
 			)

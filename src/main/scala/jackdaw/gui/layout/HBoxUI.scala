@@ -13,9 +13,9 @@ final class HBoxUI(subs:Seq[BoxItem]) extends UI {
 
 	private val items	=
 		subs map {
-			case BoxComponent(ui)	=> ui.component
-			case BoxGlue			=> Box.createHorizontalGlue()
-			case BoxStrut(size)		=> Box createHorizontalStrut size
+			case BoxItem.Component(ui)	=> ui.component
+			case BoxItem.Glue			=> Box.createHorizontalGlue()
+			case BoxItem.Strut(size)	=> Box createHorizontalStrut size
 		}
 	items foreach panel.add
 

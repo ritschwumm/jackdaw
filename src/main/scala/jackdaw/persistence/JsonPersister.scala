@@ -2,8 +2,8 @@ package jackdaw.persistence
 
 import java.io._
 
-import scutil.base.implicits._
 import scutil.core.implicits._
+import scutil.jdk.implicits._
 import scutil.log._
 
 import scjson.converter._
@@ -20,7 +20,7 @@ final class JsonPersister[T:JsonReader:JsonWriter] extends Persister[T] with Log
 
 	def save(file:File)(value:T):Unit	= {
 		file.parentOption.foreach { _.mkdirs() }
-		JsonIo saveFile (file, value, true) leftEffect {
+		JsonIo.saveFile(file, value, true) leftEffect {
 			case JsonSaveFailure.IoException(e) 	=> ERROR("failed to write", file, e)
 			case JsonSaveFailure.UnparseFailure(e)	=> ERROR("failed to unparse", file, e)
 		}

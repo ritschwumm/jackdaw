@@ -35,13 +35,13 @@ final class Input(val st:InputStream) {
 			afterEnd		= readBoolean(),
 			position		= readDouble(),
 			pitch			= readDouble(),
-			measureMatch	= readOption(readDouble),
-			beatRate		= readOption(readDouble),
+			measureMatch	= readOption(readDouble()),
+			beatRate		= readOption(readDouble()),
 			needSync		= readBoolean(),
 			hasSync			= readBoolean(),
 			masterPeak		= readFloat(),
-			loopSpan		= readOption(readSpan),
-			loopDef			= readOption(readLoopDef)
+			loopSpan		= readOption(readSpan()),
+			loopDef			= readOption(readLoopDef())
 		)
 	def readSpan():Span	=
 		Span(
@@ -125,11 +125,11 @@ final class Input(val st:InputStream) {
 		)
 	def readPlayerAction_PlayerSetFile():PlayerAction	=
 		PlayerAction.PlayerSetFile(
-			file	= readOption(readFile)
+			file	= readOption(readFile())
 		)
 	def readPlayerAction_PlayerSetRhythm():PlayerAction	=
 		PlayerAction.PlayerSetRhythm(
-			rhythm	= readOption(readRhythm)
+			rhythm	= readOption(readRhythm())
 		)
 	def readPlayerAction_PlayerSetRunning():PlayerAction	=
 		PlayerAction.PlayerSetRunning(
@@ -265,7 +265,7 @@ final class Input(val st:InputStream) {
 		val out	= new Array[Byte](length)
 		var i = 0
 		while (i < length) {
-			val len	= st read (out, i, length-i)
+			val len	= st.read(out, i, length-i)
 			if (len == -1)	sys error "unexpected end of stream"
 			i	= i + len
 		}

@@ -1,5 +1,7 @@
 package jackdaw.player
 
+import scutil.bit._
+
 /** detects peaks from put values, resetting after a read and turn peaks into a decaying value */
 final class PeakDetector {
 	private val decayMul	= 0.002f	// 0.015f	for 50ms
@@ -10,7 +12,7 @@ final class PeakDetector {
 
 	/** lowpass-filtered peak value with different filter coefficient for raising and falling peak values */
 	def decay:Float = {
-		val lower	= current * (1-decayMul) - decayAdd
+		val lower	= FloatUtil.ftz(current * (1-decayMul) - decayAdd)
 		current		= if (peak > lower)	peak else lower
 		peak		= 0
 		current

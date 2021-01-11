@@ -4,12 +4,12 @@ import scutil.lang._
 
 object Worker {
 	def apply(name:String, priority:Int, body:Io[Boolean]):Worker	=
-			new WorkerThread(name, priority, body)
+		new WorkerThread(name, priority, body)
 }
 
-sealed trait Worker extends Disposable {
+sealed trait Worker extends AutoCloseable {
 	def start():Unit
-	def dispose():Unit
+	//def close():Unit
 }
 
 private final class WorkerThread(name:String, priority:Int,  body:Io[Boolean]) extends Thread with Worker {
@@ -19,7 +19,7 @@ private final class WorkerThread(name:String, priority:Int,  body:Io[Boolean]) e
 	@volatile
 	private var keepAlive	= true
 
-	def dispose():Unit	= {
+	def close():Unit	= {
 		keepAlive	= false
 		interrupt()
 		join()

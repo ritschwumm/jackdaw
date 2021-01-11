@@ -25,7 +25,7 @@ object Decoder {
 		.worker[Decoder,Unit](
 			all,
 			_.name,
-			_ convertToWav (input, output, preferredFrameRate, preferredChannelCount)
+			_.convertToWav(input, output, preferredFrameRate, preferredChannelCount)
 		)
 		.isDefined
 }

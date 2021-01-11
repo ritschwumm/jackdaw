@@ -1,6 +1,6 @@
 package jackdaw.util
 
-import scutil.base.implicits._
+import scutil.core.implicits._
 import scutil.lang._
 
 object Checked {
@@ -11,5 +11,5 @@ object Checked {
 		Left(problem1(problem))
 
 	def problem1(problem:String):Nes[String]	=
-		Nes single problem
+		Nes one problem
 }

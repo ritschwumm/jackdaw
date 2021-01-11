@@ -2,7 +2,7 @@ package jackdaw.media
 
 import java.io.File
 
-import scutil.core.implicits._
+import scutil.jdk.implicits._
 
 import jackdaw.util.Checked
 
@@ -13,7 +13,7 @@ object Faad extends Inspector with Decoder {
 		for {
 			_		<-	recognizeFile(input)
 			_		<-	MediaUtil requireCommand "faad"
-			result	<-	MediaUtil runCommand (
+			result	<-	MediaUtil.runCommand(
 							"faad",
 							"-i",
 							input.getPath
@@ -34,7 +34,7 @@ object Faad extends Inspector with Decoder {
 		for {
 			_	<-	recognizeFile(input)
 			_	<-	MediaUtil requireCommand "faad"
-			_	<-	MediaUtil runCommand (
+			_	<-	MediaUtil.runCommand(
 						"faad",
 						"-o",	output.getPath,
 						"-b",	"1",			// 16 bit signed short
@@ -44,10 +44,10 @@ object Faad extends Inspector with Decoder {
 						input.getPath
 					)
 			// NOTE faad rc is 0 regardless of whether it worked or not
-			_	<-	Checked trueWin1 (output.exists, "output file not generated")
+			_	<-	Checked.trueWin1(output.exists, "output file not generated")
 		}
 		yield ()
 
 	private val recognizeFile:File=>Checked[Unit]	=
-		MediaUtil requireFileSuffixIn (".m4a", ".aac")
+		MediaUtil.requireFileSuffixIn(".m4a", ".aac")
 }

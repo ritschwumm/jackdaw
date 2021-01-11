@@ -6,9 +6,8 @@ import java.io.RandomAccessFile
 import de.jarnbjo.ogg._
 import de.jarnbjo.vorbis._
 
-import scutil.base.implicits._
 import scutil.core.implicits._
-import scutil.lang.tc.Resource
+import scutil.jdk.implicits._
 import scutil.lang._
 import scutil.lang.Charsets._
 import scutil.bit.ByteArrayUtil
@@ -63,7 +62,7 @@ object JOgg extends Inspector with Decoder with Logging {
 		val buffer	= new Array[Byte](16384)
 		while (true) {
 			try {
-				val len = vorbisStream readPcm (buffer, 0, buffer.length)
+				val len = vorbisStream.readPcm(buffer, 0, buffer.length)
 				// BETTER use AudioFormat_S2LE.putShort?
 				// convert to little endian
 				swapEndianShort(buffer, len)
@@ -120,9 +119,9 @@ object JOgg extends Inspector with Decoder with Logging {
 				require(it.length == 4, show"tag id expected to have 4 chars, ${it} has ${it.length}")
 				outFile write (it getBytes us_ascii)
 			}
-			def writeInt(it:Int):Unit						= outFile write (ByteArrayUtil littleEndianInt		it)
-			def writeShort(it:Short):Unit					= outFile write (ByteArrayUtil littleEndianShort	it)
-			def writeBytes(bytes:Array[Byte], len:Int):Unit	= outFile write (bytes, 0, len)
+			def writeInt(it:Int):Unit						= outFile.write(ByteArrayUtil fromLittleEndianInt	it)
+			def writeShort(it:Short):Unit					= outFile.write(ByteArrayUtil fromLittleEndianShort	it)
+			def writeBytes(bytes:Array[Byte], len:Int):Unit	= outFile.write(bytes, 0, len)
 
 			def tag(id:String)(content: =>Unit):Unit	= {
 				writeId(id)

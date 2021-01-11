@@ -6,8 +6,8 @@ import javazoom.jl.decoder.{Header,Obuffer,JavaLayerException}
 import javazoom.jl.converter._
 import javazoom.jl.converter.Converter.{ ProgressListener => ConverterProgressListener }
 
-import scutil.base.implicits._
 import scutil.core.implicits._
+import scutil.jdk.implicits._
 import scutil.log._
 
 import jackdaw.util.Checked
@@ -22,7 +22,7 @@ object JLayer extends Decoder with Logging {
 						DEBUG(show"decoding with ${name}")
 
 						try {
-							new Converter convert (ist, output.getAbsolutePath, pl, null)
+							(new Converter).convert(ist, output.getAbsolutePath, pl, null)
 							Right(())
 						}
 						catch { case e:JavaLayerException =>

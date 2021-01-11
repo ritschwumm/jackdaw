@@ -2,7 +2,7 @@ package jackdaw.player
 
 import java.io.File
 
-import scutil.base.implicits._
+import scutil.core.implicits._
 import scutil.io.implicits._
 import scutil.lang._
 import scutil.time._
@@ -28,14 +28,14 @@ final class Loader(engineTarget:Target[LoaderFeedback]) extends Logging {
 				true
 			}
 		)
-	val target	= actor.asTarget
+	val target:Target[LoaderAction]	= actor.asTarget
 
 	def start():Unit	= {
 		actor.start()
 	}
 
-	def dispose():Unit	= {
-		actor.dispose()
+	def close():Unit	= {
+		actor.close()
 	}
 
 	//------------------------------------------------------------------------------
@@ -51,10 +51,10 @@ final class Loader(engineTarget:Target[LoaderFeedback]) extends Logging {
 	private def doDecode(file:File, callback:Effect[Option[CacheSample]]):Unit	= {
 		DEBUG("loader loading", file)
 		val sample	=
-				(Wav load file)
-				.leftEffect	{ it => ERROR("cannot load file", it) }
-				.toOption
-				.map { new CacheSample(_) }
+			(Wav load file)
+			.leftEffect	{ it => ERROR("cannot load file", it) }
+			.toOption
+			.map { new CacheSample(_) }
 		doInEngine(thunk {
 			callback(sample)
 		})

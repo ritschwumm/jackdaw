@@ -2,7 +2,7 @@ package jackdaw.media
 
 import java.io.File
 
-import scutil.core.implicits._
+import scutil.jdk.implicits._
 
 import jackdaw.util.Checked
 
@@ -13,7 +13,7 @@ object Opusinfo extends Inspector {
 		for {
 			_		<-	recognizeFile(input)
 			_		<-	MediaUtil requireCommand "opusinfo"
-			result	<-	MediaUtil runCommand (
+			result	<-	MediaUtil.runCommand(
 							"opusinfo",
 							input.getPath
 						)
@@ -29,5 +29,5 @@ object Opusinfo extends Inspector {
 		}
 
 	private val recognizeFile:File=>Checked[Unit]	=
-		MediaUtil requireFileSuffixIn (".opus")
+		MediaUtil.requireFileSuffixIn(".opus")
 }

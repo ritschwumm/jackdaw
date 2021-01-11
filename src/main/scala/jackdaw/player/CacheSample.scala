@@ -27,8 +27,9 @@ final class CacheSample(peer:Sample) extends Sample {
 
 	private type Chunk	= Array[Float]
 
+	// TODO questionable conversion
 	private val spreadFrames:Int	=
-		ceil(Config.preloadSpread.millis * frameRate / 1000).toInt
+		ceil((Config.preloadSpread.millis * frameRate / 1000).toDouble).toInt
 
 	private val bufferFrames:Int	=
 		spreadFrames + Player.maxDistance
@@ -82,7 +83,7 @@ final class CacheSample(peer:Sample) extends Sample {
 
 	private final class CacheChannel(channelIndex:Int) extends Channel {
 		val frameCount:Int			= CacheSample.this.frameCount
-		def get(frame:Int):Float	= CacheSample.this getSample (frame, channelIndex)
+		def get(frame:Int):Float	= CacheSample.this.getSample(frame, channelIndex)
 	}
 
 	private def getSample(frame:Int, channelIndex:Int):Float	= {

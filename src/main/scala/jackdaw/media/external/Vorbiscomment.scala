@@ -2,7 +2,7 @@ package jackdaw.media
 
 import java.io.File
 
-import scutil.core.implicits._
+import scutil.jdk.implicits._
 
 import jackdaw.util.Checked
 
@@ -13,7 +13,7 @@ object Vorbiscomment extends Inspector {
 		for {
 			_		<-	recognizeFile(input)
 			_		<-	MediaUtil requireCommand "vorbiscomment"
-			result	<-	MediaUtil runCommand (
+			result	<-	MediaUtil.runCommand(
 							"vorbiscomment",
 							input.getPath
 						)

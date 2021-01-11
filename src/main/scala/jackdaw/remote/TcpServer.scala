@@ -2,6 +2,8 @@ package jackdaw.remote
 
 import java.net._
 
+import scutil.lang.implicits._
+
 final class TcpServer {
 	private val serverSocket	=
 		new ServerSocket(
@@ -16,7 +18,9 @@ final class TcpServer {
 	def connect():TcpConnection[ToStub,ToSkeleton]	= {
 		val connection	=
 			new TcpConnection[ToStub,ToSkeleton](
-				serverSocket.accept(),
+				// NOTE disables nagle's algorithm:
+				// batching up packets increases latency, and low latency is more important for us than throughput
+				serverSocket.accept().doto(_.setTcpNoDelay(true)),
 				(input:Input)					=> input.readToStub(),
 				(output:Output, it:ToSkeleton)	=> output.writeToSkeleton(it)
 			)

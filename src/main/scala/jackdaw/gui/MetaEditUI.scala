@@ -3,7 +3,7 @@ package jackdaw.gui
 import java.awt.event._
 import javax.swing._
 
-import scutil.base.implicits._
+import scutil.core.implicits._
 import scutil.lang._
 import scutil.gui.CasterInstances._
 import scutil.gui.SwingUtil._
@@ -26,7 +26,7 @@ final class MetaEditUI(value:Signal[Option[String]], strong:Boolean) extends UI 
 	//## components
 
 	private val field	= new JTextField
-	field	setFont			(strong	cata (Style.meta.edit.weak.font,	Style.meta.edit.strong.font))
+	field	setFont			strong.cata(Style.meta.edit.weak.font,	Style.meta.edit.strong.font)
 	field	setBorder		null
 	// file dropping should not focus this
 	field	setDropTarget	null
@@ -50,7 +50,7 @@ final class MetaEditUI(value:Signal[Option[String]], strong:Boolean) extends UI 
 	//## wiring
 
 	private val textChanges:Events[String]	=
-		SwingWidget transformer (
+		SwingWidget.transformer(
 			display,
 			(field.getDocument:DocumentCaster).connect,
 			thunk { field.getText },
@@ -79,7 +79,7 @@ final class MetaEditUI(value:Signal[Option[String]], strong:Boolean) extends UI 
 	//## output
 
 	val focussed:Signal[Boolean]	=
-		SwingWidget signal (
+		SwingWidget.signal(
 			(component:FocusCaster).connect,
 			thunk { component.hasFocus }
 		)

@@ -2,7 +2,7 @@ package jackdaw.media
 
 import java.io.File
 
-import scutil.core.implicits._
+import scutil.jdk.implicits._
 
 import jackdaw.util.Checked
 
@@ -13,7 +13,7 @@ object Metaflac extends Inspector {
 		for {
 			_		<-	recognizeFile(input)
 			_		<-	MediaUtil requireCommand "metaflac"
-			result	<-	MediaUtil runCommand (
+			result	<-	MediaUtil.runCommand(
 							"metaflac",
 							"--list",
 							input.getPath
@@ -30,5 +30,5 @@ object Metaflac extends Inspector {
 		}
 
 	private val recognizeFile:File=>Checked[Unit]	=
-		MediaUtil requireFileSuffixIn (".flac", ".flc")
+		MediaUtil.requireFileSuffixIn(".flac", ".flc")
 }

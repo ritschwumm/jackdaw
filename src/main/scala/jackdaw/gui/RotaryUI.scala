@@ -7,7 +7,7 @@ import javax.swing._
 
 import scala.math._
 
-import scutil.base.implicits._
+import scutil.core.implicits._
 import scutil.math.functions._
 
 import screact._
@@ -38,10 +38,10 @@ final class RotaryUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 	private val valueToAngle	= valueSpan spanTransformTo angleSpan
 
 	private val epsilon		= 1.0 / 10000000000D
-	private val inValueSpan	= GeomUtil containsInclusive (valueSpan, epsilon)
+	private val inValueSpan	= GeomUtil.containsInclusive(valueSpan, epsilon)
 
 	private def clampValueSpan(raw:Double):Double	=
-		GeomUtil clampValue (valueSpan, raw)
+		GeomUtil.clampValue(valueSpan, raw)
 
 	//------------------------------------------------------------------------------
 	//## figures
@@ -85,14 +85,14 @@ final class RotaryUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 				Some(		StrokeShape(track,	Style.rotary.outline.color,	Style.rotary.outline.stroke)	),
 				knob map {	FillShape(_,		Style.rotary.knob.color)									},
 				knob map {	StrokeShape(_,		Style.rotary.outline.color,	Style.rotary.outline.stroke)	}
-			).collapse
+			).flattenOption
 		}
 
 	private def stripeShape(bounds:SgRectangle, span:SgSpan):Shape = {
 		// stroke an open arc with a suffiently fast stroke
 		val inset	= bounds inset (SgRectangleInsets.one * Style.rotary.track.size / 2)
 		val stroke	= new BasicStroke(
-			Style.rotary.track.size,
+			Style.rotary.track.size.toFloat,
 			BasicStroke.CAP_SQUARE,
 			BasicStroke.JOIN_ROUND)
 		val path	= new Arc2D.Double(
@@ -139,8 +139,9 @@ final class RotaryUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 
 	// mouse actions modify the value
 	private val mouseModify:Events[Double] =
-		mousePress orElse mouseDrag filterMap { ev =>
-			calculateValue(ev.getPoint) combineWith (_ flatOptionNot _)
+		mousePress orElse mouseDrag mapFilter { ev =>
+			val (inside, next)	= calculateValue(ev.getPoint)
+			inside flatOptionNot next
 		}
 
 	private val mouseReset:Events[Double]	=
@@ -196,7 +197,7 @@ final class RotaryUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 	}
 
 	private val mouseWheel:Events[Int]	=
-		canvas.mouse.wheelRotation map { _ * (valueSpan.normal cata (-1, +1)) }
+		canvas.mouse.wheelRotation map { _ * valueSpan.normal.cata (-1, +1) }
 
 	//------------------------------------------------------------------------------
 	//## output

@@ -3,7 +3,7 @@ package jackdaw.gui
 import java.awt.{ List=>_, Canvas=>_, _ }
 import javax.swing._
 
-import scutil.base.implicits._
+import scutil.core.implicits._
 import scutil.lang._
 
 import screact._
@@ -25,24 +25,24 @@ final class LinearUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 	//## input
 
 	private val orientation	= SgOrientation trueVertical vertical
-	private val miniMax		= SgSpan startEnd (minimum, maximum)
+	private val miniMax		= SgSpan.startEnd(minimum, maximum)
 
 	private val epsilon		= 1.0 / 10000000000D
-	private val inMiniMax	= GeomUtil containsInclusive (miniMax, epsilon)
+	private val inMiniMax	= GeomUtil.containsInclusive(miniMax, epsilon)
 
 	private def clampMiniMax(raw:Double):Double	=
-		GeomUtil clampValue (miniMax, raw)
+		GeomUtil.clampValue(miniMax, raw)
 
 	private val trackBounds		=
 		canvas.bounds map {
 			_
-			.modify (orientation,			it => GeomUtil	spanDeflate	(it,		Style.linear.knob.size))
-			.modify (orientation.opposite,	it => SgSpan	centerBy 	(it.center,	Style.linear.track.size))
+			.modify(orientation,			it => GeomUtil	.spanDeflate	(it,		Style.linear.knob.size))
+			.modify(orientation.opposite,	it => SgSpan	.centerBy 		(it.center,	Style.linear.track.size))
 		}
 
 	private val value2gui	=
 		trackBounds map { it =>
-			(orientation cata (miniMax, miniMax.swap))	spanTransformTo
+			orientation.cata(miniMax, miniMax.swap)	spanTransformTo
 			(it get orientation)
 		}
 
@@ -69,12 +69,12 @@ final class LinearUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 				Some(			StrokeShape(track,	Style.linear.outline.color,	Style.linear.outline.stroke)	),
 				knob	map {	FillShape(_,		Style.linear.knob.color)									},
 				knob	map {	StrokeShape( _,		Style.linear.outline.color,	Style.linear.outline.stroke)	}
-			).collapse
+			).flattenOption
 		}
 
 	private def stripeShape(bounds:SgRectangle, span:SgSpan, value2gui:SgSpanTransform):Shape	=
 		GeomUtil smallerRectangle (
-			bounds set (
+			bounds.set(
 				orientation,
 				value2gui transformSpan span
 			)
@@ -82,7 +82,7 @@ final class LinearUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 
 	private def knobShape(bounds:SgRectangle, value:Double, value2gui:SgSpanTransform):Shape	=
 		GeomUtil smallerRectangle (
-			bounds set (
+			bounds.set(
 				orientation,
 				value2gui apply value spanCenterBy Style.linear.knob.size
 			)
@@ -102,10 +102,10 @@ final class LinearUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 		}
 
 	private val mouseReset:Events[Double]	=
-		canvas.mouse.rightPress filterMap constant(neutral)
+		canvas.mouse.rightPress mapFilter constant(neutral)
 
 	private val mouseWheel:Events[Int]	=
-		canvas.mouse.wheelRotation map { _ * (miniMax.normal cata (-1, +1)) }
+		canvas.mouse.wheelRotation map { _ * miniMax.normal.cata(-1, +1) }
 
 	//------------------------------------------------------------------------------
 	//## output

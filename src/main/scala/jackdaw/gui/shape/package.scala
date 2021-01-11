@@ -3,7 +3,7 @@ package jackdaw.gui
 import java.awt.Shape
 import java.awt.geom._
 
-import scutil.base.implicits._
+import scutil.core.implicits._
 import scutil.lang.Nes
 
 import scgeom._
@@ -27,8 +27,8 @@ package object shape {
 		val closed	= draft.points.head == draft.points.last
 		val last	= draft.points.size - 1
 		draft.points.zipWithIndex foreach {
-			case (SgPoint(x,y), 0)								=> out moveTo (x,y)
-			case (SgPoint(x,y), i)	if !(closed && i == last)	=> out lineTo (x,y)
+			case (SgPoint(x,y), 0)								=> out.moveTo(x,y)
+			case (SgPoint(x,y), i)	if !(closed && i == last)	=> out.lineTo(x,y)
 			case _												=>
 		}
 		if (closed) {

@@ -2,8 +2,8 @@ package jackdaw.remote
 
 import java.io._
 
+import scutil.jdk.implicits._
 import scutil.core.implicits._
-import scutil.base.implicits._
 import scutil.lang._
 import scutil.platform._
 import scutil.log._
@@ -86,9 +86,9 @@ final class EngineStub extends Logging {
 		DEBUG("started")
 	}
 
-	def dispose():Unit	= {
+	def close():Unit	= {
 		DEBUG("disposing")
-		receiver.dispose()
+		receiver.close()
 
 		sendToSkeleton(ToSkeleton.Kill)
 
@@ -96,7 +96,7 @@ final class EngineStub extends Logging {
 		// avoid memory leak, see http://developer.java.sun.com/developer/qow/archive/68/
 		process.waitFor()
 
-		tcpConnection.dispose()
+		tcpConnection.close()
 		DEBUG("disposed")
 	}
 

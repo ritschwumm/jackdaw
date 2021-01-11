@@ -179,11 +179,11 @@ final class Output(val st:OutputStream) {
 
 	def writeOption[T](value:Option[T], writeSub:T=>Unit):Unit	= {
 		value match {
-		case Some(x)	=>
-			writeBoolean(true)
-			writeSub(x)
-		case None	=>
-			writeBoolean(false)
+			case Some(x)	=>
+				writeBoolean(true)
+				writeSub(x)
+			case None	=>
+				writeBoolean(false)
 		}
 	}
 

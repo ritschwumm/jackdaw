@@ -20,7 +20,7 @@ final class StripUI(strip:Strip, peak:Signal[Float], phoneEnabled:Boolean, keyIn
 
 	private val speakerUI	= UIFactory volumeLinear	strip.speaker
 	private val phoneUI		= UIFactory volumeRotary	strip.phone
-	private val meterUI		= UIFactory	meter			(peak, strip.meterRange)
+	private val meterUI		= UIFactory	.meter			(peak, strip.meterRange)
 
 	speakerUI.component	setAllSizes	Style.linear.size
 	phoneUI.component	setAllSizes	Style.rotary.size
@@ -31,9 +31,9 @@ final class StripUI(strip:Strip, peak:Signal[Float], phoneEnabled:Boolean, keyIn
 	private val z		= (Style.linear.knob.size / 2).toInt
 	private val	panel	=
 		GridBagUI(
-			speakerUI	pos(0,1) size(1,1) weight(1,1) fill VERTICAL	anchor EAST		insetsTLBR(0,0,2,2),
-			meterUI		pos(1,1) size(1,1) weight(1,1) fill VERTICAL	anchor WEST		insetsTLBR(0+z,2,2+z,0),
-			phoneUI		pos(0,2) size(2,1) weight(1,0) fill NONE		anchor CENTER	insetsTLBR(2,0,0,0)
+			speakerUI	.pos(0,1) .size(1,1) .weight(1,1) .fill(VERTICAL)	.anchor(EAST)	.insetsTLBR(0,0,2,2),
+			meterUI		.pos(1,1) .size(1,1) .weight(1,1) .fill(VERTICAL)	.anchor(WEST)	.insetsTLBR(0+z,2,2+z,0),
+			phoneUI		.pos(0,2) .size(2,1) .weight(1,0) .fill(NONE)		.anchor(CENTER)	.insetsTLBR(2,0,0,0)
 		)
 	val component:JComponent	= panel.component
 

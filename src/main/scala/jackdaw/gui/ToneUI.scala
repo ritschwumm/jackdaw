@@ -4,7 +4,7 @@ import java.awt.{ List=>_, _ }
 import java.awt.event._
 import javax.swing._
 
-import scutil.base.implicits._
+import scutil.core.implicits._
 import scutil.gui.implicits._
 import scutil.gui.GridBagDSL._
 
@@ -41,11 +41,11 @@ final class ToneUI(tone:Tone, keyInput:KeyInput) extends UI with Observing {
 
 	private val panel	=
 		GridBagUI(
-			trimKnob	pos(0,0) size(1,1) weight(1,1) fill NONE insetsTLBR(0,0,2,0),
-			filterKnob	pos(0,1) size(1,1) weight(1,1) fill NONE insetsTLBR(2,0,8+2,0),
-			highKnob	pos(0,2) size(1,1) weight(1,1) fill NONE insetsTLBR(2,0,2,0),
-			midKnob		pos(0,3) size(1,1) weight(1,1) fill NONE insetsTLBR(2,0,2,0),
-			lowKnob		pos(0,4) size(1,1) weight(1,1) fill NONE insetsTLBR(2,0,0,0)
+			trimKnob	.pos(0,0) .size(1,1) .weight(1,1) .fill(NONE) .insetsTLBR(0,0,2,0),
+			filterKnob	.pos(0,1) .size(1,1) .weight(1,1) .fill(NONE) .insetsTLBR(2,0,8+2,0),
+			highKnob	.pos(0,2) .size(1,1) .weight(1,1) .fill(NONE) .insetsTLBR(2,0,2,0),
+			midKnob		.pos(0,3) .size(1,1) .weight(1,1) .fill(NONE) .insetsTLBR(2,0,2,0),
+			lowKnob		.pos(0,4) .size(1,1) .weight(1,1) .fill(NONE) .insetsTLBR(2,0,0,0)
 		)
 	val component:JComponent	= panel.component
 

@@ -2,8 +2,6 @@ package jackdaw.gui.util
 
 import java.awt.event.KeyEvent
 
-import scutil.base.implicits._
-
 import screact._
 
 object KeyInput {
@@ -22,7 +20,7 @@ final class KeyInput(target:Signal[Boolean], keys:Signal[Set[Key]]) {
 
 	implicit class RichKey(peer:Key) {
 		def asModifier:Signal[Boolean]	=
-			(keyDown(peer) zipWith target) { _ && _ }
+			(keyDown(peer) map2 target) { _ && _ }
 
 		def asAction:Events[Unit]	=
 			keyDown(peer).edge.trueUnit gate target
@@ -30,10 +28,13 @@ final class KeyInput(target:Signal[Boolean], keys:Signal[Set[Key]]) {
 
 	//------------------------------------------------------------------------------
 
-	// NOTE this is special because of the sequenceOptionSecond
+	// NOTE this is special because of the sequenceOptionSecond (???)
 	implicit class RichDirectionModifier1(peer:Signal[Option[Boolean]]) {
-		def withFine:Signal[Option[(Boolean,Boolean)]]	=
-			peer zip fineModifier map { _.first.sequenceOption }
+		def withFine:Signal[Option[(Boolean,Boolean)]]	= {
+			peer product fineModifier map { case (opt,full) =>
+				opt.map(_ -> full)
+			}
+		}
 	}
 
 	implicit class RichAction1(peer:Events[Unit]) {

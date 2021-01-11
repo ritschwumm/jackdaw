@@ -13,7 +13,7 @@ final class GridBagUI(subs:Seq[GridBagItem]) extends UI {
 	panel setLayout new GridBagLayout
 
 	subs foreach { case GridBagItem(ui,constraint) =>
-		panel add (ui.component, constraint)
+		panel.add(ui.component, constraint)
 	}
 
 	val component:JComponent	= panel

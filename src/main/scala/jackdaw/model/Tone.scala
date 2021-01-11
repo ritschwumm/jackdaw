@@ -1,7 +1,6 @@
 package jackdaw.model
 
-import scutil.base.implicits._
-import scutil.lang._
+import scutil.core.implicits._
 
 import screact._
 
@@ -9,10 +8,10 @@ import jackdaw.range._
 
 object Tone {
 	val trimStep:Boolean=>Double	=
-		_ cata (TrimRange.size/20, TrimRange.size/100)
+		_.cata(TrimRange.size/20, TrimRange.size/100)
 
 	val filterStep:Boolean=>Double	=
-		_ cata (FilterRange.size/100, FilterRange.size/250)
+		_.cata(FilterRange.size/100, FilterRange.size/250)
 }
 
 final class Tone {
@@ -78,9 +77,9 @@ final class Tone {
 		resetHigh()
 	}
 
-	private def trimModifier(steps:Int, fine:Boolean):Endo[Double]	=
+	private def trimModifier(steps:Int, fine:Boolean):Double=>Double	=
 		it => TrimRange clamp (it + steps * (Tone trimStep fine))
 
-	private def filterModifier(steps:Int, fine:Boolean):Endo[Double]	=
+	private def filterModifier(steps:Int, fine:Boolean):Double=>Double	=
 		it => FilterRange clamp (it + steps * (Tone filterStep fine))
 }

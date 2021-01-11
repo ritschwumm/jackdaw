@@ -1,12 +1,12 @@
 package jackdaw.util
 
-import scutil.base.implicits._
+import scutil.core.implicits._
 import scutil.lang._
 
 import scala.collection.mutable
 
 /** last recently used cache, unsynchronized */
-final class LRU[S,T](size:Int, create:S=>T, touch:Effect[T] = (t:T)=>(), delete:Effect[T] = (t:T)=>()) extends Disposable {
+final class LRU[S,T](size:Int, create:S=>T, touch:Effect[T] = (t:T)=>(), delete:Effect[T] = (t:T)=>()) extends AutoCloseable {
 	private val keys	= mutable.Queue.empty[S]
 	private val cache	= mutable.Map.empty[S,T]
 
@@ -21,7 +21,7 @@ final class LRU[S,T](size:Int, create:S=>T, touch:Effect[T] = (t:T)=>(), delete:
 		case None	=>
 			// prune if necessary
 			if (keys.size >= size) {
-				val	ss	= keys.dequeue
+				val	ss	= keys.dequeue()
 				val tt	= cache(ss)
 				cache remove ss
 				delete(tt)
@@ -40,7 +40,7 @@ final class LRU[S,T](size:Int, create:S=>T, touch:Effect[T] = (t:T)=>(), delete:
 		vs foreach delete
 	}
 
-	def dispose():Unit	= {
+	def close():Unit	= {
 		cache.values foreach delete
 	}
 }

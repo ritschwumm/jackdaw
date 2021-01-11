@@ -19,7 +19,7 @@ final class TcpConnection[I,O](
 		output.st.flush()
 	}
 
-	def dispose():Unit	= {
+	def close():Unit	= {
 		socket.close()
 	}
 }

@@ -2,7 +2,7 @@ package jackdaw.data
 
 import scala.math._
 
-import scutil.base.implicits._
+import scutil.core.implicits._
 import scutil.lang._
 
 import jackdaw.media.Metadata

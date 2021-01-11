@@ -45,14 +45,14 @@ final class MetaUI(deck:Deck) extends UI {
 
 	private val panel	=
 		GridBagUI(
-			titleDisplay		pos(0,0) size(1,1) weight(1,1) fill HORIZONTAL insetsTLBR(2,4,0,4),
-			artistDisplay		pos(0,1) size(1,1) weight(1,1) fill HORIZONTAL insetsTLBR(0,4,0,4),
-			locationDisplay 	pos(1,0) size(1,1) weight(0,1) fill HORIZONTAL insetsTLBR(2,4,0,4),
-			remainsDisplay		pos(1,1) size(1,1) weight(0,1) fill HORIZONTAL insetsTLBR(0,4,0,4),
-			bpmDisplay			pos(2,0) size(1,1) weight(0,1) fill HORIZONTAL insetsTLBR(2,4,0,4),
-			pitchDisplay		pos(2,1) size(1,1) weight(0,1) fill HORIZONTAL insetsTLBR(0,4,0,4),
-			annotationEditor	pos(0,2) size(2,1) weight(1,1) fill HORIZONTAL insetsTLBR(0,4,2,4),
-			keyDisplay			pos(2,2) size(1,1) weight(0,1) fill HORIZONTAL insetsTLBR(0,4,2,4)
+			titleDisplay		.pos(0,0) .size(1,1) .weight(1,1) .fill(HORIZONTAL) .insetsTLBR(2,4,0,4),
+			artistDisplay		.pos(0,1) .size(1,1) .weight(1,1) .fill(HORIZONTAL) .insetsTLBR(0,4,0,4),
+			locationDisplay 	.pos(1,0) .size(1,1) .weight(0,1) .fill(HORIZONTAL) .insetsTLBR(2,4,0,4),
+			remainsDisplay		.pos(1,1) .size(1,1) .weight(0,1) .fill(HORIZONTAL) .insetsTLBR(0,4,0,4),
+			bpmDisplay			.pos(2,0) .size(1,1) .weight(0,1) .fill(HORIZONTAL) .insetsTLBR(2,4,0,4),
+			pitchDisplay		.pos(2,1) .size(1,1) .weight(0,1) .fill(HORIZONTAL) .insetsTLBR(0,4,0,4),
+			annotationEditor	.pos(0,2) .size(2,1) .weight(1,1) .fill(HORIZONTAL) .insetsTLBR(0,4,2,4),
+			keyDisplay			.pos(2,2) .size(1,1) .weight(0,1) .fill(HORIZONTAL) .insetsTLBR(0,4,2,4)
 		)
 	panel.component setBackground	Style.meta.background.color
 	panel.component setBorder		Style.meta.border

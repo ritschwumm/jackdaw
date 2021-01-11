@@ -2,7 +2,7 @@ package jackdaw.media
 
 import java.io.File
 
-import scutil.core.implicits._
+import scutil.jdk.implicits._
 
 import jackdaw.util.Checked
 
@@ -14,7 +14,7 @@ object Avprobe extends Inspector {
 			// no suffix check
 			_		<- MediaUtil requireCommand "avprobe"
 			result	<-
-					MediaUtil runCommand (
+					MediaUtil.runCommand(
 						"avprobe",	input.getPath
 						/*
 						// this no longer works

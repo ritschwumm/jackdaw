@@ -3,7 +3,7 @@ package jackdaw.gui.util
 import java.awt.{ List=>_, _ }
 import java.awt.image._
 
-import scutil.base.implicits._
+import scutil.core.implicits._
 import scutil.lang._
 import scutil.geom._
 import scutil.gui.implicits._
@@ -26,11 +26,10 @@ final class ImageUtil(graphicsConfiguration:GraphicsConfiguration) {
 		}
 
 	def createImage(size:IntPoint, transparent:Boolean):BufferedImage	=
-		graphicsConfiguration
-		.createCompatibleImage(
+		graphicsConfiguration.createCompatibleImage(
 			size.x,
 			size.y,
-			transparent cata (
+			transparent.cata(
 				Transparency.OPAQUE,
 				Transparency.TRANSLUCENT
 			)

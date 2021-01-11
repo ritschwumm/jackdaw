@@ -4,7 +4,7 @@ import java.io.File
 
 import com.mpatric.mp3agic._
 
-import scutil.base.implicits._
+import scutil.core.implicits._
 import scutil.lang._
 import scutil.log._
 

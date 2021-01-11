@@ -5,7 +5,7 @@ import java.awt.image._
 
 import scala.math._
 
-import scutil.base.implicits._
+import scutil.core.implicits._
 import scutil.geom._
 import scutil.math.functions._
 
@@ -19,7 +19,7 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 	def drawFully(g:Graphics2D, target:IntRect):Unit	= {
 		val size	= target.size
 		val image	= provideFullImage(size)
-		g drawImage (
+		g.drawImage(
 			image,
 			target.left,
 			target.top,
@@ -72,9 +72,9 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 
 			// clip away tileInset
 			val oldClip	= g.getClip
-			g	clipRect	(tilePos, 0, tileOffset, height)
-			g	drawImage	(tile, drawPos, y, null)
-			g 	setClip		oldClip
+			g.clipRect	(tilePos, 0, tileOffset, height)
+			g.drawImage	(tile, drawPos, y, null)
+			g.setClip	(oldClip)
 		}
 
 		// next tile
@@ -106,7 +106,7 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 	//------------------------------------------------------------------------------
 
 	private def renderTile(curve:BandCurve, height:Int, index:Int):BufferedImage	=
-		blur(imageUtil renderImage (IntPoint(tileSize, height), true, g => {
+		blur(imageUtil.renderImage(IntPoint(tileSize, height), true, g => {
 			val sizeY	= height-1
 			val bottomY	= height-1
 			var x		= 0
@@ -128,7 +128,7 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 
 	/*
 	private def renderOne(curve:BandCurve, height:Int):BufferedImage	=
-		blur(ImageUtil renderImage (IntPoint(curve.chunkCount, height), true, g => {
+		blur(ImageUtil.renderImage(IntPoint(curve.chunkCount, height), true, g => {
 			val sizeY	= height-1
 			val bottomY	= height-1
 			var	x	= 0
@@ -148,7 +148,7 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 	*/
 
 	private def renderScaled(curve:BandCurve, size:IntPoint):BufferedImage	=
-		blur(imageUtil renderImage (size, true, g => {
+		blur(imageUtil.renderImage(size, true, g => {
 			val sizeY	= size.y-1
 			val bottomY	= size.y-1
 			val width	= size.x
@@ -159,9 +159,9 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 				val	endX	= floor((x+1) * step).toInt
 				val sizeX	= endX - startX
 
-				val valueLow	= curve rangeLow	(startX, sizeX)
-				val valueMiddle	= curve rangeMiddle	(startX, sizeX)
-				val valueHigh	= curve rangeHigh	(startX, sizeX)
+				val valueLow	= curve.rangeLow	(startX, sizeX)
+				val valueMiddle	= curve.rangeMiddle	(startX, sizeX)
+				val valueHigh	= curve.rangeHigh	(startX, sizeX)
 
 				renderLine(
 					g, x, sizeY, bottomY,
@@ -194,8 +194,8 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 		val valueSum	= (valueLow + valueMiddle + valueHigh)
 		val ySum		= (valueSum * sizeY).toInt
 
-		g setPaint	color
-		g drawLine	(x, bottomY-ySum, x, bottomY)
+		g.setPaint(color)
+		g.drawLine(x, bottomY-ySum, x, bottomY)
 	}
 
 	@inline
@@ -255,5 +255,5 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
     }
 
     private def blur(src:BufferedImage):BufferedImage	=
-		blurOperation filter (src, null)
+		blurOperation.filter(src, null)
 }

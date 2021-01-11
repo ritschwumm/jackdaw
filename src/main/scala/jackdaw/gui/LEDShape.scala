@@ -2,7 +2,7 @@ package jackdaw.gui
 
 import java.awt.Shape
 
-import scutil.base.implicits._
+import scutil.lang._
 
 import scgeom._
 
@@ -26,11 +26,18 @@ object LEDShape {
 				B	-> rect.y.end
 			)
 
-		def point(it:Point):SgPoint		=
-			pointPositions(it) bimap (horizontal, vertical) into SgPoint.fromPair
+		def point(it:Point):SgPoint		= {
+			val positions	= pointPositions(it)
+			SgPoint(
+				horizontal(positions._1),
+				vertical(positions._2)
+			)
+		}
 
-		def segment(it:Segment):Draft	=
-			Draft(segmentPoints(it).toNes map point)
+		def segment(it:Segment):Draft	= {
+			val points	= segmentPoints(it)
+			Draft(Nes.of(points._1, points._2) map point)
+		}
 
 		def number(it:Number):Poly	=
 			Poly(numberSegments(it).toSeq map segment)

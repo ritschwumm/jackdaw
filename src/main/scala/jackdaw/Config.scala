@@ -1,6 +1,6 @@
 package jackdaw
 
-import scutil.base.implicits._
+import scutil.core.implicits._
 
 import scaudio.output._
 import scaudio.dsp.BiQuadCoeffs

@@ -2,7 +2,7 @@ package jackdaw.gui
 
 import javax.swing._
 
-import scutil.base.implicits._
+import scutil.core.implicits._
 import scutil.lang._
 
 import screact._
@@ -38,7 +38,7 @@ final class TransportUI(cueable:Signal[Boolean], playable:Signal[Boolean], playi
 				(uis, actions)
 			}
 		})
-		.unzip
+		.untuple
 	typed[Signal[Seq[UI]]](cuePointUIs)
 	typed[Signal[Seq[Events[Int]]]](cuePointActionEvents)
 
@@ -48,7 +48,7 @@ final class TransportUI(cueable:Signal[Boolean], playable:Signal[Boolean], playi
 	private val cuePointsPanel:UI	=
 		new SwitchUI(
 			cuePointUIs map { items =>
-				new HBoxUI(items map BoxComponent.apply)
+				new HBoxUI(items map BoxItem.Component.apply)
 			}
 		)
 
@@ -84,7 +84,7 @@ final class TransportUI(cueable:Signal[Boolean], playable:Signal[Boolean], playi
 			loopChoices map { case (choice, active) =>
 				val style	=
 						active map {
-							_ cata (ButtonStyleFactory.LOOP_ON _, ButtonStyleFactory.LOOP_OFF _) apply choice.measures
+							_.cata(ButtonStyleFactory.LOOP_ON _, ButtonStyleFactory.LOOP_OFF _) apply choice.measures
 						}
 				val button	=
 						new ButtonUI(
@@ -111,13 +111,13 @@ final class TransportUI(cueable:Signal[Boolean], playable:Signal[Boolean], playi
 		(loopResetUI.actions tag None)
 
 	private val loopPanel:UI	=
-		new HBoxUI(loopUIs map BoxComponent.apply intersperse BoxStrut(2))
+		new HBoxUI(loopUIs map BoxItem.Component.apply intersperse BoxItem.Strut(2))
 
 	//------------------------------------------------------------------------------
 	//## playing components
 
 	private val playingIcon:Signal[ButtonStyle]	=
-		playing map { _ cata (ButtonStyleFactory.PLAY, ButtonStyleFactory.PAUSE) }
+		playing map { _.cata(ButtonStyleFactory.PLAY, ButtonStyleFactory.PAUSE) }
 
 	private val	playToggleButton	= new ButtonUI(ButtonStyleFactory.size, playingIcon,						canPlay)
 
@@ -134,22 +134,22 @@ final class TransportUI(cueable:Signal[Boolean], playable:Signal[Boolean], playi
 		HBoxUI(
 			// cueStopButton,
 			playToggleButton,
-			BoxStrut(4-2),
+			BoxItem.Strut(4-2),
 			ejectButton,
-			BoxStrut(4),
+			BoxItem.Strut(4),
 			seekBackwardButton,
-			BoxStrut(4),
+			BoxItem.Strut(4),
 			seekForwardButton,
-			BoxStrut(4),
+			BoxItem.Strut(4),
 			ejectButton,
-			BoxStrut(12),
+			BoxItem.Strut(12),
 			loopPanel,
-			BoxStrut(12),
-			BoxGlue,
+			BoxItem.Strut(12),
+			BoxItem.Glue,
 			cuePointsPanel,
-			BoxStrut(4+2),
+			BoxItem.Strut(4+2),
 			removeCueButton,
-			BoxStrut(2),
+			BoxItem.Strut(2),
 			addCueButton
 		)
 	val component:JComponent	= panel.component

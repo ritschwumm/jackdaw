@@ -3,7 +3,7 @@ package jackdaw.gui.util
 import java.awt.Component
 import java.awt.event._
 
-import scutil.base.implicits._
+import scutil.core.implicits._
 import scutil.gui.CasterInstances._
 import scutil.gui.InputEventPredicates._
 

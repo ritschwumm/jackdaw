@@ -2,7 +2,7 @@ package jackdaw.media
 
 import java.io.File
 
-import scutil.core.implicits._
+import scutil.jdk.implicits._
 import scutil.math.functions._
 
 import jackdaw.util.Checked
@@ -14,7 +14,7 @@ object Mpg123 extends Inspector with Decoder {
 		for {
 			_		<-	recognizeFile(input)
 			_		<-	MediaUtil requireCommand "mpg123"
-			result	<-	MediaUtil runCommand (
+			result	<-	MediaUtil.runCommand(
 							"mpg123",
 							"-n",	"1",
 							// "--stdout",
@@ -37,7 +37,7 @@ object Mpg123 extends Inspector with Decoder {
 		for {
 			_	<-	recognizeFile(input)
 			_	<-	MediaUtil requireCommand "mpg123"
-			_	<-	MediaUtil runCommand (
+			_	<-	MediaUtil.runCommand(
 						"mpg123",
 						"-w",	output.getPath,
 						// -8bit

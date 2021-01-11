@@ -2,7 +2,7 @@ package jackdaw.media
 
 import java.io.File
 
-import scutil.core.implicits._
+import scutil.jdk.implicits._
 import scutil.lang.implicits._
 import scutil.math.functions._
 
@@ -15,7 +15,7 @@ object Madplay extends Inspector with Decoder {
 		for {
 			_		<-	recognizeFile(input)
 			_		<-	MediaUtil requireCommand "madplay"
-			result	<-	MediaUtil runCommand (
+			result	<-	MediaUtil.runCommand(
 							"madplay",
 							"-T",
 							input.getPath
@@ -37,7 +37,7 @@ object Madplay extends Inspector with Decoder {
 		for {
 			_	<-	recognizeFile(input)
 			_	<-	MediaUtil requireCommand "madplay"
-			res	<-	MediaUtil runCommand (
+			res	<-	MediaUtil.runCommand(
 						"madplay",
 						"--output",			"wav:" + output.getPath,
 						"--bit-depth",		"16",
@@ -51,14 +51,14 @@ object Madplay extends Inspector with Decoder {
 						// "--time",		"44100/44100",
 						input.getPath
 					)
-			_	<-	(Checked trueWin1 (
+			_	<-	Checked.trueWin1 (
 						!(res.err contains "error: frame 0: lost synchronization"),
 						"file cannot be decoded"
-					)) orElse
-					(Checked trueWin1 (
+					) orElse
+					Checked.trueWin1(
 						output.length > 44,
 						"output file broken"
-					)) leftEffect {
+					) leftEffect {
 						_ => output.delete()
 					}
 		}

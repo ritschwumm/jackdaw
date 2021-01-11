@@ -11,7 +11,7 @@ object Opusdec extends Decoder {
 		for {
 			_	<-	recognizeFile(input)
 			_	<-	MediaUtil requireCommand "opusdec"
-			_	<-	MediaUtil runCommand (
+			_	<-	MediaUtil.runCommand(
 						"opusdec",
 						"--quiet",
 						"--rate",	preferredFrameRate.toString,
@@ -22,5 +22,5 @@ object Opusdec extends Decoder {
 		yield ()
 
 	private val recognizeFile:File=>Checked[Unit]	=
-		MediaUtil requireFileSuffixIn (".opus")
+		MediaUtil.requireFileSuffixIn(".opus")
 }

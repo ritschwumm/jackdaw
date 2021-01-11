@@ -27,10 +27,8 @@ final class FeedbackSmoothing[T](initialFeedbackRate:Double, overshotTarget:Int,
 		var block	= 0
 		var old		= None:Option[T]
 		while (block < blocks) {
-			val cur	= queue.receive
-			if (cur == None) {
-				return old
-			}
+			val cur	= queue.receive()
+			if (cur == None)	return old
 			old		= cur
 			block	+= 1
 		}

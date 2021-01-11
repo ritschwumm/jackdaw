@@ -4,7 +4,6 @@ import java.awt.AWTEvent
 import java.awt.event.KeyEvent
 import javax.swing.Timer
 
-import scutil.lang._
 import scutil.gui.GlobalAWTEvent
 import scutil.gui.ListenerInstances._
 
@@ -12,7 +11,7 @@ import screact._
 
 // TODO num lock leads to keys always held
 
-object Keyboard extends Disposable {
+object Keyboard extends AutoCloseable {
 	//------------------------------------------------------------------------------
 	//## implementation
 
@@ -61,11 +60,11 @@ object Keyboard extends Disposable {
 
 	val keys:Signal[Set[Key]]	= keysCell.signal
 
-	def dispose():Unit	= {
+	def close():Unit	= {
 		timer.stop()
 		connection.dispose()
 		// NOTE are those necessary?
-		keys.dispose()
-		keysCell.dispose()
+		keys.close()
+		keysCell.close()
 	}
 }

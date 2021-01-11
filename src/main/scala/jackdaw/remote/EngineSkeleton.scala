@@ -1,6 +1,6 @@
 package jackdaw.remote
 
-import scutil.base.implicits._
+import scutil.core.implicits._
 import scutil.lang._
 import scutil.time._
 import scutil.log._
@@ -48,10 +48,10 @@ final class EngineSkeleton(port:Int) extends Logging {
 
 	private def die():Unit	= {
 		DEBUG("disposing")
+		sender.close()
 		// this is called from the receiver itself
-		sender.dispose()
-		engine.dispose()
-		tcpConnection.dispose()
+		engine.close()
+		tcpConnection.close()
 		DEBUG("disposed")
 	}
 

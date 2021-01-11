@@ -8,7 +8,6 @@ import javax.swing.border._
 import javax.swing.plaf.metal.MetalLookAndFeel
 import javax.imageio.ImageIO
 
-import scutil.base.implicits._
 import scutil.core.implicits._
 import scutil.color._
 import scutil.geom._
@@ -28,13 +27,13 @@ object Style {
 		.map		{ _.getClassName }
 		.foreach	(UIManager.setLookAndFeel)
 		*/
-		UIManager.getDefaults put ("Panel.background",				NORMAL_BACKGROUND)
-		// UIManager.getDefaults put ("Label.foreground",				STRONG_FOREGROUND)
-		UIManager.getDefaults put ("TextField.background",			STRONG_BACKGROUND)
-		UIManager.getDefaults put ("TextField.foreground",			STRONG_FOREGROUND)
-		UIManager.getDefaults put ("TextField.selectionBackground",	STRONG_FOREGROUND)
-		UIManager.getDefaults put ("TextField.selectionForeground",	STRONG_BACKGROUND)
-		UIManager.getDefaults put ("TextField.caretForeground",		FOCUS_COLOR)
+		UIManager.getDefaults.put("Panel.background",				NORMAL_BACKGROUND)
+		// UIManager.getDefaults.put("Label.foreground",				STRONG_FOREGROUND)
+		UIManager.getDefaults.put("TextField.background",			STRONG_BACKGROUND)
+		UIManager.getDefaults.put("TextField.foreground",			STRONG_FOREGROUND)
+		UIManager.getDefaults.put("TextField.selectionBackground",	STRONG_FOREGROUND)
+		UIManager.getDefaults.put("TextField.selectionForeground",	STRONG_BACKGROUND)
+		UIManager.getDefaults.put("TextField.caretForeground",		FOCUS_COLOR)
 	}
 
 	//------------------------------------------------------------------------------
@@ -76,15 +75,15 @@ object Style {
 	private def focusBorders(top:Boolean, left:Boolean, bottom:Boolean, right:Boolean, outer:Int, inner:Int):(Border,Border)	= {
 		def make(size:Int, factory:(Int,Int,Int,Int)=>Border):Border	=
 			factory(
-				top		cata (0, size),
-				left	cata (0, size),
-				bottom	cata (0, size),
-				right	cata (0, size)
+				top		.cata (0, size),
+				left	.cata (0, size),
+				bottom	.cata (0, size),
+				right	.cata (0, size)
 			)
 		val off	= make(inner+outer, BorderFactory.createEmptyBorder)
 		val on	=
-			BorderFactory createCompoundBorder (
-				make(outer, BorderFactory createMatteBorder (_,_,_,_,FOCUS_COLOR)),
+			BorderFactory.createCompoundBorder(
+				make(outer, BorderFactory.createMatteBorder(_,_,_,_,FOCUS_COLOR)),
 				make(inner, BorderFactory.createEmptyBorder)
 			)
 		(off, on)

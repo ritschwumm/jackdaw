@@ -3,7 +3,7 @@ package jackdaw.gui
 import javax.swing._
 import java.awt.event._
 
-import scutil.base.implicits._
+import scutil.core.implicits._
 import scutil.gui.implicits._
 import scutil.gui.GridBagDSL._
 
@@ -28,7 +28,7 @@ final class SpeedUI(speed:Speed, keyTarget:Signal[Boolean]) extends UI with Obse
 
 	private val speedDisplay	= new JLabel{
 		override def getPreferredSize	=
-			super.getPreferredSize |>> { _.width = Style.speed.width }
+			super.getPreferredSize doto { _.width = Style.speed.width }
 	}
 	speedDisplay setForeground			Style.speed.display.color
 	speedDisplay setFont				Style.speed.display.font
@@ -42,26 +42,26 @@ final class SpeedUI(speed:Speed, keyTarget:Signal[Boolean]) extends UI with Obse
 	private val buttonPanel	=
 		HBoxUI(
 			pullButton,
-			BoxStrut(4),
+			BoxItem.Strut(4),
 			pushButton,
-			BoxStrut(4+4),
+			BoxItem.Strut(4+4),
 			downButton,
-			BoxStrut(4),
+			BoxItem.Strut(4),
 			upButton
 		)
 
 	private val panel	=
 		GridBagUI(
-			speedEditor		pos(0,0) size(2,1) weight(1,1) fill HORIZONTAL	anchor CENTER	insetsTLBR(0,0,2,0),
-			buttonPanel		pos(0,1) size(1,1) weight(0,1) fill NONE		anchor WEST		insetsTLBR(2,4,0,4),
-			speedDisplay	pos(1,1) size(1,1) weight(0,1) fill NONE 		anchor EAST		insetsTLBR(3,4,0,4)
+			speedEditor		.pos(0,0) .size(2,1) .weight(1,1) .fill(HORIZONTAL)	.anchor(CENTER)	.insetsTLBR(0,0,2,0),
+			buttonPanel		.pos(0,1) .size(1,1) .weight(0,1) .fill(NONE)		.anchor(WEST)	.insetsTLBR(2,4,0,4),
+			speedDisplay	.pos(1,1) .size(1,1) .weight(0,1) .fill(NONE) 		.anchor(EAST)	.insetsTLBR(3,4,0,4)
 		)
 	val component:JComponent	= panel.component
 
 	//------------------------------------------------------------------------------
 	//## wiring
 
-	private val border	= keyTarget map { _ cata (Style.speed.border.noFocus, Style.speed.border.inFocus) }
+	private val border	= keyTarget map { _.cata(Style.speed.border.noFocus, Style.speed.border.inFocus) }
 	border observeNow component.setBorder
 
 	val hovered	= ComponentUtil underMouseSignal component

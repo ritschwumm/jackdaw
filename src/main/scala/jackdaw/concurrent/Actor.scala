@@ -8,12 +8,12 @@ import scutil.time._
 
 object Actor {
 	def apply[T](name:String, priority:Int, parking:MilliDuration, body:T=>Boolean):Actor[T]	=
-			new ActorThread[T](name, priority, parking, body)
+		new ActorThread[T](name, priority, parking, body)
 }
 
-sealed trait Actor[T] extends Target[T] with Disposable {
+sealed trait Actor[T] extends Target[T] with AutoCloseable {
 	def start():Unit
-	def dispose():Unit
+	//def close():Unit
 	def send(message:T):Unit
 	def asTarget:Target[T]	= this
 }
@@ -27,7 +27,7 @@ private final class ActorThread[T](name:String, priority:Int, parking:MilliDurat
 	@volatile
 	private var keepAlive	= true
 
-	def dispose():Unit	= {
+	def close():Unit	= {
 		keepAlive	= false
 		interrupt()
 		join()
@@ -50,7 +50,7 @@ private final class ActorThread[T](name:String, priority:Int, parking:MilliDurat
 
 	private def drain():Boolean	= {
 		while (true) {
-			val message	= queue poll (parking.millis, TimeUnit.MILLISECONDS)
+			val message	= queue.poll(parking.millis, TimeUnit.MILLISECONDS)
 			if (message == null)	return true
 			if (!body(message))		return false
 		}

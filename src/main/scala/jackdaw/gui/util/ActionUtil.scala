@@ -1,6 +1,6 @@
 package jackdaw.gui.util
 
-import scutil.base.implicits._
+import scutil.core.implicits._
 import scutil.lang._
 
 import screact._
@@ -15,7 +15,7 @@ object ActionUtil {
 
 	implicit class RichRepeatable[T](peer:Signal[Option[T]]) {
 		def repeated:Events[T]	=
-			SwingClock repeat (repeatTick, repeatDelay, peer.edge)
+			SwingClock.repeat(repeatTick, repeatDelay, peer.edge)
 	}
 
 	//------------------------------------------------------------------------------
@@ -24,15 +24,15 @@ object ActionUtil {
 	// BETTER use Option[Unit] here?
 	implicit class RichModifier(peer:Signal[Boolean]) {
 		def orElse(that:Signal[Boolean]):Signal[Boolean]	=
-			(peer zipWith that) { _ || _ }
+			(peer map2 that) { _ || _ }
 
 		def upDown(that:Signal[Boolean]):Signal[Option[Boolean]]	=
-			(peer zipWith that)(directionValue)
+			(peer map2 that)(directionValue)
 	}
 
 	implicit class RichDirectionModifier(peer:Signal[Option[Boolean]]) {
 		def merge(that:Signal[Option[Boolean]]):Signal[Option[Boolean]]	=
-			(peer zipWith that)(mergeDirections)
+			(peer map2 that)(mergeDirections)
 
 		def steps:Signal[Option[Int]]	=
 			peer map { _ map directionSteps }
@@ -71,7 +71,7 @@ object ActionUtil {
 	//## calculations
 
 	private def directionSteps(up:Boolean):Int	=
-		up cata (-1, +1)
+		up.cata(-1, +1)
 
 	private def directionValue(up:Boolean, down:Boolean):Option[Boolean]	=
 		(up		option true) orElse

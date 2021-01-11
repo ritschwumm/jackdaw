@@ -31,16 +31,10 @@ final class Engine(feedbackTarget:Target[EngineFeedback]) extends Logging {
 	private val loader2	= new Loader(loaderFeedbackQueue.asTarget)
 	private val loader3	= new Loader(loaderFeedbackQueue.asTarget)
 
-	private val metronome	=
-		new Metronome(outputRate, new MetronomeContext {
-			// TODO is this good for anything?
-			// it just forwards the argument to setBeatRate
-			def beatRateChanged(beatRate:Double):Unit	= { changeBeatRate() }
-			def running:Boolean	= playerRunning
-		})
+	private val metronome	= new Metronome(outputRate)
 
-	private val speaker	= DamperDouble forRates	(unitGain, Engine.dampTime, outputRate)
-	private val phone	= DamperDouble forRates	(unitGain, Engine.dampTime, outputRate)
+	private val speaker	= DamperDouble.forRates(unitGain, Engine.dampTime, outputRate)
+	private val phone	= DamperDouble.forRates(unitGain, Engine.dampTime, outputRate)
 
 	private val peakDetector	= new PeakDetector
 
@@ -66,17 +60,6 @@ final class Engine(feedbackTarget:Target[EngineFeedback]) extends Logging {
 			loader3.target
 		)
 
-	private def playerRunning:Boolean	=
-		player1.isRunning	||
-		player2.isRunning	||
-		player3.isRunning
-
-	private def changeBeatRate():Unit	= {
-		player1.metronomeBeatRateChanged()
-		player2.metronomeBeatRateChanged()
-		player3.metronomeBeatRateChanged()
-	}
-
 	//------------------------------------------------------------------------------
 	//## public api
 
@@ -87,11 +70,11 @@ final class Engine(feedbackTarget:Target[EngineFeedback]) extends Logging {
 		output.start()
 	}
 
-	def dispose():Unit	= {
-		output.dispose()
-		loader1.dispose()
-		loader2.dispose()
-		loader3.dispose()
+	def close():Unit	= {
+		output.close()
+		loader1.close()
+		loader2.close()
+		loader3.close()
 	}
 
 	//------------------------------------------------------------------------------
@@ -119,19 +102,19 @@ final class Engine(feedbackTarget:Target[EngineFeedback]) extends Logging {
 
 	private val reactAction:Effect[EngineAction]	=
 		_ match {
-			case c@EngineAction.ChangeControl(_,_)		=> doChangeControl(c)
-			case EngineAction.SetBeatRate(beatRate)		=> metronome setBeatRate beatRate
+			case EngineAction.ChangeControl(speakerValue, phoneValue)	=>
+				speaker	target	speakerValue
+				phone	target	phoneValue
+			case EngineAction.SetBeatRate(beatRate)		=>
+					metronome setBeatRate beatRate
+					player1.metronomeBeatRateChanged()
+					player2.metronomeBeatRateChanged()
+					player3.metronomeBeatRateChanged()
 			case EngineAction.ControlPlayer(1, action)	=> player1 react action
 			case EngineAction.ControlPlayer(2, action)	=> player2 react action
 			case EngineAction.ControlPlayer(3, action)	=> player3 react action
 			case EngineAction.ControlPlayer(x, _)		=> ERROR("unexpected player", x)
 		}
-
-	// TODO ugly subtype
-	private def doChangeControl(control:EngineAction.ChangeControl):Unit	= {
-		speaker	target	control.speaker
-		phone	target	control.phone
-	}
 
 	//------------------------------------------------------------------------------
 	//## outgoing model communication
@@ -168,22 +151,26 @@ final class Engine(feedbackTarget:Target[EngineFeedback]) extends Logging {
 				player3.talkToLoader()
 			}
 
-			player1 generate (speakerBuffer,	phoneBuffer)
-			player2 generate (speakerBuffer,	phoneBuffer)
-			player3 generate (speakerBuffer,	phoneBuffer)
+			player1.generate(speakerBuffer,	phoneBuffer)
+			player2.generate(speakerBuffer,	phoneBuffer)
+			player3.generate(speakerBuffer,	phoneBuffer)
 
 			val speakerScale	= speaker.current.toFloat
-			speakerBuffer mul (speakerScale, speakerScale)
+			speakerBuffer.mul(speakerScale, speakerScale)
 
 			if (phoneEnabled) {
 				val phoneScale	= phone.current.toFloat
-				phoneBuffer	mul (phoneScale, phoneScale)
+				phoneBuffer.mul(phoneScale, phoneScale)
 			}
 
 			peakDetector put speakerBuffer.left
 			peakDetector put speakerBuffer.right
 
-			metronome.step()
+			metronome.step(
+				player1.isRunning	||
+				player2.isRunning	||
+				player3.isRunning
+			)
 			speaker.step()
 			phone.step()
 

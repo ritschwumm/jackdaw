@@ -12,7 +12,7 @@ object Avconv extends Decoder {
 			// no suffix check
 			_	<- MediaUtil requireCommand "avconv"
 			_	<-
-					MediaUtil runCommand (
+					MediaUtil.runCommand(
 						"avconv",	"-y",
 						"-i",		input.getPath,
 						"-vn",
