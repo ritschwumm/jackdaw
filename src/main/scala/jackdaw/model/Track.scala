@@ -196,7 +196,7 @@ final class Track private(val file:File) extends Observing with Logging {
 						INFO("initializing data")
 						TrackData.empty
 					}
-				edtWait { dataCell set dataVal }
+				edt { dataCell set dataVal }()
 
 				// provide metadata
 				val metadataVal:Option[Stamped[Metadata]]	=
@@ -214,14 +214,14 @@ final class Track private(val file:File) extends Observing with Logging {
 					.noneEffect {
 						WARN("cannot read metadata")
 					}
-				edtWait {
+				edt {
 					modifyData(
 						TrackData.L.metadata set metadataVal
 					)
-				}
+				}()
 
 				// loaded enough to switch the track into the deck
-				edtWait { dataLoadedCell set true }
+				edt { dataLoadedCell set true }()
 
 				// provide wav
 				// NOTE symlinks have the same last modified date as the link target,
@@ -248,7 +248,7 @@ final class Track private(val file:File) extends Observing with Logging {
 					.noneEffect {
 						WARN("cannot decode wav")
 					}
-				edtWait { wavCell set wavVal }
+				edt { wavCell set wavVal }()
 
 				// provide sample
 				val sampleVal:Option[Sample]	=
@@ -260,10 +260,10 @@ final class Track private(val file:File) extends Observing with Logging {
 						}
 						.toOption
 					}
-				edtWait { sampleCell set sampleVal }
+				edt { sampleCell set sampleVal }()
 
 				// loaded enough to actually play the track
-				edtWait { sampleLoadedCell set true }
+				edt { sampleLoadedCell set true }()
 
 				// provide curve
 				val curveFresh:Boolean	=
@@ -288,7 +288,7 @@ final class Track private(val file:File) extends Observing with Logging {
 					.noneEffect {
 						WARN("cannot provide curve")
 					}
-				edtWait { bandCurveCell set curveVal }
+				edt { bandCurveCell set curveVal }()
 
 				// provide measure
 				// TODO can use cached much earlier, before the curve is calculated!
@@ -315,11 +315,11 @@ final class Track private(val file:File) extends Observing with Logging {
 					.noneEffect {
 						WARN("cannot provide beat rate")
 					}
-				edtWait {
+				edt {
 					modifyData(
 						TrackData.L.measure set measureVal
 					)
-				}
+				}()
 
 				// provide key
 				val keyVal:Option[Stamped[MusicKey]]	=
@@ -340,19 +340,19 @@ final class Track private(val file:File) extends Observing with Logging {
 					.noneEffect {
 						WARN("cannot provide key")
 					}
-				edtWait {
+				edt {
 					modifyData(
 						TrackData.L.key set keyVal
 					)
-				}
+				}()
 
 				INFO("track loaded")
-				edtWait { fullyLoadedCell set true }
+				edt { fullyLoadedCell set true }()
 			}
 			catch { case e:Exception =>
 				ERROR("track could not be loaded", e)
-				edtWait { dataLoadedCell	set false }
-				edtWait { fullyLoadedCell	set false }
+				edt { dataLoadedCell	set false }()
+				edt { fullyLoadedCell	set false }()
 			}
 		}
 	}

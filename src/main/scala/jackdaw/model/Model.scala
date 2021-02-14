@@ -1,5 +1,8 @@
 package jackdaw.model
 
+import scutil.lang._
+import scutil.time._
+
 import screact.{ Engine => _, _ }
 import screact.swing._
 
@@ -7,17 +10,27 @@ import jackdaw.Config
 import jackdaw.player._
 import jackdaw.remote.EngineStub
 
-/** application model */
-final class Model extends Observing {
-	private val engine	= new EngineStub
+object Model {
+	def create(engine:EngineStub):IoResource[Model]	=
+		swingClock map (new Model(engine, _))
 
+	private def swingClock:IoResource[Events[MilliInstant]]	=
+		IoResource.unsafe.disposing {
+			SwingClock(Config.guiUpdateInterval, Config.guiUpdateInterval)
+		}{
+			_.close()
+		}
+}
+
+// TODO is this still true?
+// NOTE Model$ keeps being referenced by Thread#contextClassLoader
+
+/** application model */
+final class Model(engine:EngineStub, clock:Events[MilliInstant]) extends Observing {
 	val phoneEnabled	= engine.phoneEnabled
 
 	//------------------------------------------------------------------------------
 	//## receive feedback from engine
-
-	// TODO lock ugly
-	private val clock	= SwingClock(Config.guiUpdateInterval, Config.guiUpdateInterval)
 
 	private val nanoChange:Events[Long]	=
 		((clock tag System.nanoTime) stateful System.nanoTime) { (old,cur) =>
@@ -67,18 +80,4 @@ final class Model extends Observing {
 			)
 		}
 	changeControl	observeNow engine.enqueueAction
-
-	//------------------------------------------------------------------------------
-	//## life cycle
-
-	def start():Unit	= {
-		engine.start()
-	}
-
-	def close():Unit	= {
-		engine.close()
-		clock.close()
-		// NOTE Model$ keeps being referenced by Thread#contextClassLoader
-		// clock	= null
-	}
 }

@@ -6,6 +6,8 @@ import javax.swing._
 import org.simplericity.macify.eawt._
 
 import scutil.jdk.implicits._
+import scutil.lang._
+import scutil.gui.instances._
 import scutil.gui.CasterInstances._
 
 import screact._
@@ -14,59 +16,52 @@ import screact.swing._
 import jackdaw.library._
 import jackdaw.model._
 import jackdaw.gui._
+import jackdaw.gui.util.Keyboard
+import jackdaw.remote.EngineStub
 
 /** main class initializing backend and gui */
 object Main extends Observing {
-	Style.setupLnF()
-
-	private val windowActive	= cell(false)
-
-	private val	model	= new Model
-	private val ui		= new MainUI(model, windowActive)
-	private val	frame	= new JFrame
-
-	private val windowActiveFb:Events[Boolean]	=
-		SwingWidget
-		.events	((frame:WindowCaster).connect)
-		.map	{ _.getWindow.isActive }
-
-	windowActiveFb observe windowActive.set
-
-	def start():Unit	= {
-		Library.init()
-
-		model.start()
-
-		val content	= frame.getContentPane
-		content setLayout new BorderLayout
-		content.add(ui.component, BorderLayout.CENTER)
-		frame setTitle					Style.window.title
-		frame setIconImage				Style.window.icon
-		frame setSize					Style.window.size
-		frame setDefaultCloseOperation	WindowConstants.DO_NOTHING_ON_CLOSE
-		frame onWindowClosing { _ => close() }
-		frame setVisible true
-
-		val macifyApplication	= new DefaultApplication
-		macifyApplication addApplicationListener new ApplicationAdapter {
-			override def handleQuit(ev:ApplicationEvent):Unit	= {
-				close()
-			}
+	def create(shutdown:Io[Unit]):IoResource[Unit]	=
+		for {
+			_				<-	IoResource delay { Style.setupLnF() }
+			_				<-	IoResource delay { Library.init() }
+			windowActive	<-	IoResource delay cell(false)
+			engine			<-	EngineStub.create
+			model			<-	Model.create(engine)
+			keyboard		<-	Keyboard.create
+			ui				<-	IoResource delay new MainUI(model, keyboard, windowActive)
+			frame			<-	IoResource.unsafe releasable new JFrame
 		}
-		macifyApplication setApplicationIconImage Style.application.osxIcon
-		macifyApplication.removeAboutMenuItem()
-		macifyApplication.removePreferencesMenuItem()
-	}
+		yield {
+			val windowActiveFb:Events[Boolean]	=
+				SwingWidget
+				.events	((frame:WindowCaster).connect)
+				.map	{ _.getWindow.isActive }
 
-	private def close():Unit	= {
-		model.close()
-		frame.dispose()
+			windowActiveFb observe windowActive.set
 
-		// NOTE ugly, but necessary because Main$ is referenced from Thread#contextClassLoader and there are some additional GC roots still alive in swing
-		sys exit 0
-	}
+			val content	= frame.getContentPane
+			content setLayout new BorderLayout
+			content.add(ui.component, BorderLayout.CENTER)
+			frame setTitle					Style.window.title
+			frame setIconImage				Style.window.icon
+			frame setSize					Style.window.size
+			frame setDefaultCloseOperation	WindowConstants.DO_NOTHING_ON_CLOSE
+			frame onWindowClosing { _ => shutdown.unsafeRun() }
+			frame setVisible true
 
-	model.speed persist (Config.dataBase / "speed.json")
+			// keep a strong reference to the MainUI so it doesn't
+			// get collected and looses reactivity
+			ui.component.putClientProperty("STRONG_REF", ui)
 
-	start()
+			val macifyApplication	= new DefaultApplication
+			macifyApplication addApplicationListener new ApplicationAdapter {
+				override def handleQuit(ev:ApplicationEvent):Unit	= shutdown.unsafeRun()
+			}
+			macifyApplication setApplicationIconImage Style.application.osxIcon
+			macifyApplication.removeAboutMenuItem()
+			macifyApplication.removePreferencesMenuItem()
+
+			model.speed persist (Config.dataBase / "speed.json")
+		}
 }

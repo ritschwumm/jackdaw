@@ -47,6 +47,8 @@ object Player {
 
 	 // headFrame, fadeFrame, jump, loop
 	 val headCount		= 4
+
+	 private val passCoeffs	=  BiQuadCoeffs(1,0,0,0,0)
 }
 
 /**
@@ -119,6 +121,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	private var loopDef:Option[LoopDef]	= None
 
 	private var filterModeOld	= Player.filterOff
+	private var biquadCoeffs	= Player.passCoeffs
 
 	// (0+filterLow)..(nyquist-filterHigh), predivided by outputRate
 	private val filterLow	= log2(Config.filterLow / outputRate)
@@ -752,28 +755,27 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		val filterModeNow	= filterMode(filterValue)
 		if (filterModeNow != filterModeOld) {
 			filterModeOld	= filterModeNow
+
 			filterL.reset()
 			filterR.reset()
 		}
-		// calculate filter only in active mode
-		var filteredL	= 0.0
-		var filteredR	= 0.0
+		// NOTE this only has to be done when filterValue changed,
+		// but moving this inside an if-block to change actually kills performance
+		// recalculate coeffients when the mode or frequency changed
 		if (filterModeNow == Player.filterLP) {
-			val freq	= filterFreq(filterValue + 1)
-			val	coeffs	= BiQuadCoeffs.lp(freq, Config.filterQ)
-			filteredL	= filterL.process(equalizedL, coeffs)
-			filteredR	= filterR.process(equalizedR, coeffs)
+			val freq		= filterFreq(filterValue + 1)
+			biquadCoeffs	= BiQuadCoeffs.lp(freq, Config.filterQ)
 		}
 		else if (filterModeNow == Player.filterHP) {
-			val freq	= filterFreq(filterValue + 0)
-			val coeffs	= BiQuadCoeffs.hp(freq, Config.filterQ)
-			filteredL	= filterL.process(equalizedL, coeffs)
-			filteredR	= filterR.process(equalizedR, coeffs)
+			val freq		= filterFreq(filterValue + 0)
+			biquadCoeffs	= BiQuadCoeffs.hp(freq, Config.filterQ)
 		}
 		else {
-			filteredL	= equalizedL
-			filteredR	= equalizedR
+			biquadCoeffs	= Player.passCoeffs
 		}
+
+		val filteredL	= filterL.process(equalizedL, biquadCoeffs)
+		val filteredR	= filterR.process(equalizedR, biquadCoeffs)
 
 		// NOTE hack: output only when moving
 		if (velocity != zeroFrequency) {	// playing || scratchMode

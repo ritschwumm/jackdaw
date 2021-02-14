@@ -4,12 +4,7 @@ import java.awt.event.KeyEvent
 
 import screact._
 
-object KeyInput {
-	def when(target:Signal[Boolean]):KeyInput	=
-		new KeyInput(target, Keyboard.keys)
-}
-
-final class KeyInput(target:Signal[Boolean], keys:Signal[Set[Key]]) {
+final class KeyInput(keys:Signal[Set[Key]], target:Signal[Boolean]) {
 	private val fineModifier:Signal[Boolean]	=
 		keys map { _ exists { _.code == KeyEvent.VK_SHIFT } }
 

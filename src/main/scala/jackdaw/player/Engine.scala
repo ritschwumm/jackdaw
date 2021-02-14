@@ -11,70 +11,101 @@ import scaudio.math._
 import jackdaw._
 import jackdaw.concurrent._
 
+/** generates audio data using audio Player objects and a Metronome */
 object Engine {
 	// 0..1 range in 1/10 of a second
 	private val dampTime	= 0.1
+
+	// TODO using should return an Io
+	def create(output:Output, feedbackTarget:Target[EngineFeedback]):IoResource[EngineAction=>Unit]	=
+		for {
+			incomingActionQueue		<-	IoResource delay new Transfer[EngineAction]
+			loaderFeedbackQueue		<-	IoResource delay new Transfer[LoaderFeedback]
+			loaderTarget1			<-	Loader.create(loaderFeedbackQueue.asTarget)
+			loaderTarget2			<-	Loader.create(loaderFeedbackQueue.asTarget)
+			loaderTarget3			<-	Loader.create(loaderFeedbackQueue.asTarget)
+			producer				=	new Engine(
+											incomingActionQueue,
+											loaderFeedbackQueue,
+											feedbackTarget,
+											loaderTarget1,
+											loaderTarget2,
+											loaderTarget3,
+											output.outputInfo.rate,
+											output.outputInfo.headphone
+										)
+			output					<-	output.runProducerUsingConsumer(producer)
+		}
+		yield {
+			incomingActionQueue send _
+		}
 }
 
-/** generates audio data using audio Player objects and a Metronome */
-final class Engine(feedbackTarget:Target[EngineFeedback]) extends Logging {
-	private val	output		= new Output(Config.outputConfig, producer)
-	private val outputInfo	= output.info
-
-	val outputRate		= outputInfo.rate
-	val phoneEnabled	= outputInfo.headphone
-
-	private val incomingActionQueue		= new Transfer[EngineAction]
-	private val loaderFeedbackQueue		= new Transfer[LoaderFeedback]
-
-	private val loader1	= new Loader(loaderFeedbackQueue.asTarget)
-	private val loader2	= new Loader(loaderFeedbackQueue.asTarget)
-	private val loader3	= new Loader(loaderFeedbackQueue.asTarget)
-
-	private val metronome	= new Metronome(outputRate)
-
-	private val speaker	= DamperDouble.forRates(unitGain, Engine.dampTime, outputRate)
-	private val phone	= DamperDouble.forRates(unitGain, Engine.dampTime, outputRate)
+private final class Engine(
+	incomingActionQueue:Transfer[EngineAction],
+	loaderFeedbackQueue:Transfer[LoaderFeedback],
+	feedbackTarget:Target[EngineFeedback],
+	loaderTarget1:Target[LoaderAction],
+	loaderTarget2:Target[LoaderAction],
+	loaderTarget3:Target[LoaderAction],
+	outputRate:Int,
+	phoneEnabled:Boolean
+)
+extends FrameProducer with Logging {
+	private var frame:Long	= 0
 
 	private val peakDetector	= new PeakDetector
 
-	private val player1	=
-		new Player(
-			metronome,
-			outputRate,
-			phoneEnabled,
-			loader1.target
-		)
-	private val player2	=
-		new Player(
-			metronome,
-			outputRate,
-			phoneEnabled,
-			loader2.target
-		)
-	private val player3	=
-		new Player(
-			metronome,
-			outputRate,
-			phoneEnabled,
-			loader3.target
-		)
+	private val metronome	= new Metronome(outputRate)
+	private val player1		= new Player(metronome, outputRate, phoneEnabled, loaderTarget1)
+	private val player2		= new Player(metronome, outputRate, phoneEnabled, loaderTarget2)
+	private val player3		= new Player(metronome, outputRate, phoneEnabled, loaderTarget3)
+	private val speaker		= DamperDouble.forRates(unitGain, Engine.dampTime, outputRate)
+	private val phone		= DamperDouble.forRates(unitGain, Engine.dampTime, outputRate)
 
-	//------------------------------------------------------------------------------
-	//## public api
+	def produce(speakerBuffer:FrameBuffer, phoneBuffer:FrameBuffer):Unit	= {
+		val talkToGui	= frame % Config.guiIntervalFrames == 0
+		if (talkToGui) {
+			receiveActions()
+		}
+		val talkToLoader	= frame % Config.loaderIntervalFrames == 0
+		if (talkToLoader) {
+			// this indirectly executed loader answer thunks registered by the player
+			receiveLoading()
+			player1.talkToLoader()
+			player2.talkToLoader()
+			player3.talkToLoader()
+		}
 
-	def start():Unit	= {
-		loader1.start()
-		loader2.start()
-		loader3.start()
-		output.start()
-	}
+		player1.generate(speakerBuffer,	phoneBuffer)
+		player2.generate(speakerBuffer,	phoneBuffer)
+		player3.generate(speakerBuffer,	phoneBuffer)
 
-	def close():Unit	= {
-		output.close()
-		loader1.close()
-		loader2.close()
-		loader3.close()
+		val speakerScale	= speaker.current.toFloat
+		speakerBuffer.mul(speakerScale, speakerScale)
+
+		if (phoneEnabled) {
+			val phoneScale	= phone.current.toFloat
+			phoneBuffer.mul(phoneScale, phoneScale)
+		}
+
+		peakDetector put speakerBuffer.left
+		peakDetector put speakerBuffer.right
+
+		metronome.step(
+			player1.isRunning	||
+			player2.isRunning	||
+			player3.isRunning
+		)
+		speaker.step()
+		phone.step()
+
+		if (talkToGui) {
+			sendFeedback()
+			// Thread.`yield`()
+		}
+
+		frame	= frame + 1
 	}
 
 	//------------------------------------------------------------------------------
@@ -91,10 +122,6 @@ final class Engine(feedbackTarget:Target[EngineFeedback]) extends Logging {
 
 	//------------------------------------------------------------------------------
 	//## incoming model communication
-
-	def enqueueAction(action:EngineAction):Unit	= {
-		incomingActionQueue send action
-	}
 
 	private def receiveActions():Unit	= {
 		incomingActionQueue receiveAll reactAction
@@ -131,55 +158,4 @@ final class Engine(feedbackTarget:Target[EngineFeedback]) extends Logging {
 			player2		= player2.feedback,
 			player3		= player3.feedback
 		)
-
-	//------------------------------------------------------------------------------
-
-	private var frame:Long	= 0
-
-	private object producer extends FrameProducer {
-		def produce(speakerBuffer:FrameBuffer, phoneBuffer:FrameBuffer):Unit	= {
-			val talkToGui	= frame % Config.guiIntervalFrames == 0
-			if (talkToGui) {
-				receiveActions()
-			}
-			val talkToLoader	= frame % Config.loaderIntervalFrames == 0
-			if (talkToLoader) {
-				// this indirectly executed loader answer thunks registered by the player
-				receiveLoading()
-				player1.talkToLoader()
-				player2.talkToLoader()
-				player3.talkToLoader()
-			}
-
-			player1.generate(speakerBuffer,	phoneBuffer)
-			player2.generate(speakerBuffer,	phoneBuffer)
-			player3.generate(speakerBuffer,	phoneBuffer)
-
-			val speakerScale	= speaker.current.toFloat
-			speakerBuffer.mul(speakerScale, speakerScale)
-
-			if (phoneEnabled) {
-				val phoneScale	= phone.current.toFloat
-				phoneBuffer.mul(phoneScale, phoneScale)
-			}
-
-			peakDetector put speakerBuffer.left
-			peakDetector put speakerBuffer.right
-
-			metronome.step(
-				player1.isRunning	||
-				player2.isRunning	||
-				player3.isRunning
-			)
-			speaker.step()
-			phone.step()
-
-			if (talkToGui) {
-				sendFeedback()
-				// Thread.`yield`()
-			}
-
-			frame	= frame + 1
-		}
-	}
 }

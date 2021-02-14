@@ -18,8 +18,4 @@ final class TcpConnection[I,O](
 		outputFunc(output, msg)
 		output.st.flush()
 	}
-
-	def close():Unit	= {
-		socket.close()
-	}
 }

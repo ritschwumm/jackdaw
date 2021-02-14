@@ -6,17 +6,11 @@ import scala.annotation._
 
 import scutil.lang._
 
-final class Transfer[T] extends Target[T] {
+final class Transfer[T] {
 	private val queue	= new ConcurrentLinkedQueue[T]
 
-	def send(item:T):Unit	= {
-		queue offer item
-	}
-
-	def asTarget:Target[T]	= this
-
-	def available:Int	= queue.size
-
+	def available:Int		= queue.size
+	def send(item:T):Unit	= queue offer item
 	def receive():Option[T]	= Option(queue.poll)
 
 	@tailrec
@@ -27,4 +21,6 @@ final class Transfer[T] extends Target[T] {
 			receiveAll(effect)
 		}
 	}
+
+	def asTarget:Target[T]	= message => send(message)
 }

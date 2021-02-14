@@ -21,7 +21,7 @@ import jackdaw.gui.util._
 import GridBagItem.UI_is_GridBagItem
 
 /** gui for a single deck */
-final class DeckUI(deck:Deck, keyTarget:Signal[Boolean]) extends UI with Observing with Logging {
+final class DeckUI(deck:Deck, keyboard:Signal[Set[Key]], keyTarget:Signal[Boolean]) extends UI with Observing with Logging {
 	//------------------------------------------------------------------------------
 	//## input
 
@@ -111,7 +111,7 @@ final class DeckUI(deck:Deck, keyTarget:Signal[Boolean]) extends UI with Observi
 
 	import KeyEvent._
 
-	private val keyInput	= KeyInput when keyTarget
+	private val keyInput	= new KeyInput(keyboard, keyTarget)
 	import keyInput._
 
 	import ActionUtil._

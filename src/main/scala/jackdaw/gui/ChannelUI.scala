@@ -13,7 +13,7 @@ import jackdaw.gui.util._
 import GridBagItem.UI_is_GridBagItem
 
 /** mastering volumes and meter */
-final class ChannelUI(strip:Strip, tone:Option[Tone], peak:Signal[Float], phoneEnabled:Boolean, keyTarget:Signal[Boolean]) extends UI with Observing {
+final class ChannelUI(strip:Strip, tone:Option[Tone], peak:Signal[Float], phoneEnabled:Boolean, keyboard:Signal[Set[Key]], keyTarget:Signal[Boolean]) extends UI with Observing {
 	//------------------------------------------------------------------------------
 	//## components
 
@@ -45,7 +45,7 @@ final class ChannelUI(strip:Strip, tone:Option[Tone], peak:Signal[Float], phoneE
 	val hovered	= ComponentUtil underMouseSignal component
 
 	// // NOTE forward reference works because of the DelayUI
-	private val keyInput	= KeyInput when keyTarget
+	private val keyInput	= new KeyInput(keyboard, keyTarget)
 
 	delayedToneUI.init()
 	delayedStripUI.init()

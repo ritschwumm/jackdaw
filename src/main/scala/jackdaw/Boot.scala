@@ -1,6 +1,7 @@
 package jackdaw
 
 import scutil.core.implicits._
+import scutil.lang._
 import scutil.gui.SwingUtil.edt
 import scutil.platform.ExceptionUtil
 import scutil.log._
@@ -18,7 +19,18 @@ object Boot extends Logging {
 
 		edt {
 			try {
-				Main
+				var disposer:Io[Unit]	= Io.unit
+
+				val shutdown:Io[Unit]	=
+					Io delay {
+						disposer.unsafeRun()
+
+						// NOTE ugly, but necessary because Main$ is referenced from Thread#contextClassLoader and there are some additional GC roots still alive in swing
+						sys exit 0
+					}
+
+				val main	= Main.create(shutdown).open.unsafeRun()
+				disposer	= main._2
 			}
 			catch { case e:Exception =>
 				ERROR("cannot start application", e)

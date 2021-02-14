@@ -5,6 +5,9 @@ import scutil.lang._
 import scutil.time._
 import scutil.log._
 
+import scaudio.output._
+
+import jackdaw.Config
 import jackdaw.player._
 import jackdaw.concurrent._
 
@@ -12,76 +15,53 @@ import jackdaw.concurrent._
 object EngineSkeleton extends Logging {
 	def main(args:Array[String]):Unit	= {
 		INFO("booting")
-		val port		= args.head.toInt
-		val skeleton	= new EngineSkeleton(port)
-		skeleton.start()
+		val port	= args.head.toInt
+		create(port).use(identity).unsafeRun()
 	}
 
 	private val cycleDelay:MilliDuration	= 5.millis
-}
 
-final class EngineSkeleton(port:Int) extends Logging {
-	private val sender	=
-		Actor[EngineFeedback](
-			"skeleton sender",
-			Thread.NORM_PRIORITY,
-			EngineSkeleton.cycleDelay,
-			engineFeedback	=> {
-				sendToStub(ToStub.Send(engineFeedback))
-				true
-			}
-		)
-
-	private val engine		= new Engine(sender)
-	private val tcpClient	= new TcpClient(port)
-	private val tcpConnection:TcpConnection[ToSkeleton,ToStub]	= tcpClient.connect()
-
-	def start():Unit	= {
-		DEBUG("starting")
-		sendToStub(ToStub.Started(engine.outputRate, engine.phoneEnabled))
-
-		engine.start()
-		receiver.start()
-		sender.start()
-		DEBUG("started")
-	}
-
-	private def die():Unit	= {
-		DEBUG("disposing")
-		sender.close()
-		// this is called from the receiver itself
-		engine.close()
-		tcpConnection.close()
-		DEBUG("disposed")
-	}
-
-	//------------------------------------------------------------------------------
-
-	private val receiver	=
-		Worker(
-			"skeleton receiver",
-			Thread.NORM_PRIORITY,
-			Io delay {
-				receiveAndAct()
-			}
-		)
-
-	private def receiveAndAct():Boolean	=
-		try {
-			tcpConnection.receive() match {
-				case ToSkeleton.Kill			=> die();							false
-				case ToSkeleton.Send(action)	=> engine enqueueAction action;		true
+	def create(port:Int):IoResource[Io[Unit]]	= {
+		for {
+			_				<-	debugLifecycle("starting", "stopped")
+			tcpConnection	<-	TcpClient.open(port)
+			sendToStub		=	tcpConnection send _
+			sender			<-	Actor.create[EngineFeedback](
+									"skeleton sender",
+									Thread.NORM_PRIORITY,
+									EngineSkeleton.cycleDelay,
+									engineFeedback	=> {
+										sendToStub(ToStub.Send(engineFeedback))
+										true
+									}
+								)
+			output			=	Output.find(Config.outputConfig).getOrError("audio is not available")
+			enqueueAction	<-	Engine.create(output, sender)
+			_				<-	IoResource delay sendToStub(ToStub.Started(output.outputInfo.rate, output.outputInfo.headphone))
+			_				<-	debugLifecycle("started", "stopping")
+		}
+		yield Io delay {
+			// TODO using move this out
+			var keepOn	= true
+			while (keepOn) {
+				try {
+					tcpConnection.receive() match {
+						case ToSkeleton.Send(action)	=> enqueueAction(action)
+						case ToSkeleton.Kill			=> keepOn	= false
+					}
+				}
+				catch { case e:Exception =>
+					ERROR("parent (stub) died unexpectedly, commiting suicide", e)
+					sys exit 1
+					nothing
+				}
 			}
 		}
-		catch { case e:Exception =>
-			ERROR("parent (stub) died unexpectedly, commiting suicide", e)
-			sys exit 1
-			nothing
-		}
-
-	//------------------------------------------------------------------------------
-
-	private def sendToStub(msg:ToStub):Unit	= {
-		tcpConnection send msg
 	}
+
+	private def debugLifecycle(start:String, end:String):IoResource[Unit]	=
+		IoResource.unsafe.lifecycle(DEBUG(start), DEBUG(end))
 }
+
+// NOTE this is just here for the static forwarder
+class EngineSkeleton

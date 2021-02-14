@@ -14,7 +14,7 @@ import jackdaw.gui.util._
 
 import GridBagItem.UI_is_GridBagItem
 
-final class SpeedUI(speed:Speed, keyTarget:Signal[Boolean]) extends UI with Observing {
+final class SpeedUI(speed:Speed, keyboard:Signal[Set[Key]], keyTarget:Signal[Boolean]) extends UI with Observing {
 	//------------------------------------------------------------------------------
 	//## input
 
@@ -68,7 +68,7 @@ final class SpeedUI(speed:Speed, keyTarget:Signal[Boolean]) extends UI with Obse
 
 	import KeyEvent._
 
-	private val keyInput	= KeyInput when keyTarget
+	private val keyInput	= new KeyInput(keyboard, keyTarget)
 	import keyInput._
 
 	import ActionUtil._

@@ -3,6 +3,8 @@ package jackdaw.media
 import java.io.File
 import java.io.RandomAccessFile
 
+import  scala.util.Using.Releasable
+
 import de.jarnbjo.ogg._
 import de.jarnbjo.vorbis._
 
@@ -18,7 +20,7 @@ import jackdaw.util.Checked
 object JOgg extends Inspector with Decoder with Logging {
 	def name	= "j-ogg"
 
-	private implicit val FileStreamResource:Resource[FileStream]	= Resource instance (_.close())
+	private implicit val FileStreamReleasable:Releasable[FileStream]	= _.close()
 
 	private type BufferWriter	= (Array[Byte], Int) => Unit
 

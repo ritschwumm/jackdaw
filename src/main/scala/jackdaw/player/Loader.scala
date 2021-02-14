@@ -12,35 +12,26 @@ import scaudio.sample._
 
 import jackdaw.concurrent._
 
-object Loader {
+object Loader extends Logging {
 	private val actorPriority:Int			= (Thread.NORM_PRIORITY+Thread.MAX_PRIORITY)/2
 	private val cycleDelay:MilliDuration	= 10.millis
-}
 
-final class Loader(engineTarget:Target[LoaderFeedback]) extends Logging {
-	private val actor	=
-		Actor[LoaderAction](
+	def create(engineTarget:Target[LoaderFeedback]):IoResource[Target[LoaderAction]]	= {
+		val loader	= new Loader(engineTarget)
+		Actor.create[LoaderAction](
 			"sample preloader",
 			Loader.actorPriority,
 			Loader.cycleDelay,
 			message	=> {
-				reactAction(message)
+				loader.reactAction(message)
 				true
 			}
 		)
-	val target:Target[LoaderAction]	= actor.asTarget
-
-	def start():Unit	= {
-		actor.start()
 	}
+}
 
-	def close():Unit	= {
-		actor.close()
-	}
-
-	//------------------------------------------------------------------------------
-
-	private val reactAction:Effect[LoaderAction]	=
+final class Loader(engineTarget:Target[LoaderFeedback]) extends Logging {
+	val reactAction:Effect[LoaderAction]	=
 		_ match {
 			// BETTER don't close over the player, we already know it
 			case LoaderAction.Decode(file, callback)		=> doDecode(file, callback)

@@ -40,6 +40,7 @@ final class LRU[S,T](size:Int, create:S=>T, touch:Effect[T] = (t:T)=>(), delete:
 		vs foreach delete
 	}
 
+	// TODO using do we have to call this?
 	def close():Unit	= {
 		cache.values foreach delete
 	}

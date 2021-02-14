@@ -7,11 +7,12 @@ import scutil.gui.GridBagDSL._
 import screact._
 
 import jackdaw.model._
+import jackdaw.gui.util._
 
 import GridBagItem.UI_is_GridBagItem
 
 /** the complete application window */
-final class MainUI(model:Model, windowActive:Signal[Boolean]) extends UI with Observing {
+final class MainUI(model:Model, keyboard:Signal[Set[Key]], windowActive:Signal[Boolean]) extends UI with Observing {
 	//------------------------------------------------------------------------------
 	//## feedback
 
@@ -57,9 +58,9 @@ final class MainUI(model:Model, windowActive:Signal[Boolean]) extends UI with Ob
 	//------------------------------------------------------------------------------
 	//## components
 
-	private val deck1UI		= new DeckUI(model.deck1, deck1Target)
-	private val deck2UI		= new DeckUI(model.deck2, deck2Target)
-	private val deck3UI		= new DeckUI(model.deck3, deck3Target)
+	private val deck1UI		= new DeckUI(model.deck1, keyboard, deck1Target)
+	private val deck2UI		= new DeckUI(model.deck2, keyboard, deck2Target)
+	private val deck3UI		= new DeckUI(model.deck3, keyboard, deck3Target)
 
 	private val deckPanel	=
 		GridBagUI(
@@ -68,11 +69,11 @@ final class MainUI(model:Model, windowActive:Signal[Boolean]) extends UI with Ob
 			deck3UI	.pos(0,2) .size(1,1) .weight(1,1)	.fill(BOTH) .insetsTLBR(6,0,0,0)
 		)
 
-	private val channel1UI	= new ChannelUI(model.mix.strip1, Some(model.mix.tone1),	model.masterPeak1,	model.phoneEnabled, channel1Target)
-	private val channel2UI	= new ChannelUI(model.mix.strip2, Some(model.mix.tone2),	model.masterPeak2,	model.phoneEnabled, channel2Target)
-	private val channel3UI	= new ChannelUI(model.mix.strip3, Some(model.mix.tone3),	model.masterPeak3,	model.phoneEnabled, channel3Target)
-	private val masterUI	= new ChannelUI(model.mix.master, None,						model.masterPeak,	model.phoneEnabled, masterTarget)
-	private val speedUI		= new SpeedUI(model.speed, speedTarget)
+	private val channel1UI	= new ChannelUI(model.mix.strip1, Some(model.mix.tone1),	model.masterPeak1,	model.phoneEnabled, keyboard, channel1Target)
+	private val channel2UI	= new ChannelUI(model.mix.strip2, Some(model.mix.tone2),	model.masterPeak2,	model.phoneEnabled, keyboard, channel2Target)
+	private val channel3UI	= new ChannelUI(model.mix.strip3, Some(model.mix.tone3),	model.masterPeak3,	model.phoneEnabled, keyboard, channel3Target)
+	private val masterUI	= new ChannelUI(model.mix.master, None,						model.masterPeak,	model.phoneEnabled, keyboard, masterTarget)
+	private val speedUI		= new SpeedUI(model.speed, keyboard, speedTarget)
 
 	private val	masterPanel	=
 		GridBagUI(

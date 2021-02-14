@@ -2,7 +2,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 name			:= "jackdaw"
 organization	:= "de.djini"
-version			:= "1.40.0"
+version			:= "1.41.0"
 
 scalaVersion	:= "2.13.4"
 scalacOptions	++= Seq(
@@ -19,13 +19,13 @@ scalacOptions	++= Seq(
 
 conflictManager		:= ConflictManager.strict withOrganization "^(?!(org\\.scala-lang|org\\.scala-js)(\\..*)?)$"
 libraryDependencies	++= Seq(
-	"de.djini"		%%	"scutil-jdk"			% "0.198.0"	% "compile",
-	"de.djini"		%%	"scutil-gui"			% "0.198.0"	% "compile",
-	"de.djini"		%%	"scaudio"				% "0.191.0"	% "compile",
-	"de.djini"		%%	"scjson-io-converter"	% "0.219.0"	% "compile",
-	"de.djini"		%%	"screact"				% "0.210.0"	% "compile",
-	"de.djini"		%%	"scgeom"				% "0.47.0"	% "compile",
-	"de.djini"		%%	"sc2d"					% "0.36.0"	% "compile",
+	"de.djini"		%%	"scutil-jdk"			% "0.203.0"	% "compile",
+	"de.djini"		%%	"scutil-gui"			% "0.203.0"	% "compile",
+	"de.djini"		%%	"scaudio"				% "0.201.0"	% "compile",
+	"de.djini"		%%	"scjson-io-converter"	% "0.227.0"	% "compile",
+	"de.djini"		%%	"screact"				% "0.215.0"	% "compile",
+	"de.djini"		%%	"scgeom"				% "0.49.0"	% "compile",
+	"de.djini"		%%	"sc2d"					% "0.39.0"	% "compile",
 	"de.djini"					% "jkeyfinder"	% "0.4.1"	% "compile",
 	"org.simplericity.macify"	% "macify"		% "1.6"		% "compile",
 	"javazoom"					% "jlayer"		% "1.0.1"	% "compile",
