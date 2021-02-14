@@ -9,7 +9,7 @@ import scutil.log._
 import scjson.ast._
 import scjson.codec._
 import scjson.converter._
-import scjson.io.converter._
+import scjson.io._
 
 import jackdaw.library._
 

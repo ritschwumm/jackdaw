@@ -3,8 +3,6 @@ package jackdaw
 import java.awt._
 import javax.swing._
 
-import org.simplericity.macify.eawt._
-
 import scutil.jdk.implicits._
 import scutil.lang._
 import scutil.gui.instances._
@@ -21,7 +19,7 @@ import jackdaw.remote.EngineStub
 
 /** main class initializing backend and gui */
 object Main extends Observing {
-	def create(shutdown:Io[Unit]):IoResource[Unit]	=
+	def create(shutdown:Io[Unit]):IoResource[Io[Unit]]	=
 		for {
 			_				<-	IoResource delay { Style.setupLnF() }
 			_				<-	IoResource delay { Library.init() }
@@ -32,7 +30,7 @@ object Main extends Observing {
 			ui				<-	IoResource delay new MainUI(model, keyboard, windowActive)
 			frame			<-	IoResource.unsafe releasable new JFrame
 		}
-		yield {
+		yield Io delay {
 			val windowActiveFb:Events[Boolean]	=
 				SwingWidget
 				.events	((frame:WindowCaster).connect)
@@ -54,13 +52,23 @@ object Main extends Observing {
 			// get collected and looses reactivity
 			ui.component.putClientProperty("STRONG_REF", ui)
 
-			val macifyApplication	= new DefaultApplication
-			macifyApplication addApplicationListener new ApplicationAdapter {
-				override def handleQuit(ev:ApplicationEvent):Unit	= shutdown.unsafeRun()
+			// TODO use setAboutHandler to display out own dialog
+
+			try {
+				Desktop.getDesktop setQuitHandler { (ev, res) =>
+					shutdown.unsafeRun()
+				}
 			}
-			macifyApplication setApplicationIconImage Style.application.osxIcon
-			macifyApplication.removeAboutMenuItem()
-			macifyApplication.removePreferencesMenuItem()
+			catch { case e:UnsupportedOperationException =>
+				//e.printStackTrace()
+			}
+
+			try {
+				Taskbar.getTaskbar setIconImage Style.application.icon
+			}
+			catch { case e:UnsupportedOperationException =>
+				//e.printStackTrace()
+			}
 
 			model.speed persist (Config.dataBase / "speed.json")
 		}

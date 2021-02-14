@@ -92,7 +92,7 @@ object Style {
 	//------------------------------------------------------------------------------
 
 	object application {
-		val osxIcon	= bufferedImage("/logo.png")
+		val icon	= bufferedImage("/logo.png")
 	}
 
 	object window {

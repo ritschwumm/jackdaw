@@ -36,8 +36,8 @@ object EngineSkeleton extends Logging {
 									}
 								)
 			output			=	Output.find(Config.outputConfig).getOrError("audio is not available")
-			enqueueAction	<-	Engine.create(output, sender)
 			_				<-	IoResource delay sendToStub(ToStub.Started(output.outputInfo.rate, output.outputInfo.headphone))
+			enqueueAction	<-	Engine.create(output, sender)
 			_				<-	debugLifecycle("started", "stopping")
 		}
 		yield Io delay {

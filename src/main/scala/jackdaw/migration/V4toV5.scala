@@ -2,7 +2,7 @@ package jackdaw.migration
 
 import scjson.ast._
 import scjson.converter._
-import scjson.io.converter._
+import scjson.io._
 
 import jackdaw.library._
 import jackdaw.data._

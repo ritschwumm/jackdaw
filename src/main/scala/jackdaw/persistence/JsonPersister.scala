@@ -7,11 +7,11 @@ import scutil.jdk.implicits._
 import scutil.log._
 
 import scjson.converter._
-import scjson.io.converter._
+import scjson.io._
 
 final class JsonPersister[T:JsonReader:JsonWriter] extends Persister[T] with Logging {
 	def load(file:File):Option[T]	= {
-		(JsonIo loadFile file)
+		JsonIo.loadFile(file)
 		.leftEffect { e =>
 			ERROR("unmarshalling failed", file, e.toString)
 		}

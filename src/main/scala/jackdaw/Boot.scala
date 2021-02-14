@@ -29,8 +29,9 @@ object Boot extends Logging {
 						sys exit 0
 					}
 
-				val main	= Main.create(shutdown).open.unsafeRun()
-				disposer	= main._2
+				val (start, tmp)	= Main.create(shutdown).open.unsafeRun()
+				disposer	= tmp
+				start.unsafeRun()
 			}
 			catch { case e:Exception =>
 				ERROR("cannot start application", e)
