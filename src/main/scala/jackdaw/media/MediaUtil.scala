@@ -37,7 +37,7 @@ object MediaUtil extends Logging {
 				}
 			}
 
-		val errorGroups:Seq[Group]	= outcome.swap.flattenMany
+		val errorGroups:Seq[Group]	= outcome.swap.toOption.flattenMany
 		errorGroups foreach { it =>
 			it.worker +: (it.messages map { "\t" + _ }) foreach { WARN(_) }
 		}

@@ -3,8 +3,8 @@ package jackdaw.gui
 import java.awt.{ List=>_, Canvas=>_, _ }
 
 import scutil.lang.implicits._
-
-import scgeom._
+import scutil.gui.geom._
+import scutil.gui.geom.extensions._
 
 import sc2d._
 

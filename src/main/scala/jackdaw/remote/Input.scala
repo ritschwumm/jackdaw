@@ -49,7 +49,7 @@ final class Input(val st:InputStream) {
 			size	= readDouble()
 		)
 	def readLoopDef():LoopDef	=
-		LoopDef(
+		LoopDef.fromInput(
 			measures	= readInt()
 		)
 

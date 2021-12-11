@@ -10,8 +10,10 @@ import scutil.concurrent._
 object Actor {
 	def create[T](name:String, priority:Int, parking:MilliDuration, body:T=>Boolean):IoResource[Target[T]]	=
 		for {
+			// NOTE this is uses a LinkedTransferQueue instead of a an ConcurrentLinkedQueue because
+			// we _want_ to be able to block on reads when there is nothing available in the queue
 			queue	<-	IoResource delay new LinkedTransferQueue[T]
-			worker	<-	SimpleWorker.ioResource(
+			worker	<-	SimpleWorker.create(
 							name,
 							priority,
 							Io delay {

@@ -5,9 +5,10 @@ import javax.swing._
 
 import scutil.core.implicits._
 import scutil.lang._
+import scutil.gui.geom._
+import scutil.gui.geom.extensions._
 
 import screact._
-import scgeom._
 import sc2d._
 
 import jackdaw.gui.util._
@@ -42,7 +43,7 @@ final class LinearUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 
 	private val value2gui	=
 		trackBounds map { it =>
-			orientation.cata(miniMax, miniMax.swap)	spanTransformTo
+			orientation.cata(miniMax, miniMax.swap)	linearTransformTo
 			(it get orientation)
 		}
 
@@ -72,7 +73,7 @@ final class LinearUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 			).flattenOption
 		}
 
-	private def stripeShape(bounds:SgRectangle, span:SgSpan, value2gui:SgSpanTransform):Shape	=
+	private def stripeShape(bounds:SgRectangle, span:SgSpan, value2gui:SgLinearTransform1D):Shape	=
 		GeomUtil smallerRectangle (
 			bounds.set(
 				orientation,
@@ -80,7 +81,7 @@ final class LinearUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 			)
 		)
 
-	private def knobShape(bounds:SgRectangle, value:Double, value2gui:SgSpanTransform):Shape	=
+	private def knobShape(bounds:SgRectangle, value:Double, value2gui:SgLinearTransform1D):Shape	=
 		GeomUtil smallerRectangle (
 			bounds.set(
 				orientation,

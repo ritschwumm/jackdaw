@@ -3,8 +3,7 @@ package jackdaw.gui
 import java.awt.Shape
 
 import scutil.lang._
-
-import scgeom._
+import scutil.gui.geom._
 
 import jackdaw.gui.LED._
 import jackdaw.gui.shape._

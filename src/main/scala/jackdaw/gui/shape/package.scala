@@ -5,8 +5,7 @@ import java.awt.geom._
 
 import scutil.core.implicits._
 import scutil.lang.Nes
-
-import scgeom._
+import scutil.gui.geom._
 
 package object shape {
 	def poly(drafts:Draft*)						= Poly(drafts.toVector)

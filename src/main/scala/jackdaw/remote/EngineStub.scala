@@ -54,7 +54,7 @@ object EngineStub extends Logging {
 			_					<-	engineProcess(tcpServer.port)
 			_					=	DEBUG("initializing communication")
 			tcpConnection		<-	tcpServer.connect
-			sendToSkeleton		=	tcpConnection send _
+			sendToSkeleton		=	tcpConnection send (_:ToSkeleton)
 			tmp					=	tcpConnection.receive() match {
 										case ToStub.Started(outputRate, phoneEnabled)	=> (outputRate, phoneEnabled)
 										case x@ToStub.Send(_)							=> sys error show"unexpected message ${x.toString}"
@@ -69,7 +69,7 @@ object EngineStub extends Logging {
 											adaptFactor			= Config.guiQueueAdaptFactor
 										)
 									}
-			_					<-	SimpleWorker.ioResource(
+			_					<-	SimpleWorker.create(
 										"stub receiver",
 										Thread.NORM_PRIORITY,
 										Io delay {

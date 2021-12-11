@@ -25,7 +25,7 @@ object EngineSkeleton extends Logging {
 		for {
 			_				<-	debugLifecycle("starting", "stopped")
 			tcpConnection	<-	TcpClient.open(port)
-			sendToStub		=	tcpConnection send _
+			sendToStub		=	tcpConnection send (_:ToStub)
 			sender			<-	Actor.create[EngineFeedback](
 									"skeleton sender",
 									Thread.NORM_PRIORITY,

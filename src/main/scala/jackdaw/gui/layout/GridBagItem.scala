@@ -6,7 +6,8 @@ import java.awt.Insets
 import scutil.gui.GridBagDSL._
 
 object GridBagItem {
-	implicit def UI_is_GridBagItem[T](ui:T)(implicit ev:T=>UI):GridBagItem	= GridBagItem(ui, GBC)
+	// TODO dotty this is wonky
+	implicit def UI_is_GridBagItem[T](ui:T)(implicit ev:T=>UI):GridBagItem	= GridBagItem(ev(ui), GBC)
 }
 
 final case class GridBagItem(ui:UI, gbc:GridBagConstraints) {

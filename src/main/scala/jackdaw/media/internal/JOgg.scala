@@ -49,7 +49,7 @@ object JOgg extends Inspector with Decoder with Logging {
 						val header	= vorbis.getIdentificationHeader
 						for {
 							_		<-
-									writeWavChecked(output, header.getSampleRate, header.getChannels.toShort) { append:BufferWriter =>
+									writeWavChecked(output, header.getSampleRate, header.getChannels.toShort) { (append:BufferWriter) =>
 										copyPcm(vorbis, append)
 									} leftEffect {
 										_ => output.delete()

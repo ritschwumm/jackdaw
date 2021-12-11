@@ -8,9 +8,9 @@ import scutil.geom._
 import scutil.gui.implicits._
 import scutil.gui.CasterInstances._
 import scutil.gui.ComponentUnderMouse
+import scutil.gui.geom._
+import scutil.gui.geom.extensions._
 import scutil.log._
-
-import scgeom._
 
 import screact._
 import screact.swing._

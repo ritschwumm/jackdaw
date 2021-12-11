@@ -6,6 +6,7 @@ import scala.annotation._
 
 import scutil.lang._
 
+// NOTE drone.concurrent.TransferQueue and  jackdaw.concurrent.Transfer are almost identical
 final class Transfer[T] {
 	private val queue	= new ConcurrentLinkedQueue[T]
 

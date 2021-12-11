@@ -143,9 +143,9 @@ object Library extends Logging {
 
 	/** path element for a file system root */
 	private def prefixPath(path:String):Option[String]	=
-			 if (path == "/")					None
-		else if (path == """\\""")				Some("UNC")
-		else if (path matches """[A-Z]:\\""")	Some(path.substring(0,1))
+		if		(path == "/")					None
+		else if	(path == """\\""")				Some("UNC")
+		else if	(path matches """[A-Z]:\\""")	Some(path.substring(0,1))
 		else {
 			ERROR(show"unexpected root path ${path}")
 			None

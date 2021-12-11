@@ -30,7 +30,7 @@ object Deck {
 	private val pitchFactor:Boolean=>Double				= _.cata(cents(5),		cents(2))
 	private val stopDragSpeed:Boolean=>Double			= _.cata(1.0/4,			1.0/8)
 	private val playDragSpeed:Boolean=>Double			= _.cata(cents(200),	cents(100))
-	private val independentRhythmFactor:Boolean=>Double	= _.cata(2.0,			1.5)
+	private val independentRhythmFactor:Boolean=>Double = _.cata(2.0,			1.5)
 	private val cursorRhythmFactor:Boolean=>Double		= _.cata(cr,			cr/2)
 	private val phaseMoveOffset:Boolean=>Double			= _.cata(1.0/16,		1.0/384)
 }
@@ -55,7 +55,7 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 	}
 
 	// switches needSync off
-	private def setPitch(pitch:Double):Unit	= {
+	private def setPitch(pitch:Double):Unit = {
 		otherEmitter emit PlayerAction.PlayerPitchAbsolute(pitch, false)
 	}
 	def setPitchOctave(octave:Double):Unit	= {
@@ -84,39 +84,39 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 	def movePhase(scale:RhythmUnit, steps:Double, fine:Boolean):Unit	= {
 		val offset	= RhythmValue(steps * (Deck phaseMoveOffset fine), scale)
 		otherEmitter emit PlayerAction.PlayerPhaseRelative(offset)
- 	}
+	}
 
- 	def modifyPhase(scale:RhythmUnit, fraction:Double):Unit	= {
+	def modifyPhase(scale:RhythmUnit, fraction:Double):Unit = {
 		val offset	= RhythmValue(fraction, scale)
 		otherEmitter emit PlayerAction.PlayerPhaseRelative(offset)
- 	}
+	}
 
- 	private def emitSetNeedSync(needSync:Boolean):Unit	= {
- 		otherEmitter	emit PlayerAction.PlayerSetNeedSync(needSync)
- 	}
+	private def emitSetNeedSync(needSync:Boolean):Unit	= {
+		otherEmitter	emit PlayerAction.PlayerSetNeedSync(needSync)
+	}
 
- 	private def emitLooping(size:Option[LoopDef]):Unit	= {
- 		otherEmitter emit (
- 			size.cata(PlayerAction.PlayerLoopDisable, PlayerAction.PlayerLoopEnable)
- 		)
- 	}
+	private def emitLooping(size:Option[LoopDef]):Unit	= {
+		otherEmitter emit (
+			size.cata(PlayerAction.PlayerLoopDisable, PlayerAction.PlayerLoopEnable.apply)
+		)
+	}
 
 	//------------------------------------------------------------------------------
 	//## track derivates
 
 	private val trackWrap:OptionSignal[Track]	= OptionSignal(track.signal)
 	val sample:Signal[Option[Sample]]			= (trackWrap flatMap { it => OptionSignal(it.sample)	}).unwrap
-	val bandCurve:Signal[Option[BandCurve]]		= (trackWrap flatMap { it => OptionSignal(it.bandCurve)	}).unwrap
+	val bandCurve:Signal[Option[BandCurve]]		= (trackWrap flatMap { it => OptionSignal(it.bandCurve) }).unwrap
 	val metadata:Signal[Option[Metadata]]		= (trackWrap flatMap { it => OptionSignal(it.metadata)	}).unwrap
 	val rhythm:Signal[Option[Rhythm]]			= (trackWrap flatMap { it => OptionSignal(it.rhythm)	}).unwrap
 	val wav:Signal[Option[File]]				= (trackWrap flatMap { it => OptionSignal(it.wav)		}).unwrap
-	val	key:Signal[Option[MusicKey]]			= (trackWrap flatMap { it => OptionSignal(it.key)		}).unwrap
+	val key:Signal[Option[MusicKey]]			= (trackWrap flatMap { it => OptionSignal(it.key)		}).unwrap
 	val fileName:Signal[Option[String]]			= signal { track.current map	{ _.fileName				} }
 	val cuePoints:Signal[Option[Seq[Double]]]	= signal { track.current map	{ _.cuePoints.current		} }
 	val annotation:Signal[Option[String]]		= signal { track.current map	{ _.annotation.current		} }
-	val dataLoaded:Signal[Boolean]				= signal { track.current exists	{ _.dataLoaded.current		} }
-	val sampleLoaded:Signal[Boolean]			= signal { track.current exists	{ _.sampleLoaded.current	} }
-	// val fullyLoaded:Signal[Boolean]			= signal { track.current exists	{ _.fullyLoaded.current		} }
+	val dataLoaded:Signal[Boolean]				= signal { track.current exists { _.dataLoaded.current		} }
+	val sampleLoaded:Signal[Boolean]			= signal { track.current exists { _.sampleLoaded.current	} }
+	// val fullyLoaded:Signal[Boolean]			= signal { track.current exists { _.fullyLoaded.current		} }
 
 	val cuePointsFlat:Signal[Seq[Double]]		= signal { cuePoints.current.flattenMany }
 
@@ -135,10 +135,10 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 		signal {
 			val feedback	= playerFeedback.current
 			(feedback.needSync, feedback.hasSync) match {
-				case (true,  true)	=> Some(true)
-				case (true,  false)	=> Some(false)
+				case (true,	 true)	=> Some(true)
+				case (true,	 false) => Some(false)
 				case (false, true)	=> Some(false)
-				case (false, false)	=> None
+				case (false, false) => None
 			}
 		}
 
@@ -196,8 +196,8 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 	/** player position (almost) floored to rhythm points */
 	val playerRhythmIndex:Signal[Option[RhythmIndex]]	=
 		signal {
-			val rhy	= rhythm.current
-			val pos	= position.current
+			val rhy = rhythm.current
+			val pos = position.current
 			for {
 				rhythm	<- rhy
 			}
@@ -207,9 +207,9 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 	/** how far it is from the player position to the next cue point */
 	val playerBeforeCuePoint:Signal[Option[RhythmIndex]]	=
 		signal {
-			val rhy	= rhythm.current
-			val cpf	= cuePointsFlat.current
-			val pos	= position.current
+			val rhy = rhythm.current
+			val cpf = cuePointsFlat.current
+			val pos = position.current
 			for {
 				rhythm		<- rhy
 				cuePoint	<- cpf find { _ > pos }
@@ -243,11 +243,11 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 
 	// make start/move/end from continuous option
 
-	private val dragMode	= state(dragSpeed,	PlayerAction.PlayerDragAbsolute,		PlayerAction.PlayerDragEnd)
-	private val scratchMode	= state(scratching,	PlayerAction.PlayerScratchRelative,	PlayerAction.PlayerScratchEnd)
+	private val dragMode	= state(dragSpeed,	PlayerAction.PlayerDragAbsolute.apply,		PlayerAction.PlayerDragEnd)
+	private val scratchMode = state(scratching, PlayerAction.PlayerScratchRelative.apply,	PlayerAction.PlayerScratchEnd)
 
-	private def state[S,T](input:Signal[Option[S]], move:S=>T, end:T):Events[T]	=
-		(input.edge.flattenOption map move)	orElse
+	private def state[S,T](input:Signal[Option[S]], move:S=>T, end:T):Events[T] =
+		(input.edge.flattenOption map move) orElse
 		(input.edge map { it => !it.isEmpty } tag end)
 
 	//------------------------------------------------------------------------------
@@ -255,7 +255,7 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 
 	private val newTrack:Events[Unit]	= {
 		val switchedToLoadedTrack:Events[Unit]	= (track.edge.flattenOption snapshotOnly dataLoaded).trueUnit
-		val existingTrackGotLoaded:Events[Unit]	= track flatMapEvents { _.cata(never, _.dataLoaded.edge.trueUnit) }
+		val existingTrackGotLoaded:Events[Unit] = track flatMapEvents { _.cata(never, _.dataLoaded.edge.trueUnit) }
 		switchedToLoadedTrack orElse existingTrackGotLoaded
 	}
 
@@ -333,7 +333,7 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 	}
 
 	// private def pitchStep	=
-	// 		Deck pitchFactor decouple(fineModifier.current)
+	//		Deck pitchFactor decouple(fineModifier.current)
 
 	def setAnnotation(it:String):Unit	= {
 		changeTrack {
@@ -347,7 +347,7 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 		}
 	}
 
-	def toggleRhythm():Unit	= {
+	def toggleRhythm():Unit = {
 		changeTrack {
 			_ toogleRhythm position.current
 		}
@@ -362,7 +362,7 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 		}
 	}
 
-	def resizeRhythmBy(positive:Boolean, fine:Boolean):Unit	= {
+	def resizeRhythmBy(positive:Boolean, fine:Boolean):Unit = {
 		changeTrack {
 			_ resizeRhythmBy multiplicative(
 				positive, 1,
@@ -371,7 +371,7 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 		}
 	}
 
-	def resizeRhythmAt(positive:Boolean, fine:Boolean):Unit	= {
+	def resizeRhythmAt(positive:Boolean, fine:Boolean):Unit = {
 		changeTrack {
 			_.resizeRhythmAt(
 				position.current,
@@ -430,7 +430,7 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 	//------------------------------------------------------------------------------
 	//## wiring
 
-	private val autoPitchReset:Events[Unit]	=
+	private val autoPitchReset:Events[Unit] =
 		(track map { _.isDefined }).edge.falseUnit	orElse
 		(newTrack snapshotOnly rhythm map { _.isDefined }).falseUnit
 
@@ -438,5 +438,5 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 		track.edge tag (())
 
 	autoPitchReset	observe { _ => unPitch() }
-	autoToneReset	observe { _ => tone.resetAll()  }
+	autoToneReset	observe { _ => tone.resetAll()	}
 }

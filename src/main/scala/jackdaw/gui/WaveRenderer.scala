@@ -14,7 +14,7 @@ import jackdaw.util.LRU
 import jackdaw.gui.util.ImageUtil
 
 final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
-	private var fullImageCache:Option[(IntPoint,BufferedImage)]	= None
+	private var fullImageCache:Option[(IntPoint,BufferedImage)] = None
 
 	def drawFully(g:Graphics2D, target:IntRect):Unit	= {
 		val size	= target.size
@@ -47,7 +47,7 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 	// derived from a maximum WaveUI width of 4096
 	private val tileCached	= 4096 / tileSize
 
-	private var tileImageCache:Option[(Int,LRU[Int,BufferedImage])]	= None
+	private var tileImageCache:Option[(Int,LRU[Int,BufferedImage])] = None
 
 	def drawPartial(g:Graphics2D, target:IntRect, offset:Int):Unit	= {
 		val x		= target.left
@@ -57,7 +57,7 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 
 		// which tile first
 		var ti	=
-			if (offset < 0)	(offset - tileOffset + 1) / tileOffset
+			if (offset < 0) (offset - tileOffset + 1) / tileOffset
 			else			offset / tileOffset
 		// where in the tile
 		val tm	= moduloInt(offset, tileOffset)
@@ -66,14 +66,14 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 		while (xx - tm < x + width) {
 		provideTileImage(height, ti) foreach { tile =>
 			// first visible, tile's first real (inset) pixel is painted here
-			val tilePos	= xx - tm
+			val tilePos = xx - tm
 			// first physical pixel of the tile would be painted here, but is clipped away
-			val drawPos	= tilePos - tileInset
+			val drawPos = tilePos - tileInset
 
 			// clip away tileInset
-			val oldClip	= g.getClip
+			val oldClip = g.getClip
 			g.clipRect	(tilePos, 0, tileOffset, height)
-			g.drawImage	(tile, drawPos, y, null)
+			g.drawImage (tile, drawPos, y, null)
 			g.setClip	(oldClip)
 		}
 
@@ -108,14 +108,14 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 	private def renderTile(curve:BandCurve, height:Int, index:Int):BufferedImage	=
 		blur(imageUtil.renderImage(IntPoint(tileSize, height), true, g => {
 			val sizeY	= height-1
-			val bottomY	= height-1
+			val bottomY = height-1
 			var x		= 0
 			var c		= index * tileOffset - tileInset
 			while (x < tileSize) {
 				if (c >= 0 && c < curve.chunkCount) {
-					val valueLow	= curve	valuesLow 		c
-					val valueMiddle	= curve	valuesMiddle	c
-					val valueHigh	= curve	valuesHigh		c
+					val valueLow	= curve valuesLow		c
+					val valueMiddle = curve valuesMiddle	c
+					val valueHigh	= curve valuesHigh		c
 					renderLine(
 						g, x, sizeY, bottomY,
 						valueLow, valueMiddle, valueHigh
@@ -130,12 +130,12 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 	private def renderOne(curve:BandCurve, height:Int):BufferedImage	=
 		blur(ImageUtil.renderImage(IntPoint(curve.chunkCount, height), true, g => {
 			val sizeY	= height-1
-			val bottomY	= height-1
-			var	x	= 0
+			val bottomY = height-1
+			var x	= 0
 			while (x < curve.chunkCount) {
-				val valueLow	= curve	valuesLow 		x
-				val valueMiddle	= curve	valuesMiddle	x
-				val valueHigh	= curve	valuesHigh		x
+				val valueLow	= curve valuesLow		x
+				val valueMiddle = curve valuesMiddle	x
+				val valueHigh	= curve valuesHigh		x
 
 				renderLine(
 					g, x, sizeY, bottomY,
@@ -150,17 +150,17 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 	private def renderScaled(curve:BandCurve, size:IntPoint):BufferedImage	=
 		blur(imageUtil.renderImage(size, true, g => {
 			val sizeY	= size.y-1
-			val bottomY	= size.y-1
+			val bottomY = size.y-1
 			val width	= size.x
 			val step	= curve.chunkCount.toDouble * curve.rasterFrames.toDouble / (width+1).toDouble
 			var x	= 0
 			while (x < width) {
-				val	startX	= floor((x+0) * step).toInt
-				val	endX	= floor((x+1) * step).toInt
+				val startX	= floor((x+0) * step).toInt
+				val endX	= floor((x+1) * step).toInt
 				val sizeX	= endX - startX
 
 				val valueLow	= curve.rangeLow	(startX, sizeX)
-				val valueMiddle	= curve.rangeMiddle	(startX, sizeX)
+				val valueMiddle = curve.rangeMiddle (startX, sizeX)
 				val valueHigh	= curve.rangeHigh	(startX, sizeX)
 
 				renderLine(
@@ -199,8 +199,8 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 	}
 
 	@inline
-	private def sumColor(low:Float, middle:Float, high:Float):Color	= {
-		val max	= max3Float(low, middle, high)
+	private def sumColor(low:Float, middle:Float, high:Float):Color = {
+		val max = max3Float(low, middle, high)
 		new Color(
 		low		/ max,
 		middle	/ max,
@@ -217,7 +217,7 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 		valueLow:Float, valueMiddle:Float, valueHigh:Float
 	) {
 		val yLow	= (valueLow		* sizeY).toInt
-		val yMiddle	= (valueMiddle	* sizeY).toInt
+		val yMiddle = (valueMiddle	* sizeY).toInt
 		val yHigh	= (valueHigh	* sizeY).toInt
 
 		g setPaint	Style.wave.overlap.low
@@ -232,28 +232,28 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 	//------------------------------------------------------------------------------
 
 	private val blurOperation	= {
-    	val raw	=
+		val raw =
 			Array[Float](
-				0,  3, 0,
-				1,  7, 1,
+				0,	3, 0,
+				1,	7, 1,
 				2, 15, 2,
-				1,  7, 1,
-				0,  3, 0
+				1,	7, 1,
+				0,	3, 0
 			)
 		val kernel	=
 			new Kernel(
 				3, 5,
 				raw map { _ / raw.sum }
 			)
-		val	operation	=
+		val operation	=
 			new ConvolveOp(
 				kernel,
 				ConvolveOp.EDGE_NO_OP,
 				null
 			)
 		operation
-    }
+	}
 
-    private def blur(src:BufferedImage):BufferedImage	=
+	private def blur(src:BufferedImage):BufferedImage	=
 		blurOperation.filter(src, null)
 }

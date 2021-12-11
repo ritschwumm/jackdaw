@@ -32,7 +32,7 @@ object KeyDetector {
 		*/
 		val audio	= new Audio {
 			def frameCount	= sample.frameCount
-			def frameRate	= sample.frameRate
+			def frameRate	= sample.frameRate.toDouble
 			def get(frame:Int):Float	= mono get frame
 		}
 

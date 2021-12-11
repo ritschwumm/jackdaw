@@ -8,6 +8,9 @@ object LoopDef {
 			LoopDef(4),
 			LoopDef(8)
 		)
+
+	// NOTE this should _not_ be used for anything else than deserialization in remote.Input
+	def fromInput(measures:Int):LoopDef	= new LoopDef(measures)
 }
 
 final case class LoopDef private (measures:Int) {

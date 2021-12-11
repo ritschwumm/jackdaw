@@ -4,8 +4,7 @@ import java.awt.Shape
 
 import scutil.lang._
 import scutil.math.functions._
-
-import scgeom._
+import scutil.gui.geom._
 
 /** swing geometry utility functions */
 object GeomUtil {

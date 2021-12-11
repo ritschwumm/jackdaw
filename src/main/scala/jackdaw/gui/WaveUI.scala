@@ -10,10 +10,10 @@ import scutil.core.implicits._
 import scutil.lang._
 import scutil.geom._
 import scutil.gui.implicits._
+import scutil.gui.geom._
 
 import screact._
 import sc2d._
-import scgeom._
 
 import jackdaw.Config
 import jackdaw.curve.BandCurve

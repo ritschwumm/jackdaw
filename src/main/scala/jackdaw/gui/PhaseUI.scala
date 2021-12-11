@@ -5,9 +5,10 @@ import javax.swing._
 import scala.math._
 
 import scutil.core.implicits._
+import scutil.gui.geom._
+import scutil.gui.geom.extensions._
 
 import screact._
-import scgeom._
 import sc2d._
 
 import jackdaw.data._
@@ -35,7 +36,7 @@ final class PhaseUI(value:Signal[Option[Double]], rhythm:Signal[Option[Rhythm]])
 
 	private val value2gui	=
 		canvas.bounds map { it =>
-			SgSpanTransform.fromTo(PhaseRange.span, it.x)
+			SgLinearTransform1D.fromTo(PhaseRange.span, it.x)
 		}
 
 	//------------------------------------------------------------------------------

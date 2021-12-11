@@ -627,8 +627,8 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	// returns a filter mode
 	@inline
 	private def filterMode(value:Double):Int	=
-			 if (value < -Player.filterEpsilon)	Player.filterLP
-		else if (value > +Player.filterEpsilon)	Player.filterHP
+		if		(value < -Player.filterEpsilon)	Player.filterLP
+		else if	(value > +Player.filterEpsilon)	Player.filterHP
 		else									Player.filterOff
 
 	//------------------------------------------------------------------------------

@@ -9,9 +9,10 @@ import scala.math._
 
 import scutil.core.implicits._
 import scutil.math.functions._
+import scutil.gui.geom._
+import scutil.gui.geom.extensions._
 
 import screact._
-import scgeom._
 import sc2d._
 
 import jackdaw.gui.util._
@@ -35,7 +36,7 @@ final class RotaryUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 	// 270 or -90 degrees is bottom
 	private val valueSpan		= minimum					spanTo	maximum
 	private val angleSpan		= Style.rotary.angle.min	spanTo	Style.rotary.angle.max
-	private val valueToAngle	= valueSpan spanTransformTo angleSpan
+	private val valueToAngle	= valueSpan linearTransformTo angleSpan
 
 	private val epsilon		= 1.0 / 10000000000D
 	private val inValueSpan	= GeomUtil.containsInclusive(valueSpan, epsilon)
@@ -166,31 +167,31 @@ final class RotaryUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 		}
 
 		val value	= {
-		// we need the jump at the bottom instead of at the left
+			// we need the jump at the bottom instead of at the left
 
-		// 		-90
-		//	+-180	0
-		//		+90
-		val angle1	= toDegrees(offset.angle)
+			// 		-90
+			//	+-180	0
+			//		+90
+			val angle1	= toDegrees(offset.angle)
 
-		// 		+90
-		//	+-180	0
-		//		-90
-		val angle2	= -angle1
+			// 		+90
+			//	+-180	0
+			//		-90
+			val angle2	= -angle1
 
-		//			90
-		//	180				0
-		//		270/-90
-		val angle3	=
+			//			90
+			//	180				0
+			//		270/-90
+			val angle3	=
 				if (angle2 < -90)	angle2 + 360
 				else				angle2
 
-		// half opening overshot is allowed and limited
-		(angle3 >= Style.rotary.angle.max - Style.rotary.angle.opening/2) &&
-			(angle3 <= Style.rotary.angle.min + Style.rotary.angle.opening/2) option {
-				val angle	= clampDouble(angle3, Style.rotary.angle.max, Style.rotary.angle.min)
-				valueToAngle inverse angle
-			}
+			// half opening overshot is allowed and limited
+			(angle3 >= Style.rotary.angle.max - Style.rotary.angle.opening/2) &&
+				(angle3 <= Style.rotary.angle.min + Style.rotary.angle.opening/2) option {
+					val angle	= clampDouble(angle3, Style.rotary.angle.max, Style.rotary.angle.min)
+					valueToAngle inverse angle
+				}
 		}
 
 		(inside, value)

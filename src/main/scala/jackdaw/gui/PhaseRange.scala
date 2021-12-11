@@ -1,6 +1,6 @@
 package jackdaw.gui
 
-import scgeom._
+import scutil.gui.geom._
 
 import jackdaw.gui.util._
 

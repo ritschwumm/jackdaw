@@ -8,9 +8,9 @@ import scala.math._
 
 import scutil.core.implicits._
 import scutil.geom._
+import scutil.gui.geom._
 
 import screact._
-import scgeom._
 import sc2d._
 
 import scaudio.math._
@@ -61,9 +61,9 @@ final class MeterUI(value:Signal[Float], meterRange:MeterRange, vertical:Boolean
 	private val orientation	= SgOrientation trueVertical vertical
 	private val miniMax		= SgSpan.one
 
-	private val fraction2gui:Signal[SgSpanTransform]	=
+	private val fraction2gui:Signal[SgLinearTransform1D]	=
 		canvas.bounds map { it =>
-			SgSpanTransform.fromTo(
+			SgLinearTransform1D.fromTo(
 				orientation.cata(miniMax, miniMax.swap),
 				it get orientation
 			)

@@ -1,7 +1,6 @@
 package jackdaw.gui.shape
 
 import scutil.lang.Nes
-
-import scgeom._
+import scutil.gui.geom._
 
 final case class Draft(points:Nes[SgPoint])
