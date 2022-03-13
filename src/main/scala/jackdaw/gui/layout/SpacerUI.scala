@@ -1,6 +1,6 @@
 package jackdaw.gui
 
-import javax.swing._
+import javax.swing.*
 
 /** empty space */
 final class SpacerUI extends UI {

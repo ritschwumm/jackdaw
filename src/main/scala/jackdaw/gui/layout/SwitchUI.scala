@@ -1,9 +1,9 @@
 package jackdaw.gui
 
-import java.awt.{ List => _, _ }
-import javax.swing._
+import java.awt.{ List as _, * }
+import javax.swing.*
 
-import screact._
+import screact.*
 
 final class SwitchUI(child:Signal[UI]) extends UI with Observing {
 	// becomes too wide in a HBoxUI without this
@@ -22,4 +22,5 @@ final class SwitchUI(child:Signal[UI]) extends UI with Observing {
 	}
 
 	val component:JComponent	= panel
+	component.putClientProperty("STRONG_REF", this)
 }

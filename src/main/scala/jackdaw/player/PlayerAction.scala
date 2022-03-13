@@ -2,7 +2,7 @@ package jackdaw.player
 
 import java.io.File
 
-import jackdaw.data._
+import jackdaw.data.*
 
 object PlayerAction {
 	final case class PlayerChangeControl(

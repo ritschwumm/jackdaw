@@ -2,9 +2,9 @@ package jackdaw.concurrent
 
 import java.util.concurrent.ConcurrentLinkedQueue
 
-import scala.annotation._
+import scala.annotation.*
 
-import scutil.lang._
+import scutil.lang.*
 
 // NOTE drone.concurrent.TransferQueue and  jackdaw.concurrent.Transfer are almost identical
 final class Transfer[T] {

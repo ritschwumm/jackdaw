@@ -1,17 +1,17 @@
 package jackdaw.gui
 
 import java.net.URL
-import java.awt._
+import java.awt.*
 import java.awt.image.BufferedImage
-import javax.swing._
-import javax.swing.border._
+import javax.swing.*
+import javax.swing.border.*
 import javax.swing.plaf.metal.MetalLookAndFeel
 import javax.imageio.ImageIO
 
-import scutil.core.implicits._
-import scutil.color._
-import scutil.geom._
-import scutil.gui.implicits._
+import scutil.core.implicits.*
+import scutil.color.*
+import scutil.geom.*
+import scutil.gui.implicits.*
 import scutil.gui.Colors
 
 import jackdaw.BuildInfo

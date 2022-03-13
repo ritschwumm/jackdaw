@@ -1,17 +1,17 @@
 package jackdaw.gui
 
-import java.awt.{ List=>_, Canvas=>_, _ }
-import javax.swing._
+import java.awt.{ List as _, Canvas as _, * }
+import javax.swing.*
 
-import scutil.core.implicits._
-import scutil.lang._
-import scutil.gui.geom._
-import scutil.gui.geom.extensions._
+import scutil.core.implicits.*
+import scutil.lang.*
+import scutil.gui.geom.*
+import scutil.gui.geom.extensions.*
 
-import screact._
-import sc2d._
+import screact.*
+import sc2d.*
 
-import jackdaw.gui.util._
+import jackdaw.gui.util.*
 
 /** a potentiometer like linear fader */
 final class LinearUI(value:Signal[Double], minimum:Double, maximum:Double, neutral:Option[Double], vertical:Boolean) extends UI with Observing {
@@ -21,6 +21,7 @@ final class LinearUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 	private val canvas	= new CanvasWrapper(None, Hints.lowQuality)
 
 	val component:JComponent	= canvas.component
+	component.putClientProperty("STRONG_REF", this)
 
 	//------------------------------------------------------------------------------
 	//## input

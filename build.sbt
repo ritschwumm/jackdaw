@@ -4,30 +4,26 @@ ThisBuild / versionScheme := Some("early-semver")
 
 name			:= "jackdaw"
 organization	:= "de.djini"
-version			:= "1.43.0"
+version			:= "1.44.0"
 
-scalaVersion	:= "2.13.7"
+scalaVersion	:= "3.1.1"
 scalacOptions	++= Seq(
 	"-feature",
 	"-deprecation",
 	"-unchecked",
-	"-Werror",
-	"-Xlint",
-	"-Xsource:3",
-	"-language:implicitConversions",
-	// attention: requires build and runtime library version never differ
-	"-opt:l:inline",
-	"-opt-inline-from:**",
+	"-Wunused:all",
+	"-Xfatal-warnings",
+	"-Ykind-projector:underscores",
 )
 
 conflictManager		:= ConflictManager.strict withOrganization "^(?!(org\\.scala-lang|org\\.scala-js)(\\..*)?)$"
 libraryDependencies	++= Seq(
-	"de.djini"		%%	"scutil-jdk"	% "0.213.0"	% "compile",
-	"de.djini"		%%	"scutil-gui"	% "0.213.0"	% "compile",
-	"de.djini"		%%	"scaudio"		% "0.212.0"	% "compile",
-	"de.djini"		%%	"scjson-io"		% "0.239.0"	% "compile",
-	"de.djini"		%%	"screact"		% "0.226.0"	% "compile",
-	"de.djini"		%%	"sc2d"			% "0.42.0"	% "compile",
+	"de.djini"		%%	"scutil-jdk"	% "0.220.0"	% "compile",
+	"de.djini"		%%	"scutil-gui"	% "0.220.0"	% "compile",
+	"de.djini"		%%	"scaudio"		% "0.220.0"	% "compile",
+	"de.djini"		%%	"scjson-io"		% "0.248.0"	% "compile",
+	"de.djini"		%%	"screact"		% "0.233.0"	% "compile",
+	"de.djini"		%%	"sc2d"			% "0.44.0"	% "compile",
 	"de.djini"		%	"jkeyfinder"	% "0.4.1"	% "compile",
 	"javazoom"		%	"jlayer"		% "1.0.1"	% "compile",
 	"com.mpatric"	%	"mp3agic"		% "0.9.1"	% "compile",

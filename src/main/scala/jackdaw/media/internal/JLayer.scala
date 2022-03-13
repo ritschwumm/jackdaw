@@ -3,12 +3,12 @@ package jackdaw.media
 import java.io.File
 
 import javazoom.jl.decoder.{Header,Obuffer,JavaLayerException}
-import javazoom.jl.converter._
-import javazoom.jl.converter.Converter.{ ProgressListener => ConverterProgressListener }
+import javazoom.jl.converter.*
+import javazoom.jl.converter.Converter.{ ProgressListener as ConverterProgressListener }
 
-import scutil.core.implicits._
-import scutil.jdk.implicits._
-import scutil.log._
+import scutil.core.implicits.*
+import scutil.jdk.implicits.*
+import scutil.log.*
 
 import jackdaw.util.Checked
 

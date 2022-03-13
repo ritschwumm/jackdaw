@@ -1,9 +1,9 @@
 package jackdaw.remote
 
-import java.net._
+import java.net.*
 
-import scutil.lang.implicits._
-import scutil.lang._
+import scutil.lang.implicits.*
+import scutil.lang.*
 
 object TcpClient {
 	// TODO needs proper exception checks

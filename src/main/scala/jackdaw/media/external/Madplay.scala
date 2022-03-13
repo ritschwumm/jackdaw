@@ -2,9 +2,9 @@ package jackdaw.media
 
 import java.io.File
 
-import scutil.jdk.implicits._
-import scutil.lang.implicits._
-import scutil.math.functions._
+import scutil.jdk.implicits.*
+import scutil.lang.implicits.*
+import scutil.math.functions.*
 
 import jackdaw.util.Checked
 

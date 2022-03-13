@@ -1,10 +1,10 @@
 package jackdaw.model
 
-import scutil.core.implicits._
+import scutil.core.implicits.*
 
-import screact._
+import screact.*
 
-import jackdaw.range._
+import jackdaw.range.*
 
 object Tone {
 	val trimStep:Boolean=>Double	=

@@ -2,9 +2,9 @@ package jackdaw.gui.util
 
 import java.awt.Shape
 
-import scutil.lang._
-import scutil.math.functions._
-import scutil.gui.geom._
+import scutil.lang.*
+import scutil.math.functions.*
+import scutil.gui.geom.*
 
 /** swing geometry utility functions */
 object GeomUtil {

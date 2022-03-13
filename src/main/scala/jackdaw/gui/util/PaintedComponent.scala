@@ -1,7 +1,7 @@
 package jackdaw.gui.util
 
-import java.awt.{ List=>_, _ }
-import javax.swing._
+import java.awt.{ List as _, * }
+import javax.swing.*
 
 final class PaintedComponent(paintFunc:Graphics2D=>Unit) extends JComponent {
 	// NOTE Further, if you do not invoker super's implementation you must honor the opaque property,

@@ -1,9 +1,9 @@
 package jackdaw.gui.util
 
-import scutil.core.implicits._
-import scutil.lang._
+import scutil.core.implicits.*
+import scutil.lang.*
 
-import screact._
+import screact.*
 import screact.swing.SwingClock
 
 object ActionUtil {
@@ -13,7 +13,7 @@ object ActionUtil {
 	private val repeatDelay	= 300.millis
 	private val repeatTick	= 100.millis
 
-	implicit class RichRepeatable[T](peer:Signal[Option[T]]) {
+	extension[T](peer:Signal[Option[T]]) {
 		def repeated:Events[T]	=
 			SwingClock.repeat(repeatTick, repeatDelay, peer.edge)
 	}
@@ -22,7 +22,7 @@ object ActionUtil {
 	//## modifiers
 
 	// BETTER use Option[Unit] here?
-	implicit class RichModifier(peer:Signal[Boolean]) {
+	extension(peer:Signal[Boolean]) {
 		def orElse(that:Signal[Boolean]):Signal[Boolean]	=
 			(peer map2 that) { _ || _ }
 
@@ -30,7 +30,7 @@ object ActionUtil {
 			(peer map2 that)(directionValue)
 	}
 
-	implicit class RichDirectionModifier(peer:Signal[Option[Boolean]]) {
+	extension(peer:Signal[Option[Boolean]]) {
 		def merge(that:Signal[Option[Boolean]]):Signal[Option[Boolean]]	=
 			(peer map2 that)(mergeDirections)
 
@@ -41,13 +41,13 @@ object ActionUtil {
 	//------------------------------------------------------------------------------
 	//## actions
 
-	implicit class RichAction(peer:Events[Unit]) {
+	extension(peer:Events[Unit]) {
 		def upDown(that:Events[Unit]):Events[Boolean]	=
 			(peer	tag true)	orElse
 			(that	tag false)
 	}
 
-	implicit class RichDirectionAction(peer:Events[Boolean]) {
+	extension(peer:Events[Boolean]) {
 		def steps:Events[Int]	=
 			peer map directionSteps
 	}
@@ -55,14 +55,14 @@ object ActionUtil {
 	//------------------------------------------------------------------------------
 	//## triggers
 
-	implicit class RichUnitAction(peer:Events[Unit]) {
-		def trigger(target:()=>Unit)(implicit obs:Observing):Unit	= {
+	extension(peer:Events[Unit]) {
+		def trigger(target:()=>Unit)(using obs:Observing):Unit	= {
 			peer observe ignorant(target)
 		}
 	}
 
-	implicit class RichPairAction[S,T](peer:Events[(S,T)]) {
-		def trigger(target:(S,T)=>Unit)(implicit obs:Observing):Unit	= {
+	extension[S,T](peer:Events[(S,T)]) {
+		def trigger(target:(S,T)=>Unit)(using obs:Observing):Unit	= {
 			peer observe target.tupled
 		}
 	}

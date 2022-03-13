@@ -1,15 +1,15 @@
 package jackdaw.remote
 
-import scutil.core.implicits._
-import scutil.lang._
-import scutil.time._
-import scutil.log._
+import scutil.core.implicits.*
+import scutil.lang.*
+import scutil.time.*
+import scutil.log.*
 
-import scaudio.output._
+import scaudio.output.*
 
 import jackdaw.Config
-import jackdaw.player._
-import jackdaw.concurrent._
+import jackdaw.player.*
+import jackdaw.concurrent.*
 
 /** runs on the server */
 object EngineSkeleton extends Logging {

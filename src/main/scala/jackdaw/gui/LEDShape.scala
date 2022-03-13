@@ -2,11 +2,11 @@ package jackdaw.gui
 
 import java.awt.Shape
 
-import scutil.lang._
-import scutil.gui.geom._
+import scutil.lang.*
+import scutil.gui.geom.*
 
-import jackdaw.gui.LED._
-import jackdaw.gui.shape._
+import jackdaw.gui.LED.*
+import jackdaw.gui.shape.*
 
 object LEDShape {
 	val numbers	= Vector(N0, N1, N2, N3, N4,  N5, N6, N7, N8, N9)

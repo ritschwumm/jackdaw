@@ -1,6 +1,6 @@
 package jackdaw.player
 
-import jackdaw.data._
+import jackdaw.data.*
 
 object Metronome {
 	val beatsPerMeasure	= Schema.default.beatsPerMeasure

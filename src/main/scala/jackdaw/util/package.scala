@@ -1,8 +1,6 @@
-package jackdaw
+package jackdaw.util
 
-import scutil.lang._
+import scutil.lang.*
 
-package object util {
-	// TODO should we use Validated here?
-	type Checked[T]	= Either[Nes[String],T]
-}
+// TODO should we use Validated here?
+type Checked[T]	= Either[Nes[String],T]

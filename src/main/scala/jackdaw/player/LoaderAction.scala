@@ -2,7 +2,7 @@ package jackdaw.player
 
 import java.io.File
 
-import scutil.lang._
+import scutil.lang.*
 
 object LoaderAction {
 	final case class Decode(

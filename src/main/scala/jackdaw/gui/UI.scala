@@ -1,6 +1,8 @@
 package jackdaw.gui
 
-import javax.swing._
+import scala.language.implicitConversions
+
+import javax.swing.*
 
 object UI {
 	implicit def JComponent_is_UI(component:JComponent):UI	= new TrivialUI(component)

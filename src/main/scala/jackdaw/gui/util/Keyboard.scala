@@ -2,15 +2,15 @@ package jackdaw.gui.util
 
 import java.util.concurrent.atomic.AtomicReference
 import java.awt.AWTEvent
-import java.awt.event._
+import java.awt.event.*
 import javax.swing.Timer
 
-import scutil.core.implicits._
-import scutil.lang._
+import scutil.core.implicits.*
+import scutil.lang.*
 import scutil.gui.GlobalAWTEvent
-import scutil.gui.ListenerInstances._
+import scutil.gui.ListenerInstances.*
 
-import screact._
+import screact.*
 
 // TODO num lock leads to keys always held
 

@@ -1,6 +1,6 @@
 package jackdaw.player
 
-import scutil.lang._
+import scutil.lang.*
 
 sealed trait LoaderFeedback
 

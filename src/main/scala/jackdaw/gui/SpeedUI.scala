@@ -1,16 +1,16 @@
 package jackdaw.gui
 
-import javax.swing._
-import java.awt.event._
+import javax.swing.*
+import java.awt.event.*
 
-import scutil.core.implicits._
-import scutil.gui.implicits._
-import scutil.gui.GridBagDSL._
+import scutil.core.implicits.*
+import scutil.gui.implicits.*
+import scutil.gui.GridBagDSL.*
 
-import screact._
+import screact.*
 
-import jackdaw.model._
-import jackdaw.gui.util._
+import jackdaw.model.*
+import jackdaw.gui.util.*
 
 import GridBagItem.UI_is_GridBagItem
 
@@ -56,7 +56,9 @@ final class SpeedUI(speed:Speed, keyboard:Signal[Set[Key]], keyTarget:Signal[Boo
 			buttonPanel		.pos(0,1) .size(1,1) .weight(0,1) .fill(NONE)		.anchor(WEST)	.insetsTLBR(2,4,0,4),
 			speedDisplay	.pos(1,1) .size(1,1) .weight(0,1) .fill(NONE) 		.anchor(EAST)	.insetsTLBR(3,4,0,4)
 		)
+
 	val component:JComponent	= panel.component
+	component.putClientProperty("STRONG_REF", this)
 
 	//------------------------------------------------------------------------------
 	//## wiring
@@ -66,12 +68,12 @@ final class SpeedUI(speed:Speed, keyboard:Signal[Set[Key]], keyTarget:Signal[Boo
 
 	val hovered	= ComponentUtil underMouseSignal component
 
-	import KeyEvent._
+	import KeyEvent.*
 
 	private val keyInput	= new KeyInput(keyboard, keyTarget)
-	import keyInput._
+	import keyInput.*
 
-	import ActionUtil._
+	import ActionUtil.*
 
 	// modifiers
 

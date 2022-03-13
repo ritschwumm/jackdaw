@@ -1,8 +1,8 @@
 package jackdaw.range
 
-import scutil.math.functions._
+import scutil.math.functions.*
 
-import jackdaw.range.PitchMath._
+import jackdaw.range.PitchMath.*
 
 object SpeedRange {
 	val	min	= bpm(30.0)

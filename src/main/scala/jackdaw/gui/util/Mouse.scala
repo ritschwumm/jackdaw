@@ -1,14 +1,14 @@
 package jackdaw.gui.util
 
 import java.awt.Component
-import java.awt.event._
+import java.awt.event.*
 
-import scutil.core.implicits._
-import scutil.gui.CasterInstances._
-import scutil.gui.InputEventPredicates._
+import scutil.core.implicits.*
+import scutil.gui.CasterInstances.*
+import scutil.gui.InputEventPredicates.*
 
-import screact._
-import screact.swing._
+import screact.*
+import screact.swing.*
 
 final class Mouse(component:Component) {
 	val events	=

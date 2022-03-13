@@ -2,22 +2,22 @@ package jackdaw.player
 
 import java.io.File
 
-import scala.math._
+import scala.math.*
 
-import scutil.core.implicits._
-import scutil.lang._
-import scutil.math.functions._
-import scutil.bit._
+import scutil.core.implicits.*
+import scutil.lang.*
+import scutil.math.functions.*
+import scutil.bit.*
 
-import scaudio.control._
-import scaudio.output._
-import scaudio.sample._
-import scaudio.interpolation._
-import scaudio.math._
-import scaudio.dsp._
+import scaudio.control.*
+import scaudio.output.*
+import scaudio.sample.*
+import scaudio.interpolation.*
+import scaudio.math.*
+import scaudio.dsp.*
 
-import jackdaw._
-import jackdaw.data._
+import jackdaw.*
+import jackdaw.data.*
 import jackdaw.concurrent.Target
 
 object Player {
@@ -433,8 +433,8 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	/** jump for a given number of rhythm while staying in sync */
 	private def positionSeekWithRaster(offset:RhythmValue, rhythm:Rhythm):Unit	= {
 		val position:Double		=
-				if (running)	headFrame + (rhythm sizeOf offset)
-				else			snappingSeekCalculation(headFrame, offset.steps, rhythm raster offset.unit)
+			if (running)	headFrame + (rhythm sizeOf offset)
+			else			snappingSeekCalculation(headFrame, offset.steps, rhythm raster offset.unit)
 		startFade(position)
 	}
 

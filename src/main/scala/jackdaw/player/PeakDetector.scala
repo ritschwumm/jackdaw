@@ -1,6 +1,6 @@
 package jackdaw.player
 
-import scutil.bit._
+import scutil.bit.*
 
 /** detects peaks from put values, resetting after a read and turn peaks into a decaying value */
 final class PeakDetector {

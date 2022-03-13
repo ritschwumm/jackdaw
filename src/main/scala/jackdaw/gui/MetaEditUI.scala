@@ -1,15 +1,15 @@
 package jackdaw.gui
 
-import java.awt.event._
-import javax.swing._
+import java.awt.event.*
+import javax.swing.*
 
-import scutil.core.implicits._
-import scutil.lang._
-import scutil.gui.CasterInstances._
-import scutil.gui.SwingUtil._
+import scutil.core.implicits.*
+import scutil.lang.*
+import scutil.gui.CasterInstances.*
+import scutil.gui.SwingUtil.*
 
-import screact._
-import screact.swing._
+import screact.*
+import screact.swing.*
 
 /** edits a single text cell */
 final class MetaEditUI(value:Signal[Option[String]], strong:Boolean) extends UI with Observing {
@@ -30,14 +30,16 @@ final class MetaEditUI(value:Signal[Option[String]], strong:Boolean) extends UI 
 	field	setBorder		null
 	// file dropping should not focus this
 	field	setDropTarget	null
+
 	val component:JComponent	= field
+	component.putClientProperty("STRONG_REF", this)
 
 	//------------------------------------------------------------------------------
 	//## keyboard
 
 	(component:KeyCaster) connect { ev =>
 		component.getParent.optionNotNull foreach { parent =>
-			import KeyEvent._
+			import KeyEvent.*
 			(ev.getID, ev.getKeyCode) match {
 				case (KEY_PRESSED, 	VK_ESCAPE)	=> parent.requestFocusInWindow()
 				case (KEY_PRESSED, 	VK_ENTER)	=> parent.requestFocusInWindow()

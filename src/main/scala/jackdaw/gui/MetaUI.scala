@@ -1,12 +1,12 @@
 package jackdaw.gui
 
-import javax.swing._
+import javax.swing.*
 
-import scutil.gui.GridBagDSL._
+import scutil.gui.GridBagDSL.*
 
-import screact._
+import screact.*
 
-import jackdaw.model._
+import jackdaw.model.*
 
 import GridBagItem.UI_is_GridBagItem
 
@@ -56,7 +56,9 @@ final class MetaUI(deck:Deck) extends UI {
 		)
 	panel.component setBackground	Style.meta.background.color
 	panel.component setBorder		Style.meta.border
+
 	val component:JComponent	= panel.component
+	component.putClientProperty("STRONG_REF", this)
 
 	//------------------------------------------------------------------------------
 	//## actions

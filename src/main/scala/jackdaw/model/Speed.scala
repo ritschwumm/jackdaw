@@ -2,17 +2,19 @@ package jackdaw.model
 
 import java.io.File
 
-import scala.math._
+import scala.math.*
 
-import scutil.core.implicits._
+import scutil.core.implicits.*
 
-import screact._
+import screact.*
 
-import jackdaw.range._
-import jackdaw.range.PitchMath._
-import jackdaw.data._
-import jackdaw.persistence._
-import jackdaw.persistence.JsonProtocol._
+import scjson.converter.JsonFormat.given
+
+import jackdaw.range.*
+import jackdaw.range.PitchMath.*
+import jackdaw.data.*
+import jackdaw.persistence.*
+import jackdaw.persistence.JsonProtocol.given
 
 object Speed {
 	private val step:Boolean=>Double	= _.cata(bpm(1),		bpm(0.05))

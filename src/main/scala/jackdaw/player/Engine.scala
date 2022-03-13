@@ -1,15 +1,15 @@
 package jackdaw.player
 
-import scutil.lang.implicits._
-import scutil.lang._
-import scutil.log._
+import scutil.lang.implicits.*
+import scutil.lang.*
+import scutil.log.*
 
-import scaudio.control._
-import scaudio.output._
-import scaudio.math._
+import scaudio.control.*
+import scaudio.output.*
+import scaudio.math.*
 
-import jackdaw._
-import jackdaw.concurrent._
+import jackdaw.*
+import jackdaw.concurrent.*
 
 /** generates audio data using audio Player objects and a Metronome */
 object Engine {
@@ -133,10 +133,10 @@ extends FrameProducer with Logging {
 				speaker	target	speakerValue
 				phone	target	phoneValue
 			case EngineAction.SetBeatRate(beatRate)		=>
-					metronome setBeatRate beatRate
-					player1.metronomeBeatRateChanged()
-					player2.metronomeBeatRateChanged()
-					player3.metronomeBeatRateChanged()
+				metronome setBeatRate beatRate
+				player1.metronomeBeatRateChanged()
+				player2.metronomeBeatRateChanged()
+				player3.metronomeBeatRateChanged()
 			case EngineAction.ControlPlayer(1, action)	=> player1 react action
 			case EngineAction.ControlPlayer(2, action)	=> player2 react action
 			case EngineAction.ControlPlayer(3, action)	=> player3 react action

@@ -1,14 +1,14 @@
 package jackdaw.gui
 
-import java.awt.{ List=>_, Canvas=>_, _ }
-import javax.swing._
+import java.awt.{ List as _, Canvas as _, * }
+import javax.swing.*
 
-import scutil.gui.implicits._
+import scutil.gui.implicits.*
 
-import screact._
-import sc2d._
+import screact.*
+import sc2d.*
 
-import jackdaw.gui.util._
+import jackdaw.gui.util.*
 
 final class ButtonUI(size:Dimension, style:Signal[ButtonStyle], enabled:Signal[Boolean]) extends UI with Observing {
 	//------------------------------------------------------------------------------
@@ -17,6 +17,7 @@ final class ButtonUI(size:Dimension, style:Signal[ButtonStyle], enabled:Signal[B
 	private val canvas	= new CanvasWrapper(None, Hints.highQuality)
 
 	val component:JComponent	= canvas.component
+	component.putClientProperty("STRONG_REF", this)
 	component	setAllSizes	size
 
 	//------------------------------------------------------------------------------

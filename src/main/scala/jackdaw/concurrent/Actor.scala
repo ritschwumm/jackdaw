@@ -3,9 +3,9 @@ package jackdaw.concurrent
 import java.util.concurrent.LinkedTransferQueue
 import java.util.concurrent.TimeUnit
 
-import scutil.lang._
-import scutil.time._
-import scutil.concurrent._
+import scutil.lang.*
+import scutil.time.*
+import scutil.concurrent.*
 
 object Actor {
 	def create[T](name:String, priority:Int, parking:MilliDuration, body:T=>Boolean):IoResource[Target[T]]	=

@@ -2,15 +2,15 @@ package jackdaw.player
 
 import java.io.File
 
-import scutil.core.implicits._
-import scutil.io.implicits._
-import scutil.lang._
-import scutil.time._
-import scutil.log._
+import scutil.core.implicits.*
+import scutil.io.implicits.*
+import scutil.lang.*
+import scutil.time.*
+import scutil.log.*
 
-import scaudio.sample._
+import scaudio.sample.*
 
-import jackdaw.concurrent._
+import jackdaw.concurrent.*
 
 object Loader extends Logging {
 	private val actorPriority:Int			= (Thread.NORM_PRIORITY+Thread.MAX_PRIORITY)/2

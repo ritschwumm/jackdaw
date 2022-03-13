@@ -1,6 +1,6 @@
 package jackdaw.gui
 
-import javax.swing._
+import javax.swing.*
 
 object HBoxUI {
 	def apply(subs:BoxItem*):HBoxUI	=
@@ -20,4 +20,5 @@ final class HBoxUI(subs:Seq[BoxItem]) extends UI {
 	items foreach panel.add
 
 	val component:JComponent	= panel
+	component.putClientProperty("STRONG_REF", this)
 }

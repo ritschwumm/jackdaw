@@ -1,6 +1,6 @@
 package jackdaw.range
 
-import scaudio.math._
+import scaudio.math.*
 
 object PitchMath {
 	def cents(it:Double):Double	= octave2frequency(it/1200.0)

@@ -1,13 +1,13 @@
 package jackdaw.persistence
 
-import java.io._
+import java.io.*
 
-import scutil.core.implicits._
-import scutil.jdk.implicits._
-import scutil.log._
+import scutil.core.implicits.*
+import scutil.jdk.implicits.*
+import scutil.log.*
 
-import scjson.converter._
-import scjson.io._
+import scjson.converter.*
+import scjson.io.*
 
 final class JsonPersister[T:JsonReader:JsonWriter] extends Persister[T] with Logging {
 	def load(file:File):Option[T]	= {

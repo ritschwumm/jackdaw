@@ -1,8 +1,8 @@
 package jackdaw.gui
 
-import screact._
+import screact.*
 
-import jackdaw.gui.util._
+import jackdaw.gui.util.*
 
 /** controls the playback pitch of a deck */
 final class MatchUI(synced:Signal[Option[Boolean]], pitched:Signal[Boolean]) extends UI {
@@ -35,7 +35,7 @@ final class MatchUI(synced:Signal[Option[Boolean]], pitched:Signal[Boolean]) ext
 	//------------------------------------------------------------------------------
 	//## output
 
-	import ActionUtil._
+	import ActionUtil.*
 
 	val syncToggle:Events[Unit]	= syncUI.actions
 	val reset:Events[Unit]		= resetButton.actions

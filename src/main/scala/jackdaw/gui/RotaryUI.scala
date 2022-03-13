@@ -1,21 +1,21 @@
 package jackdaw.gui
 
-import java.awt.{ List=>_, Canvas=>_, _ }
-import java.awt.event._
-import java.awt.geom._
-import javax.swing._
+import java.awt.{ List as _, Canvas as _, * }
+import java.awt.event.*
+import java.awt.geom.*
+import javax.swing.*
 
-import scala.math._
+import scala.math.*
 
-import scutil.core.implicits._
-import scutil.math.functions._
-import scutil.gui.geom._
-import scutil.gui.geom.extensions._
+import scutil.core.implicits.*
+import scutil.math.functions.*
+import scutil.gui.geom.*
+import scutil.gui.geom.extensions.*
 
-import screact._
-import sc2d._
+import screact.*
+import sc2d.*
 
-import jackdaw.gui.util._
+import jackdaw.gui.util.*
 
 /** a potentiometer like rotary knob */
 final class RotaryUI(value:Signal[Double], minimum:Double, maximum:Double, neutral:Double) extends UI with Observing {
@@ -25,6 +25,7 @@ final class RotaryUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 	private val canvas	= new CanvasWrapper(None, Hints.highQuality)
 
 	val component:JComponent	= canvas.component
+	component.putClientProperty("STRONG_REF", this)
 
 	//------------------------------------------------------------------------------
 	//## input
@@ -54,9 +55,11 @@ final class RotaryUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 			val valueCur	= value.current
 
 			val track	= stripeShape(boundsCur, angleSpan)
-			val active	= stripeShape(
+			val active	=
+				stripeShape(
 					boundsCur,
-					valueToAngle(neutral) spanTo valueToAngle(valueCur))
+					valueToAngle(neutral) spanTo valueToAngle(valueCur)
+				)
 
 			val knob	= inValueSpan(valueCur) option {
 				/*
@@ -73,10 +76,10 @@ final class RotaryUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 						(boundsCur.y.center	spanCenterBy	Style.rotary.knob.size)
 				val rotation	= valueToAngle(valueCur)
 				val xform		=
-						SgAffineTransform
-						.translate	( boundsCur.center)
-						.rotate		(toRadians(-rotation))
-						.translate	(-boundsCur.center)
+					SgAffineTransform
+					.translate	( boundsCur.center)
+					.rotate		(toRadians(-rotation))
+					.translate	(-boundsCur.center)
 				xform transformAwtShape knobRect.toAwtRectangle2D
 			}
 

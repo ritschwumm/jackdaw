@@ -1,6 +1,6 @@
 package jackdaw.remote
 
-import jackdaw.player._
+import jackdaw.player.*
 
 object ToSkeleton {
 	case object Kill							extends ToSkeleton

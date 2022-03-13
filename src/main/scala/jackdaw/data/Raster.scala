@@ -1,6 +1,6 @@
 package jackdaw.data
 
-import java.lang.{ Math=>JMath }
+import java.lang.{ Math as JMath }
 
 final case class Raster(size:Double, offset:Double) {
 	def floor(it:Double):Double	= denormalize(JMath.floor(normalize(it)))

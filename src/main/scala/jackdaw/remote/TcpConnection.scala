@@ -1,6 +1,6 @@
 package jackdaw.remote
 
-import java.net._
+import java.net.*
 
 final class TcpConnection[I,O](
 	socket:Socket,

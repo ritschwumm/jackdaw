@@ -1,13 +1,13 @@
 package jackdaw.key
 
-import scutil.lang._
+import scutil.lang.*
 
 object MusicKey {
 	object P {
-		import jackdaw.key.{ MusicKey => Self }
+		import jackdaw.key.{ MusicKey as Self }
 
-		val Silence		= Prism.Gen[Self,Self.Silence.type]
-		val Chord		= Prism.Gen[Self,Self.Chord]
+		val Silence		= Prism.subType[Self,Self.Silence.type]
+		val Chord		= Prism.subType[Self,Self.Chord]
 	}
 
 	case object Silence							extends MusicKey

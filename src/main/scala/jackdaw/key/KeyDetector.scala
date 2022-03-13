@@ -1,9 +1,9 @@
 package jackdaw.key
 
 import java.util.Optional
-import jkeyfinder._
+import jkeyfinder.*
 
-import scaudio.sample._
+import scaudio.sample.*
 
 object KeyDetector {
 	//private val scaling	= 8

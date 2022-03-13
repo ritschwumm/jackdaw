@@ -1,10 +1,10 @@
 package jackdaw.persistence
 
-import java.io._
+import java.io.*
 
-import scutil.core.implicits._
-import scutil.jdk.implicits._
-import scutil.log._
+import scutil.core.implicits.*
+import scutil.jdk.implicits.*
+import scutil.log.*
 
 import jackdaw.curve.BandCurve
 

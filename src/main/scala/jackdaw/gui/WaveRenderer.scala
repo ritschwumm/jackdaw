@@ -1,13 +1,13 @@
 package jackdaw.gui
 
-import java.awt.{ List=>_, _ }
-import java.awt.image._
+import java.awt.{ List as _, * }
+import java.awt.image.*
 
-import scala.math._
+import scala.math.*
 
-import scutil.core.implicits._
-import scutil.geom._
-import scutil.math.functions._
+import scutil.core.implicits.*
+import scutil.geom.*
+import scutil.math.functions.*
 
 import jackdaw.curve.BandCurve
 import jackdaw.util.LRU

@@ -4,10 +4,10 @@ import java.io.File
 
 import scala.util.matching.Regex
 
-import scutil.core.implicits._
-import scutil.lang._
-import scutil.platform._
-import scutil.log._
+import scutil.core.implicits.*
+import scutil.lang.*
+import scutil.platform.*
+import scutil.log.*
 
 import jackdaw.util.Checked
 
@@ -65,7 +65,7 @@ object MediaUtil extends Logging {
 				Checked fail1 "external media converters are only supported on OSX and Linux"
 		}
 
-	def runCommand(command:String*)(implicit sl:SourceLocation):Checked[ExternalResult]	= {
+	def runCommand(command:String*)(using sl:SourceLocation):Checked[ExternalResult]	= {
 		DEBUG log command.toVector.map(LogValue.string)
 		External exec command.toVector result false eitherBy { _.rc == 0 } leftMap { res =>
 			val first	= "command failed: " + (command mkString " ")
@@ -75,7 +75,7 @@ object MediaUtil extends Logging {
 
 	//------------------------------------------------------------------------------
 
-	def checkedExceptions[T](block: =>Checked[T])(implicit sl:SourceLocation):Checked[T]	=
+	def checkedExceptions[T](block: =>Checked[T])(using sl:SourceLocation):Checked[T]	=
 		(Catch.exception in block)
 		.leftMap { e =>
 			ERROR(e)

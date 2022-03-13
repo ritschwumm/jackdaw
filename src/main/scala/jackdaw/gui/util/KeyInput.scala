@@ -2,7 +2,7 @@ package jackdaw.gui.util
 
 import java.awt.event.KeyEvent
 
-import screact._
+import screact.*
 
 final class KeyInput(keys:Signal[Set[Key]], target:Signal[Boolean]) {
 	private val fineModifier:Signal[Boolean]	=
@@ -13,7 +13,7 @@ final class KeyInput(keys:Signal[Set[Key]], target:Signal[Boolean]) {
 
 	//------------------------------------------------------------------------------
 
-	implicit class RichKey(peer:Key) {
+	extension(peer:Key) {
 		def asModifier:Signal[Boolean]	=
 			(keyDown(peer) map2 target) { _ && _ }
 
@@ -24,7 +24,7 @@ final class KeyInput(keys:Signal[Set[Key]], target:Signal[Boolean]) {
 	//------------------------------------------------------------------------------
 
 	// NOTE this is special because of the sequenceOptionSecond (???)
-	implicit class RichDirectionModifier1(peer:Signal[Option[Boolean]]) {
+	extension(peer:Signal[Option[Boolean]]) {
 		def withFine:Signal[Option[(Boolean,Boolean)]]	= {
 			peer product fineModifier map { case (opt,full) =>
 				opt.map(_ -> full)
@@ -32,12 +32,12 @@ final class KeyInput(keys:Signal[Set[Key]], target:Signal[Boolean]) {
 		}
 	}
 
-	implicit class RichAction1(peer:Events[Unit]) {
-		def withFine:Events[Boolean]	=
+	extension(peer:Events[Unit]) {
+		def unitWithFine:Events[Boolean]	=
 			peer snapshotOnly fineModifier
 	}
 
-	implicit class RichAction2[T](peer:Events[T]) {
+	extension[T](peer:Events[T]) {
 		def withFine:Events[(T,Boolean)]	=
 			peer snapshot fineModifier
 	}

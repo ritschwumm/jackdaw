@@ -2,18 +2,18 @@ package jackdaw.gui.util
 
 import javax.swing.JComponent
 
-import scutil.core.implicits._
-import scutil.lang._
-import scutil.geom._
-import scutil.gui.implicits._
-import scutil.gui.CasterInstances._
+import scutil.core.implicits.*
+import scutil.lang.*
+import scutil.geom.*
+import scutil.gui.implicits.*
+import scutil.gui.CasterInstances.*
 import scutil.gui.ComponentUnderMouse
-import scutil.gui.geom._
-import scutil.gui.geom.extensions._
-import scutil.log._
+import scutil.gui.geom.*
+import scutil.gui.geom.extensions.*
+import scutil.log.*
 
-import screact._
-import screact.swing._
+import screact.*
+import screact.swing.*
 
 /** swing component utility functions */
 object ComponentUtil extends Logging {

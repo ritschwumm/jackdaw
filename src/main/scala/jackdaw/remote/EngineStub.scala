@@ -1,16 +1,16 @@
 package jackdaw.remote
 
-import java.io._
+import java.io.*
 
-import scutil.jdk.implicits._
-import scutil.core.implicits._
-import scutil.lang._
-import scutil.platform._
-import scutil.log._
-import scutil.concurrent._
+import scutil.jdk.implicits.*
+import scutil.core.implicits.*
+import scutil.lang.*
+import scutil.platform.*
+import scutil.log.*
+import scutil.concurrent.*
 
 import jackdaw.Config
-import jackdaw.player._
+import jackdaw.player.*
 import jackdaw.concurrent.Target
 
 object EngineStub extends Logging {

@@ -1,12 +1,12 @@
 package jackdaw.gui.util
 
-import java.awt.{ List=>_, _ }
-import java.awt.image._
+import java.awt.{ List as _, * }
+import java.awt.image.*
 
-import scutil.core.implicits._
-import scutil.lang._
-import scutil.geom._
-import scutil.gui.implicits._
+import scutil.core.implicits.*
+import scutil.lang.*
+import scutil.geom.*
+import scutil.gui.implicits.given
 
 object ImageUtil {
 	def forComponent(component:Component):ImageUtil	=

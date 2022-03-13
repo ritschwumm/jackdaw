@@ -1,10 +1,10 @@
 package jackdaw
 
-import scutil.core.implicits._
-import scutil.lang._
+import scutil.core.implicits.*
+import scutil.lang.*
 import scutil.gui.SwingUtil.edt
 import scutil.platform.ExceptionUtil
-import scutil.log._
+import scutil.log.*
 
 object Boot extends Logging {
 	def main(args:Array[String]):Unit	= {

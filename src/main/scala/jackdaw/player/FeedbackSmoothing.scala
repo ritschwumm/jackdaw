@@ -1,8 +1,8 @@
 package jackdaw.player
 
-import scala.math._
+import scala.math.*
 
-import jackdaw.concurrent._
+import jackdaw.concurrent.*
 
 final class FeedbackSmoothing[T](initialFeedbackRate:Double, overshotTarget:Int, adaptFactor:Double) {
 	private val queue	= new Transfer[T]

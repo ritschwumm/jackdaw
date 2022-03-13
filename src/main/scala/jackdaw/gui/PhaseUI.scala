@@ -1,18 +1,18 @@
 package jackdaw.gui
 
-import javax.swing._
+import javax.swing.*
 
-import scala.math._
+import scala.math.*
 
-import scutil.core.implicits._
-import scutil.gui.geom._
-import scutil.gui.geom.extensions._
+import scutil.core.implicits.*
+import scutil.gui.geom.*
+import scutil.gui.geom.extensions.*
 
-import screact._
-import sc2d._
+import screact.*
+import sc2d.*
 
-import jackdaw.data._
-import jackdaw.gui.util._
+import jackdaw.data.*
+import jackdaw.gui.util.*
 
 object PhaseUI {
 	private val subDivide	= Schema.default.beatsPerMeasure
@@ -29,6 +29,7 @@ final class PhaseUI(value:Signal[Option[Double]], rhythm:Signal[Option[Rhythm]])
 	private val canvas	= new CanvasWrapper(Some(Style.phase.background.color), Hints.lowQuality)
 
 	val component:JComponent	= canvas.component
+	component.putClientProperty("STRONG_REF", this)
 	component setBorder	Style.phase.border
 
 	//------------------------------------------------------------------------------

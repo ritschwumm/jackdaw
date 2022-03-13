@@ -2,29 +2,29 @@ package jackdaw.model
 
 import java.io.File
 
-import scutil.core.implicits._
-import scutil.jdk.implicits._
-import scutil.lang._
-import scutil.log._
+import scutil.core.implicits.*
+import scutil.jdk.implicits.*
+import scutil.lang.*
+import scutil.log.*
 
 import scaudio.sample.Sample
-import scaudio.math._
+import scaudio.math.*
 
-import screact._
-import screact.extra._
+import screact.*
+import screact.extra.*
 
 import jackdaw.Config
 import jackdaw.range.PitchMath
-import jackdaw.data._
+import jackdaw.data.*
 import jackdaw.media.Metadata
 import jackdaw.curve.BandCurve
-import jackdaw.key._
-import jackdaw.player._
+import jackdaw.key.*
+import jackdaw.player.*
 
 import jackdaw.player.PlayerAction
 
 object Deck {
-	import Config.{ curveRaster => cr }
+	import Config.{ curveRaster as cr }
 	import PitchMath.cents
 
 	private val pitchFactor:Boolean=>Double				= _.cata(cents(5),		cents(2))
@@ -145,7 +145,7 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 	private val pitch:Signal[Double]	= playerFeedback map { _.pitch	}
 
 	/** pitch in octaves */
-	val pitchOctave:Signal[Double]		= pitch map frequency2octave
+	val pitchOctave:Signal[Double]		= pitch.map(frequency2octave(_))
 	/** whether the player's pitch is non-unit */
 	val pitched:Signal[Boolean]			= pitch map { _ != unitFrequency }
 

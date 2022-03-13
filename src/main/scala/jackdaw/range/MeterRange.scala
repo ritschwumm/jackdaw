@@ -1,6 +1,6 @@
 package jackdaw.range
 
-import scaudio.math._
+import scaudio.math.*
 
 trait MeterRange {
 	val over:Double

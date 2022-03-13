@@ -1,8 +1,8 @@
 package jackdaw.gui
 
-import scutil.gui.geom._
+import scutil.gui.geom.*
 
-import jackdaw.gui.util._
+import jackdaw.gui.util.*
 
 object PhaseRange {
 	val span	= SgSpan.startEnd(-0.5, +0.5)

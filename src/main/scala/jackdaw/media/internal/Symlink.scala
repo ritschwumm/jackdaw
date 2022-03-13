@@ -4,8 +4,8 @@ import java.io.File
 import java.nio.file.Path
 import java.nio.file.Files
 
-import scutil.core.implicits._
-import scutil.log._
+import scutil.core.implicits.*
+import scutil.log.*
 
 import jackdaw.util.Checked
 

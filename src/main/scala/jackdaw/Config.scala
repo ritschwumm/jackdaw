@@ -1,11 +1,11 @@
 package jackdaw
 
-import scutil.core.implicits._
+import scutil.core.implicits.*
 
-import scaudio.output._
+import scaudio.output.*
 import scaudio.dsp.BiQuadCoeffs
 
-import jackdaw.range.PitchMath._
+import jackdaw.range.PitchMath.*
 import jackdaw.util.AppDirs
 
 object Config {

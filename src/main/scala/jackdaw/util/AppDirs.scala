@@ -1,8 +1,8 @@
 package jackdaw.util
 
 import java.io.File
-import scutil.jdk.implicits._
-import scutil.platform._
+import scutil.jdk.implicits.*
+import scutil.platform.*
 
 object AppDirs {
 	def forApp(name:String):File	=

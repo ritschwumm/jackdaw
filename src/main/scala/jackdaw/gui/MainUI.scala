@@ -1,13 +1,13 @@
 package jackdaw.gui
 
-import javax.swing._
+import javax.swing.*
 
-import scutil.gui.GridBagDSL._
+import scutil.gui.GridBagDSL.*
 
-import screact._
+import screact.*
 
-import jackdaw.model._
-import jackdaw.gui.util._
+import jackdaw.model.*
+import jackdaw.gui.util.*
 
 import GridBagItem.UI_is_GridBagItem
 
@@ -90,6 +90,7 @@ final class MainUI(model:Model, keyboard:Signal[Set[Key]], windowActive:Signal[B
 			masterPanel	.pos(1,0) .size(0,1) .weight(0,1)	.fill(BOTH) .insetsTLBR(0,14,0,12)
 		)
 	val component:JComponent	= panel.component
+	component.putClientProperty("STRONG_REF", this)
 
 	//------------------------------------------------------------------------------
 	//## wiring

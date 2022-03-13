@@ -1,14 +1,14 @@
 package jackdaw.gui
 
-import javax.swing._
+import javax.swing.*
 
-import scutil.core.implicits._
-import scutil.lang._
+import scutil.core.implicits.*
+import scutil.lang.*
 
-import screact._
+import screact.*
 
-import jackdaw.data._
-import jackdaw.gui.util._
+import jackdaw.data.*
+import jackdaw.gui.util.*
 
 object TransportUI {
 	private val maxCuePoints	= ButtonStyleFactory.digitCount
@@ -23,18 +23,18 @@ final class TransportUI(cueable:Signal[Boolean], playable:Signal[Boolean], playi
 		(cuePointsCount map { count =>
 			decouple {
 				val (uis, actions)	=
-						(0 until count map { index =>
-							val image	= ButtonStyleFactory CUE index
-							val button	=
-									new ButtonUI(
-										ButtonStyleFactory.size,
-										static(image),
-										cueable
-									)
-							val actions	= button.actions tag index
-							(button, actions)
-						})
-						.unzip
+					(0 until count map { index =>
+						val image	= ButtonStyleFactory CUE index
+						val button	=
+								new ButtonUI(
+									ButtonStyleFactory.size,
+									static(image),
+									cueable
+								)
+						val actions	= button.actions tag index
+						(button, actions)
+					})
+					.unzip
 				(uis, actions)
 			}
 		})
@@ -43,7 +43,7 @@ final class TransportUI(cueable:Signal[Boolean], playable:Signal[Boolean], playi
 	typed[Signal[Seq[Events[Int]]]](cuePointActionEvents)
 
 	private val cuePointActions:Events[Int]	=
-		(cuePointActionEvents map Events.multiOrElse).flattenEvents
+		cuePointActionEvents.map(Events.multiOrElse).flattenEvents
 
 	private val cuePointsPanel:UI	=
 		new SwitchUI(
@@ -83,17 +83,17 @@ final class TransportUI(cueable:Signal[Boolean], playable:Signal[Boolean], playi
 		(
 			loopChoices map { case (choice, active) =>
 				val style	=
-						active map {
-							_.cata(ButtonStyleFactory.LOOP_ON _, ButtonStyleFactory.LOOP_OFF _) apply choice.measures
-						}
+					active map {
+						_.cata(ButtonStyleFactory.LOOP_ON _, ButtonStyleFactory.LOOP_OFF _) apply choice.measures
+					}
 				val button	=
-						new ButtonUI(
-							size	= ButtonStyleFactory.size,
-							style	= style,
-							enabled	= canLoop
-						)
+					new ButtonUI(
+						size	= ButtonStyleFactory.size,
+						style	= style,
+						enabled	= canLoop
+					)
 				val action	=
-						button.actions tag Some(choice)
+					button.actions tag Some(choice)
 				(button, action)
 			}
 		)
@@ -152,12 +152,14 @@ final class TransportUI(cueable:Signal[Boolean], playable:Signal[Boolean], playi
 			BoxItem.Strut(2),
 			addCueButton
 		)
+
 	val component:JComponent	= panel.component
+	component.putClientProperty("STRONG_REF", this)
 
 	//------------------------------------------------------------------------------
 	//## output
 
-	import ActionUtil._
+	import ActionUtil.*
 
 	val playToggle:Events[Unit]			= playToggleButton.actions
 	val setLoop:Events[Option[LoopDef]]	= loopActions

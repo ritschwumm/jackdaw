@@ -1,12 +1,12 @@
 package jackdaw.model
 
-import scutil.core.implicits._
+import scutil.core.implicits.*
 
-import screact._
+import screact.*
 
-import scaudio.math._
+import scaudio.math.*
 
-import jackdaw.range._
+import jackdaw.range.*
 
 object Strip {
 	def forMaster	= new Strip(VolumeRange.alot,	VolumeRange.alot,	MasterRange)

@@ -1,7 +1,7 @@
 package jackdaw.gui
 
-import java.awt.{ List=>_, _ }
-import javax.swing._
+import java.awt.{ List as _, * }
+import javax.swing.*
 
 object GridBagUI {
 	def apply(subs:GridBagItem*):GridBagUI	=
@@ -17,4 +17,5 @@ final class GridBagUI(subs:Seq[GridBagItem]) extends UI {
 	}
 
 	val component:JComponent	= panel
+	component.putClientProperty("STRONG_REF", this)
 }

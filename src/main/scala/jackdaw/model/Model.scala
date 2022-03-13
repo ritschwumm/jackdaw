@@ -1,13 +1,13 @@
 package jackdaw.model
 
-import scutil.lang._
-import scutil.time._
+import scutil.lang.*
+import scutil.time.*
 
-import screact.{ Engine => _, _ }
-import screact.swing._
+import screact.{ Engine as _, * }
+import screact.swing.*
 
 import jackdaw.Config
-import jackdaw.player._
+import jackdaw.player.*
 import jackdaw.remote.EngineStub
 
 object Model {

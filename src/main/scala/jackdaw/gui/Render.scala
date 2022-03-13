@@ -2,15 +2,15 @@ package jackdaw.gui
 
 import java.util.Locale
 
-import scala.math._
+import scala.math.*
 
-import scutil.core.implicits._
-import scutil.math.functions._
+import scutil.core.implicits.*
+import scutil.math.functions.*
 
-import scaudio.math._
+import scaudio.math.*
 
-import jackdaw.data._
-import jackdaw.key._
+import jackdaw.data.*
+import jackdaw.key.*
 
 object Render {
 	def rhythmIndexOpt(it:Option[RhythmIndex]):String	=

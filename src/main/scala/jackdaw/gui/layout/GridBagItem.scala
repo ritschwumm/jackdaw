@@ -1,13 +1,15 @@
 package jackdaw.gui
 
+import scala.language.implicitConversions
+
 import java.awt.GridBagConstraints
 import java.awt.Insets
 
-import scutil.gui.GridBagDSL._
+import scutil.gui.GridBagDSL.*
 
 object GridBagItem {
 	// TODO dotty this is wonky
-	implicit def UI_is_GridBagItem[T](ui:T)(implicit ev:T=>UI):GridBagItem	= GridBagItem(ev(ui), GBC)
+	implicit def UI_is_GridBagItem[T](ui:T)(using ev:T=>UI):GridBagItem	= GridBagItem(ev(ui), GBC)
 }
 
 final case class GridBagItem(ui:UI, gbc:GridBagConstraints) {

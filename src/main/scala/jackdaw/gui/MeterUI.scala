@@ -1,22 +1,22 @@
 package jackdaw.gui
 
-import java.awt.{ List=>_, Canvas=>_, _ }
-import javax.swing._
-import java.awt.image._
+import java.awt.{ List as _, Canvas as _, * }
+import javax.swing.*
+import java.awt.image.*
 
-import scala.math._
+import scala.math.*
 
-import scutil.core.implicits._
-import scutil.geom._
-import scutil.gui.geom._
+import scutil.core.implicits.*
+import scutil.geom.*
+import scutil.gui.geom.*
 
-import screact._
-import sc2d._
+import screact.*
+import sc2d.*
 
-import scaudio.math._
+import scaudio.math.*
 
 import jackdaw.range.MeterRange
-import jackdaw.gui.util._
+import jackdaw.gui.util.*
 
 /** value is linear [0..1] and displayed in fader values */
 final class MeterUI(value:Signal[Float], meterRange:MeterRange, vertical:Boolean) extends UI with Observing {
@@ -53,6 +53,7 @@ final class MeterUI(value:Signal[Float], meterRange:MeterRange, vertical:Boolean
 	private val canvas	= new CanvasWrapper(None, Hints.lowQuality)
 
 	val component:JComponent	= canvas.component
+	component.putClientProperty("STRONG_REF", this)
 	component setBorder	Style.meter.border
 
 	//------------------------------------------------------------------------------

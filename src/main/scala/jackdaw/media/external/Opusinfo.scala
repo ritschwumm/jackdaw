@@ -2,7 +2,7 @@ package jackdaw.media
 
 import java.io.File
 
-import scutil.jdk.implicits._
+import scutil.jdk.implicits.*
 
 import jackdaw.util.Checked
 

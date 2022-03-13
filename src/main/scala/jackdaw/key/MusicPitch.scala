@@ -1,6 +1,6 @@
 package jackdaw.key
 
-import scutil.math.functions._
+import scutil.math.functions.*
 
 /** index in 0..11, starting at A */
 final case class MusicPitch(index:Int) {

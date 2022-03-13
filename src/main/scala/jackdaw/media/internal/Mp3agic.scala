@@ -2,11 +2,11 @@ package jackdaw.media
 
 import java.io.File
 
-import com.mpatric.mp3agic._
+import com.mpatric.mp3agic.*
 
-import scutil.core.implicits._
-import scutil.lang._
-import scutil.log._
+import scutil.core.implicits.*
+import scutil.lang.*
+import scutil.log.*
 
 import jackdaw.util.Checked
 

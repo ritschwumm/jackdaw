@@ -1,17 +1,17 @@
 package jackdaw.gui
 
-import java.awt.{ List=>_, _ }
-import java.awt.event._
-import javax.swing._
+import java.awt.{ List as _, * }
+import java.awt.event.*
+import javax.swing.*
 
-import scutil.core.implicits._
-import scutil.gui.implicits._
-import scutil.gui.GridBagDSL._
+import scutil.core.implicits.*
+import scutil.gui.implicits.*
+import scutil.gui.GridBagDSL.*
 
-import screact._
+import screact.*
 
-import jackdaw.model._
-import jackdaw.gui.util._
+import jackdaw.model.*
+import jackdaw.gui.util.*
 
 import GridBagItem.UI_is_GridBagItem
 
@@ -47,14 +47,16 @@ final class ToneUI(tone:Tone, keyInput:KeyInput) extends UI with Observing {
 			midKnob		.pos(0,3) .size(1,1) .weight(1,1) .fill(NONE) .insetsTLBR(2,0,2,0),
 			lowKnob		.pos(0,4) .size(1,1) .weight(1,1) .fill(NONE) .insetsTLBR(2,0,0,0)
 		)
+
 	val component:JComponent	= panel.component
+	component.putClientProperty("STRONG_REF", this)
 
 	//------------------------------------------------------------------------------
 	//## wiring
 
-	import KeyEvent._
-	import keyInput._
-	import ActionUtil._
+	import KeyEvent.*
+	import keyInput.*
+	import ActionUtil.*
 
 	// actions
 

@@ -1,19 +1,19 @@
 package jackdaw
 
-import java.awt._
-import javax.swing._
+import java.awt.*
+import javax.swing.*
 
-import scutil.jdk.implicits._
-import scutil.lang._
-import scutil.gui.instances._
-import scutil.gui.CasterInstances._
+import scutil.jdk.implicits.*
+import scutil.lang.*
+import scutil.gui.instances.given
+import scutil.gui.CasterInstances.*
 
-import screact._
-import screact.swing._
+import screact.*
+import screact.swing.*
 
-import jackdaw.library._
-import jackdaw.model._
-import jackdaw.gui._
+import jackdaw.library.*
+import jackdaw.model.*
+import jackdaw.gui.*
 import jackdaw.gui.util.Keyboard
 import jackdaw.remote.EngineStub
 

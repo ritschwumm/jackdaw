@@ -1,7 +1,7 @@
 package jackdaw.util
 
-import scutil.core.implicits._
-import scutil.lang._
+import scutil.core.implicits.*
+import scutil.lang.*
 
 object Checked {
 	def trueWin1(cond:Boolean, problem:String):Checked[Unit]	=

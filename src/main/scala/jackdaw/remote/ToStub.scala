@@ -1,6 +1,6 @@
 package jackdaw.remote
 
-import jackdaw.player._
+import jackdaw.player.*
 
 object ToStub {
 	final case class Started(outputRate:Int, phoneEnabled:Boolean)	extends ToStub

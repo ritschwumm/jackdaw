@@ -1,10 +1,10 @@
 package jackdaw.remote
 
-import java.io._
+import java.io.*
 
-import scutil.lang.implicits._
-import jackdaw.player._
-import jackdaw.data._
+import scutil.lang.implicits.*
+import jackdaw.player.*
+import jackdaw.data.*
 
 final class Input(val st:InputStream) {
 	def readToStub():ToStub	=

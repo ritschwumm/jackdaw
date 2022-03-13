@@ -1,16 +1,16 @@
 package jackdaw.gui
 
-// import java.awt.{ List=>AwtList, _ }
-import java.awt.event._
-import javax.swing._
+// import java.awt.{ List as AwtList, * }
+import java.awt.event.*
+import javax.swing.*
 
-import scutil.gui.implicits._
-import scutil.gui.GridBagDSL._
+import scutil.gui.implicits.*
+import scutil.gui.GridBagDSL.*
 
-import screact._
+import screact.*
 
-import jackdaw.model._
-import jackdaw.gui.util._
+import jackdaw.model.*
+import jackdaw.gui.util.*
 
 import GridBagItem.UI_is_GridBagItem
 
@@ -35,14 +35,16 @@ final class StripUI(strip:Strip, peak:Signal[Float], phoneEnabled:Boolean, keyIn
 			meterUI		.pos(1,1) .size(1,1) .weight(1,1) .fill(VERTICAL)	.anchor(WEST)	.insetsTLBR(0+z,2,2+z,0),
 			phoneUI		.pos(0,2) .size(2,1) .weight(1,0) .fill(NONE)		.anchor(CENTER)	.insetsTLBR(2,0,0,0)
 		)
+
 	val component:JComponent	= panel.component
+	component.putClientProperty("STRONG_REF", this)
 
 	//------------------------------------------------------------------------------
 	//## wiring
 
-	import KeyEvent._
-	import keyInput._
-	import ActionUtil._
+	import KeyEvent.*
+	import keyInput.*
+	import ActionUtil.*
 
 	// actions
 

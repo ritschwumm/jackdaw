@@ -1,22 +1,22 @@
 package jackdaw.gui
 
 import java.io.File
-import java.awt.event._
-import javax.swing._
+import java.awt.event.*
+import javax.swing.*
 
-import scutil.core.implicits._
-import scutil.lang._
-import scutil.gui.implicits._
+import scutil.core.implicits.*
+import scutil.lang.*
+import scutil.gui.implicits.*
 import scutil.gui.DndFileImport
 import scutil.gui.DndFileExport
-import scutil.gui.GridBagDSL._
-import scutil.log._
+import scutil.gui.GridBagDSL.*
+import scutil.log.*
 
-import screact._
+import screact.*
 
-import jackdaw.data._
-import jackdaw.model._
-import jackdaw.gui.util._
+import jackdaw.data.*
+import jackdaw.model.*
+import jackdaw.gui.util.*
 
 import GridBagItem.UI_is_GridBagItem
 
@@ -99,6 +99,7 @@ final class DeckUI(deck:Deck, keyboard:Signal[Set[Key]], keyTarget:Signal[Boolea
 			matchUI		.pos(2,0) .size(1,4) .weight(0,1)	.fill (NONE) .anchor (CENTER)	.insetsTLBR(2,2,6,0)
 		)
 	val component:JComponent	= panel.component
+	component.putClientProperty("STRONG_REF", this)
 
 	//------------------------------------------------------------------------------
 	//## wiring
@@ -109,12 +110,12 @@ final class DeckUI(deck:Deck, keyboard:Signal[Set[Key]], keyTarget:Signal[Boolea
 	val hovered			= ComponentUtil underMouseSignal component
 	val grabsKeyboard	= metaUI.grabsKeyboard
 
-	import KeyEvent._
+	import KeyEvent.*
 
 	private val keyInput	= new KeyInput(keyboard, keyTarget)
-	import keyInput._
+	import keyInput.*
 
-	import ActionUtil._
+	import ActionUtil.*
 
 	// modifiers
 
@@ -253,7 +254,7 @@ final class DeckUI(deck:Deck, keyboard:Signal[Set[Key]], keyTarget:Signal[Boolea
 	private val addCue:Events[Unit]	=
 		addCueKey	orElse
 		transportUI.addCue
-	addCue.withFine	observe deck.addCue
+	addCue.unitWithFine	observe deck.addCue
 
 	private val removeCueKey:Events[Unit]	=
 		Key(VK_BACK_SPACE,	KEY_LOCATION_STANDARD).asAction
@@ -299,13 +300,13 @@ final class DeckUI(deck:Deck, keyboard:Signal[Set[Key]], keyTarget:Signal[Boolea
 	DndFileImport.install(
 		component,
 		_	=> Some {
-		(files:Validated[Nes[Exception],Nes[File]]) => {
-			files
-			.invalidEffect	{ es => ERROR log es.toSeq.map(LogValue.throwable)	}
-			.toOption
-			.map			{ _.head }
-			.foreach		(deck.loadTrack)
-		}
+			(files:Validated[Nes[Exception],Nes[File]]) => {
+				files
+				.invalidEffect	{ es => ERROR log es.toSeq.map(LogValue.throwable)	}
+				.toOption
+				.map			{ _.head }
+				.foreach		(deck.loadTrack)
+			}
 		}
 	)
 

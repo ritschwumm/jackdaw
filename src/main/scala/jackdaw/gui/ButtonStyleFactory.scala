@@ -1,14 +1,14 @@
 package jackdaw.gui
 
-import java.awt.{ List=>_, Canvas=>_, _ }
+import java.awt.{ List as _, Canvas as _, * }
 
-import scutil.lang.implicits._
-import scutil.gui.geom._
-import scutil.gui.geom.extensions._
+import scutil.lang.implicits.*
+import scutil.gui.geom.*
+import scutil.gui.geom.extensions.*
 
-import sc2d._
+import sc2d.*
 
-import jackdaw.gui.shape._
+import jackdaw.gui.shape.*
 
 object ButtonStyleFactory {
 	private val maximumI	= 18

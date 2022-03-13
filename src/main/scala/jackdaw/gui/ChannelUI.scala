@@ -1,14 +1,14 @@
 package jackdaw.gui
 
-import javax.swing._
+import javax.swing.*
 
-import scutil.core.implicits._
-import scutil.gui.GridBagDSL._
+import scutil.core.implicits.*
+import scutil.gui.GridBagDSL.*
 
-import screact._
+import screact.*
 
-import jackdaw.model._
-import jackdaw.gui.util._
+import jackdaw.model.*
+import jackdaw.gui.util.*
 
 import GridBagItem.UI_is_GridBagItem
 
@@ -35,6 +35,7 @@ final class ChannelUI(strip:Strip, tone:Option[Tone], peak:Signal[Float], phoneE
 			delayedStripUI	.pos(0,1) .size(1,1) .weight(1,1) .fill(VERTICAL)	.anchor(EAST)	.insetsTLBR(6,0,0,0)
 		)
 	val component:JComponent	= panel.component
+	component.putClientProperty("STRONG_REF", this)
 
 	//------------------------------------------------------------------------------
 	//## wiring

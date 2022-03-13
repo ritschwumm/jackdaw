@@ -1,12 +1,12 @@
 package jackdaw.curve
 
-import scala.math._
+import scala.math.*
 
 object MeasureDetector {
 	/*
 	def main(args:Array[String]) {
 		import java.io.File
-		import scutil.Implicits._
+		import scutil.Implicits.*
 
 		if (args.length != 1) {
 			System.err println("usage: MeasureDetector file.wav")

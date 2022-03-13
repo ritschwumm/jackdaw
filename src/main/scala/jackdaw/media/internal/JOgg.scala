@@ -5,22 +5,22 @@ import java.io.RandomAccessFile
 
 import  scala.util.Using.Releasable
 
-import de.jarnbjo.ogg._
-import de.jarnbjo.vorbis._
+import de.jarnbjo.ogg.*
+import de.jarnbjo.vorbis.*
 
-import scutil.core.implicits._
-import scutil.jdk.implicits._
-import scutil.lang._
-import scutil.lang.Charsets._
+import scutil.core.implicits.*
+import scutil.jdk.implicits.*
+import scutil.lang.*
+import scutil.lang.Charsets.*
 import scutil.bit.ByteArrayUtil
-import scutil.log._
+import scutil.log.*
 
 import jackdaw.util.Checked
 
 object JOgg extends Inspector with Decoder with Logging {
 	def name	= "j-ogg"
 
-	private implicit val FileStreamReleasable:Releasable[FileStream]	= _.close()
+	private given Releasable[FileStream]	= _.close()
 
 	private type BufferWriter	= (Array[Byte], Int) => Unit
 

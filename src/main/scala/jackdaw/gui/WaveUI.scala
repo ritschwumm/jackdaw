@@ -1,24 +1,24 @@
 package jackdaw.gui
 
-import java.awt.{ List=>_, _ }
-import java.awt.geom._
+import java.awt.{ List as _, * }
+import java.awt.geom.*
 import java.awt.image.BufferedImage
 
-import scala.math._
+import scala.math.*
 
-import scutil.core.implicits._
-import scutil.lang._
-import scutil.geom._
-import scutil.gui.implicits._
-import scutil.gui.geom._
+import scutil.core.implicits.*
+import scutil.lang.*
+import scutil.geom.*
+import scutil.gui.implicits.given
+import scutil.gui.geom.*
 
-import screact._
-import sc2d._
+import screact.*
+import sc2d.*
 
 import jackdaw.Config
 import jackdaw.curve.BandCurve
-import jackdaw.data._
-import jackdaw.gui.util._
+import jackdaw.data.*
+import jackdaw.gui.util.*
 
 object WaveUI {
 	val	maxFigureWidth = 10
@@ -403,7 +403,7 @@ final class WaveUI(
 	private var bufferImage:BufferedImage	= null
 
 	private def renderToImage(coord:Coords):BufferedImage	= {
-		import coord._
+		import coord.*
 
 		if (bufferImage == null || bufferImage.getWidth != sizeX || bufferImage.getHeight != sizeY) {
 			bufferImage	= imageUtil.createImage (inner.size, false)
@@ -416,7 +416,7 @@ final class WaveUI(
 	}
 
 	private def renderToGraphics(coord:Coords, bg:Graphics2D):Unit	= {
-		import coord._
+		import coord.*
 
 		/*
 		// background

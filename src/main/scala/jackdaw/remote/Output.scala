@@ -1,9 +1,9 @@
 package jackdaw.remote
 
-import java.io._
+import java.io.*
 
-import jackdaw.player._
-import jackdaw.data._
+import jackdaw.player.*
+import jackdaw.data.*
 
 final class Output(val st:OutputStream) {
 	def writeToStub(it:ToStub):Unit	= {

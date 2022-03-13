@@ -2,14 +2,14 @@ package jackdaw.library
 
 import java.io.File
 
-import scutil.core.implicits._
-import scutil.jdk.implicits._
+import scutil.core.implicits.*
+import scutil.jdk.implicits.*
 import scutil.text.Human
-import scutil.log._
-import scutil.time._
+import scutil.log.*
+import scutil.time.*
 
 import jackdaw.Config
-import jackdaw.migration._
+import jackdaw.migration.*
 
 object Library extends Logging {
 	private val metaBase	= Config.dataBase / "meta"

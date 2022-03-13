@@ -4,23 +4,23 @@ import java.io.File
 
 import scala.ref.WeakReference
 
-import scutil.core.implicits._
-import scutil.jdk.implicits._
-import scutil.gui.SwingUtil._
-import scutil.log._
+import scutil.core.implicits.*
+import scutil.jdk.implicits.*
+import scutil.gui.SwingUtil.*
+import scutil.log.*
 
-import scaudio.sample._
+import scaudio.sample.*
 
-import screact._
+import screact.*
 
 import jackdaw.Config
-import jackdaw.library._
-import jackdaw.data._
-import jackdaw.media._
-import jackdaw.curve._
-import jackdaw.key._
-import jackdaw.persistence._
-import jackdaw.persistence.JsonProtocol._
+import jackdaw.library.*
+import jackdaw.data.*
+import jackdaw.media.*
+import jackdaw.curve.*
+import jackdaw.key.*
+import jackdaw.persistence.*
+import jackdaw.persistence.JsonProtocol.given
 
 object Track extends Logging {
 	private var cache:Map[File,WeakReference[Track]]	= Map.empty

@@ -1,6 +1,6 @@
 package jackdaw.range
 
-import scutil.math.functions._
+import scutil.math.functions.*
 
 object TrimRange {
 	val min		= 0.0

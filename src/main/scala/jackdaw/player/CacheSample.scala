@@ -2,11 +2,11 @@ package jackdaw.player
 
 import java.util.concurrent.atomic.AtomicBoolean
 
-import scala.math._
+import scala.math.*
 
-import scutil.math.functions._
+import scutil.math.functions.*
 
-import scaudio.sample._
+import scaudio.sample.*
 
 import jackdaw.Config
 
@@ -17,7 +17,7 @@ object CacheSample {
 }
 
 final class CacheSample(peer:Sample) extends Sample {
-	import CacheSample._
+	import CacheSample.*
 
 	val frameRate:Int	= peer.frameRate
 	val frameCount:Int	= peer.frameCount
@@ -73,13 +73,10 @@ final class CacheSample(peer:Sample) extends Sample {
 
 	//------------------------------------------------------------------------------
 
-	val channels:Seq[Channel]	=
-		(0 until channelCount)
-		.map { channelIndex =>
+	val channels:IArray[Channel]	=
+		IArray.range(0, channelCount).map { channelIndex =>
 			new CacheChannel(channelIndex)
 		}
-		.toArray
-		.toSeq
 
 	private final class CacheChannel(channelIndex:Int) extends Channel {
 		val frameCount:Int			= CacheSample.this.frameCount

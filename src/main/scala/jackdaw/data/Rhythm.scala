@@ -1,12 +1,12 @@
 package jackdaw.data
 
-import scala.math._
+import scala.math.*
 import scala.collection.mutable
 
-import scutil.core.implicits._
-import scutil.math.functions._
+import scutil.core.implicits.*
+import scutil.math.functions.*
 
-import jackdaw.range.PitchMath._
+import jackdaw.range.PitchMath.*
 
 object Rhythm {
 	def default(anchor:Double, measure:Double):Rhythm	=

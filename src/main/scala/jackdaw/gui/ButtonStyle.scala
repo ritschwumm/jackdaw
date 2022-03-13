@@ -1,6 +1,6 @@
 package jackdaw.gui
 
-import sc2d._
+import sc2d.*
 
 final case class ButtonStyle(
 	disabled:Seq[Figure],
