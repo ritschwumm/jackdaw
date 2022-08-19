@@ -4,7 +4,7 @@ ThisBuild / versionScheme := Some("early-semver")
 
 name			:= "jackdaw"
 organization	:= "de.djini"
-version			:= "1.45.0"
+version			:= "1.46.0"
 
 scalaVersion	:= "3.1.3"
 scalacOptions	++= Seq(
@@ -20,7 +20,7 @@ conflictManager		:= ConflictManager.strict withOrganization "^(?!(org\\.scala-la
 libraryDependencies	++= Seq(
 	"de.djini"		%%	"scutil-jdk"	% "0.230.0"	% "compile",
 	"de.djini"		%%	"scutil-gui"	% "0.230.0"	% "compile",
-	"de.djini"		%%	"scaudio"		% "0.232.0"	% "compile",
+	"de.djini"		%%	"scaudio"		% "0.236.0"	% "compile",
 	"de.djini"		%%	"scjson-io"		% "0.258.0"	% "compile",
 	"de.djini"		%%	"screact"		% "0.243.0"	% "compile",
 	"de.djini"		%%	"sc2d"			% "0.46.0"	% "compile",

@@ -73,8 +73,8 @@ object Library extends Logging {
 		}
 
 		deleteTracks foreach { it =>
-			Files.delete(it.wav)
-			Files.delete(it.curve)
+			Files.deleteIfExists(it.wav)
+			Files.deleteIfExists(it.curve)
 		}
 
 		// inform user
