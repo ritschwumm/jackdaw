@@ -1,6 +1,6 @@
 package jackdaw.player
 
-import java.io.File
+import java.nio.file.Path
 
 import jackdaw.data.*
 
@@ -18,7 +18,7 @@ object PlayerAction {
 
 	final case class PlayerSetNeedSync(needSync:Boolean)	extends PlayerAction
 
-	final case class PlayerSetFile(file:Option[File])		extends PlayerAction
+	final case class PlayerSetFile(file:Option[Path])		extends PlayerAction
 	final case class PlayerSetRhythm(rhythm:Option[Rhythm])	extends PlayerAction
 
 	final case class PlayerSetRunning(running:Boolean)		extends PlayerAction

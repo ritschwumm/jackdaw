@@ -1,6 +1,6 @@
 package jackdaw.player
 
-import java.io.File
+import java.nio.file.Path
 
 import scutil.core.implicits.*
 import scutil.io.implicits.*
@@ -39,10 +39,10 @@ final class Loader(engineTarget:Target[LoaderFeedback]) extends Logging {
 			case LoaderAction.NotifyEngine(task)			=> doInEngine(task)
 		}
 
-	private def doDecode(file:File, callback:Effect[Option[CacheSample]]):Unit	= {
+	private def doDecode(file:Path, callback:Effect[Option[CacheSample]]):Unit	= {
 		DEBUG("loader loading", file)
 		val sample	=
-			(Wav load file)
+			Wav.load(file)
 			.leftEffect	{ it => ERROR("cannot load file", it) }
 			.toOption
 			.map { new CacheSample(_) }

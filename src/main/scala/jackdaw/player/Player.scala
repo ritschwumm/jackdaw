@@ -1,6 +1,6 @@
 package jackdaw.player
 
-import java.io.File
+import java.nio.file.Path
 
 import scala.math.*
 
@@ -184,7 +184,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		phone	target	control.phone
 	}
 
-	private def doSetFile(file:Option[File]):Unit	= {
+	private def doSetFile(file:Option[Path]):Unit	= {
 		file match {
 			case Some(file)	=> loaderDecode(file)
 			case None		=> setSample(None)
@@ -539,7 +539,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		}
 	}
 
-	private def loaderDecode(file:File):Unit	= {
+	private def loaderDecode(file:Path):Unit	= {
 		loaderTarget send LoaderAction.Decode(file, setSample)
 	}
 

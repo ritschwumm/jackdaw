@@ -1,6 +1,7 @@
 package jackdaw.remote
 
-import java.io.*
+import java.io.OutputStream
+import java.nio.file.Path
 
 import jackdaw.player.*
 import jackdaw.data.*
@@ -110,7 +111,7 @@ final class Output(val st:OutputStream) {
 		writeBoolean(it.needSync)
 	}
 	def writePlayerSetFile(it:PlayerAction.PlayerSetFile):Unit	= {
-		writeOption(it.file, writeFile)
+		writeOption(it.file, writePath)
 	}
 	def writePlayerSetRhythm(it:PlayerAction.PlayerSetRhythm):Unit	= {
 		writeOption(it.rhythm, writeRhythm)
@@ -151,8 +152,8 @@ final class Output(val st:OutputStream) {
 	}
 	def writePlayerLoopDisable(it:PlayerAction.PlayerLoopDisable.type):Unit	= {}
 
-	def writeFile(it:File):Unit	= {
-		writeString(it.getPath)
+	def writePath(it:Path):Unit	= {
+		writeString(it.toString)
 	}
 	def writeRhythm(it:Rhythm):Unit	= {
 		writeDouble(it.anchor)

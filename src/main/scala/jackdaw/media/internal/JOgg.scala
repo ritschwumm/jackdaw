@@ -1,6 +1,6 @@
 package jackdaw.media
 
-import java.io.File
+import java.nio.file.*
 import java.io.RandomAccessFile
 
 import  scala.util.Using.Releasable
@@ -24,7 +24,7 @@ object JOgg extends Inspector with Decoder with Logging {
 
 	private type BufferWriter	= (Array[Byte], Int) => Unit
 
-	def readMetadata(input:File):Checked[Metadata] =
+	def readMetadata(input:Path):Checked[Metadata] =
 		for {
 			_	<-	recognizeFile(input)
 			out	<-	withVorbisStream(input) { vorbis =>
@@ -41,7 +41,7 @@ object JOgg extends Inspector with Decoder with Logging {
 		yield out
 
 	// BETTER use scalaz, this is a mess. should be using a Resource monad transformer
-	def convertToWav(input:File, output:File, preferredFrameRate:Int, preferredChannelCount:Int):Checked[Unit] =
+	def convertToWav(input:Path, output:Path, preferredFrameRate:Int, preferredChannelCount:Int):Checked[Unit] =
 		for {
 			_	<-	recognizeFile(input)
 			_	<-	withVorbisStream(input) { vorbis =>
@@ -52,7 +52,7 @@ object JOgg extends Inspector with Decoder with Logging {
 									writeWavChecked(output, header.getSampleRate, header.getChannels.toShort) { (append:BufferWriter) =>
 										copyPcm(vorbis, append)
 									} leftEffect {
-										_ => output.delete()
+										_ => Files.delete(output)
 									}
 						}
 						yield (())
@@ -87,34 +87,33 @@ object JOgg extends Inspector with Decoder with Logging {
 		}
 	}
 
-	private def withVorbisStream[T](file:File)(func:VorbisStream=>Checked[T]):Checked[T]	=
+	private def withVorbisStream[T](file:Path)(func:VorbisStream=>Checked[T]):Checked[T]	=
 		withLogicalOggStream(file) { logical =>
 			func(new VorbisStream(logical))
 		}
 
-	private def withLogicalOggStream[T](file:File)(func:LogicalOggStream=>Checked[T]):Checked[T]	=
+	private def withLogicalOggStream[T](file:Path)(func:LogicalOggStream=>Checked[T]):Checked[T]	=
 		MediaUtil checkedExceptions {
-			new FileStream(new RandomAccessFile(file, "r")) use { physical =>
+			new FileStream(new RandomAccessFile(file.toFile, "r")) use { physical =>
 				for {
-					logical	<-
-							physical.getLogicalStreams.toIterable.singleOption
-							.map		{ _.asInstanceOf[LogicalOggStream] }
-							.toRight	(Checked problem1 "expected exactly one logical stream")
+					logical	<-	physical.getLogicalStreams.toIterable.singleOption
+								.map		{ _.asInstanceOf[LogicalOggStream] }
+								.toRight	(Checked problem1 "expected exactly one logical stream")
 					out		<- func(logical)
 				}
 				yield out
 			}
 		}
 
-	private def writeWavChecked(output:File, frameRate:Int, channelCount:Short)(generator:Effect[BufferWriter])	=
+	private def writeWavChecked(output:Path, frameRate:Int, channelCount:Short)(generator:Effect[BufferWriter])	=
 		MediaUtil checkedExceptions {
 			writeWav(output, frameRate, channelCount.toShort)(generator)
 			Right(())
 		}
 
 	// generator must provide interleaved little endian signed shorts
-	private def writeWav(output:File, frameRate:Int, channelCount:Short)(generator:Effect[BufferWriter]):Unit	= {
-		new RandomAccessFile(output, "rw") use { outFile =>
+	private def writeWav(output:Path, frameRate:Int, channelCount:Short)(generator:Effect[BufferWriter]):Unit	= {
+		new RandomAccessFile(output.toFile, "rw") use { outFile =>
 			val UIntMaxValue	= 1L<<32-1
 
 			def writeId(it:String):Unit	= {
@@ -169,6 +168,6 @@ object JOgg extends Inspector with Decoder with Logging {
 		}
 	}
 
-	private val recognizeFile:File=>Checked[Unit]	=
-		MediaUtil requireFileSuffixIn (".ogg")
+	private val recognizeFile:Path=>Checked[Unit]	=
+		MediaUtil.requireFileSuffixIn(".ogg")
 }

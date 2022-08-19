@@ -1,6 +1,6 @@
 package jackdaw.media
 
-import java.io.File
+import java.nio.file.Path
 
 import scutil.jdk.implicits.*
 import scutil.math.functions.*
@@ -10,7 +10,7 @@ import jackdaw.util.Checked
 object Mpg123 extends Inspector with Decoder {
 	def name	= "mpg123"
 
-	def readMetadata(input:File):Checked[Metadata] =
+	def readMetadata(input:Path):Checked[Metadata] =
 		for {
 			_		<-	recognizeFile(input)
 			_		<-	MediaUtil requireCommand "mpg123"
@@ -19,7 +19,7 @@ object Mpg123 extends Inspector with Decoder {
 							"-n",	"1",
 							// "--stdout",
 							"-w",	"-",
-							input.getPath
+							input.toString
 						)
 		}
 		yield {
@@ -33,13 +33,13 @@ object Mpg123 extends Inspector with Decoder {
 			)
 		}
 
-	def convertToWav(input:File, output:File, preferredFrameRate:Int, preferredChannelCount:Int):Checked[Unit] =
+	def convertToWav(input:Path, output:Path, preferredFrameRate:Int, preferredChannelCount:Int):Checked[Unit] =
 		for {
 			_	<-	recognizeFile(input)
 			_	<-	MediaUtil requireCommand "mpg123"
 			_	<-	MediaUtil.runCommand(
 						"mpg123",
-						"-w",	output.getPath,
+						"-w",	output.toString,
 						// -8bit
 						"-r",	preferredFrameRate.toString,
 						(clampInt(preferredChannelCount, 1, 2) match {
@@ -47,11 +47,11 @@ object Mpg123 extends Inspector with Decoder {
 							case 2	=> "--stereo"
 							case _	=> sys error "unexpected channelCount"
 						}),
-						input.getPath
+						input.toString
 					)
 		}
 		yield ()
 
-	private val recognizeFile:File=>Checked[Unit]	=
-		MediaUtil requireFileSuffixIn (".mp3")
+	private val recognizeFile:Path=>Checked[Unit]	=
+		MediaUtil.requireFileSuffixIn(".mp3")
 }

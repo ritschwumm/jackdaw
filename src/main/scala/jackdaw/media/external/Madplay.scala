@@ -1,6 +1,6 @@
 package jackdaw.media
 
-import java.io.File
+import java.nio.file.*
 
 import scutil.jdk.implicits.*
 import scutil.lang.implicits.*
@@ -11,14 +11,14 @@ import jackdaw.util.Checked
 object Madplay extends Inspector with Decoder {
 	def name	= "madplay"
 
-	def readMetadata(input:File):Checked[Metadata] =
+	def readMetadata(input:Path):Checked[Metadata] =
 		for {
 			_		<-	recognizeFile(input)
 			_		<-	MediaUtil requireCommand "madplay"
 			result	<-	MediaUtil.runCommand(
 							"madplay",
 							"-T",
-							input.getPath
+							input.toString
 						)
 		}
 		yield {
@@ -33,13 +33,13 @@ object Madplay extends Inspector with Decoder {
 			)
 		}
 
-	def convertToWav(input:File, output:File, preferredFrameRate:Int, preferredChannelCount:Int):Checked[Unit] =
+	def convertToWav(input:Path, output:Path, preferredFrameRate:Int, preferredChannelCount:Int):Checked[Unit] =
 		for {
 			_	<-	recognizeFile(input)
 			_	<-	MediaUtil requireCommand "madplay"
 			res	<-	MediaUtil.runCommand(
 						"madplay",
-						"--output",			"wav:" + output.getPath,
+						"--output",			"wav:" + output.toString,
 						"--bit-depth",		"16",
 						"--sample-rate",	preferredFrameRate.toString,
 						(clampInt(preferredChannelCount, 1, 2) match {
@@ -49,21 +49,21 @@ object Madplay extends Inspector with Decoder {
 						}),
 						// "--start",		"0/44100",
 						// "--time",		"44100/44100",
-						input.getPath
+						input.toString
 					)
 			_	<-	Checked.trueWin1 (
 						!(res.err contains "error: frame 0: lost synchronization"),
 						"file cannot be decoded"
 					) orElse
 					Checked.trueWin1(
-						output.length > 44,
+						Files.exists(output) && Files.size(output) > 44,
 						"output file broken"
 					) leftEffect {
-						_ => output.delete()
+						_ => Files.delete(output)
 					}
 		}
 		yield ()
 
-	private val recognizeFile:File=>Checked[Unit]	=
+	private val recognizeFile:Path=>Checked[Unit]	=
 		MediaUtil requireFileSuffixIn (".mp3")
 }

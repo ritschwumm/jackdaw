@@ -294,7 +294,7 @@ final class WaveUI(
 	private val numberImages:Seq[BufferedImage]	= {
 		val size	= Style.wave.marker.number.size
 		val end		= Style.wave.marker.number.end
-		val bounds	= SgRectangle topLeftZeroBy SgPoint(end.x, end.y)
+		val bounds	= SgRectangle zeroSized SgPoint(end.x, end.y)
 		LEDShape shapes bounds map { shape	=>
 			val figure	= StrokeShape(shape, Style.wave.marker.number.color, Style.wave.marker.number.stroke)
 			imageUtil.renderImage(size, true, figure.paint)

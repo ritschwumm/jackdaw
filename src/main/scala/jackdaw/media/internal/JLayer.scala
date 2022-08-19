@@ -1,6 +1,6 @@
 package jackdaw.media
 
-import java.io.File
+import java.nio.file.Path
 
 import javazoom.jl.decoder.{Header,Obuffer,JavaLayerException}
 import javazoom.jl.converter.*
@@ -9,20 +9,21 @@ import javazoom.jl.converter.Converter.{ ProgressListener as ConverterProgressLi
 import scutil.core.implicits.*
 import scutil.jdk.implicits.*
 import scutil.log.*
+import scutil.io.*
 
 import jackdaw.util.Checked
 
 object JLayer extends Decoder with Logging {
 	def name	= "JLayer"
 
-	def convertToWav(input:File, output:File, preferredFrameRate:Int, preferredChannelCount:Int):Checked[Unit] =
+	def convertToWav(input:Path, output:Path, preferredFrameRate:Int, preferredChannelCount:Int):Checked[Unit] =
 		for {
 			_	<-	recognizeFile(input)
-			_ 	<-	input withInputStream { ist =>
+			_ 	<-	MoreFiles.withInputStream(input) { ist =>
 						DEBUG(show"decoding with ${name}")
 
 						try {
-							(new Converter).convert(ist, output.getAbsolutePath, pl, null)
+							(new Converter).convert(ist, output.normalize.toString, pl, null)
 							Right(())
 						}
 						catch { case e:JavaLayerException =>
@@ -42,6 +43,6 @@ object JLayer extends Decoder with Logging {
 			def converterException(t:Throwable):Boolean	= false
 		}
 
-	private val recognizeFile:File=>Checked[Unit]	=
-		MediaUtil requireFileSuffixIn (".mp3")
+	private val recognizeFile:Path=>Checked[Unit]	=
+		MediaUtil.requireFileSuffixIn(".mp3")
 }

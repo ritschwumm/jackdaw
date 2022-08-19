@@ -1,6 +1,6 @@
 package jackdaw.media
 
-import java.io.File
+import java.nio.file.Path
 
 import scutil.jdk.implicits.*
 
@@ -9,16 +9,16 @@ import jackdaw.util.Checked
 object FFprobe extends Inspector {
 	def name	= "ffprobe"
 
-	def readMetadata(input:File):Checked[Metadata] =
+	def readMetadata(input:Path):Checked[Metadata] =
 		for {
 			// no suffix check
 			_		<-	MediaUtil requireCommand "ffprobe"
 			result	<-	MediaUtil.runCommand(
-							"ffprobe",	input.getPath
+							"ffprobe",	input.toString
 							/*
 							// this no longer works (?)
 							"ffprobe",	"-y",
-							"-i",		input.getPath,
+							"-i",		input.toString,
 							"-vn",		"-an",
 							"-null",	"-"
 							*/

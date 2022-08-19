@@ -1,12 +1,12 @@
 package jackdaw.player
 
-import java.io.File
+import java.nio.file.Path
 
 import scutil.lang.*
 
 object LoaderAction {
 	final case class Decode(
-		file:File,
+		file:Path,
 		done:Effect[Option[CacheSample]]
 	)
 	extends LoaderAction

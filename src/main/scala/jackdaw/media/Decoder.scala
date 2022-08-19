@@ -1,6 +1,6 @@
 package jackdaw.media
 
-import java.io.File
+import java.nio.file.Path
 
 import jackdaw.util.Checked
 
@@ -20,7 +20,7 @@ object Decoder {
 			JOgg
 		)
 
-	def convertToWav(input:File, output:File, preferredFrameRate:Int, preferredChannelCount:Int):Boolean	=
+	def convertToWav(input:Path, output:Path, preferredFrameRate:Int, preferredChannelCount:Int):Boolean	=
 		MediaUtil
 		.worker[Decoder,Unit](
 			all,
@@ -34,5 +34,5 @@ trait Decoder {
 	def name:String
 
 	/** decode file and write into a wav file */
-	def convertToWav(input:File, output:File, preferredFrameRate:Int, preferredChannelCount:Int):Checked[Unit]
+	def convertToWav(input:Path, output:Path, preferredFrameRate:Int, preferredChannelCount:Int):Checked[Unit]
 }

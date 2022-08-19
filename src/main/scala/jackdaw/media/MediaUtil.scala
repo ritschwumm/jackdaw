@@ -1,6 +1,6 @@
 package jackdaw.media
 
-import java.io.File
+import java.nio.file.Path
 
 import scala.util.matching.Regex
 
@@ -47,16 +47,16 @@ object MediaUtil extends Logging {
 
 	//------------------------------------------------------------------------------
 
-	def requireFileSuffixIn(suffixes:String*):File=>Checked[Unit]	=
+	def requireFileSuffixIn(suffixes:String*):Path=>Checked[Unit]	=
 		file =>
 		Checked.trueWin1(
-			suffixes exists { file.getName.toLowerCase endsWith _ },
+			suffixes exists { file.getFileName.toString.toLowerCase endsWith _ },
 			"expected suffix in " + (suffixes mkString ", ")
 		)
 
 	def requireCommand(command:String):Checked[Unit]	=
 		OperatingSystem.current match {
-			case Some(Linux) | Some(OSX)	=>
+			case Some(OperatingSystem.Linux) | Some(OperatingSystem.OSX)	=>
 				Checked.trueWin1(
 					(External exec Vector("which", command) result false).rc == 0,
 					show"command ${command} not available"

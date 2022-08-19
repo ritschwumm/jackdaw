@@ -1,10 +1,11 @@
 package jackdaw.migration
 
-import java.io.*
+import java.nio.file.*
 
 import scutil.core.implicits.*
 import scutil.jdk.implicits.*
 import scutil.log.*
+import scutil.io.*
 
 import scjson.ast.*
 import scjson.codec.*
@@ -18,7 +19,7 @@ object Migration extends Logging {
 
 	val latestVersion	= steps.last.newVersion
 
-	def involved(tf:TrackFiles):Set[File]	=
+	def involved(tf:TrackFiles):Set[Path]	=
 		for {
 			step	<- steps.toSet[Migration]
 			version	<- Set(step.oldVersion, step.newVersion)
@@ -34,13 +35,13 @@ object Migration extends Logging {
 	private def migrateStep(tf:TrackFiles)(step:Migration):Unit	= {
 		val oldData	= tf dataByVersion step.oldVersion
 		val newData	= tf dataByVersion step.newVersion
-		if (oldData.exists && !newData.exists) {
+		if (Files.exists(oldData) && !Files.exists(newData)) {
 			INFO("migrating", oldData)
 			migrateFile(step, oldData, newData)
 		}
 	}
 
-	private def migrateFile(step:Migration, oldFile:File, newFile:File):Unit	= {
+	private def migrateFile(step:Migration, oldFile:Path, newFile:Path):Unit	= {
 		val result	=
 			for {
 				strO	<- JsonIo readFileString oldFile
@@ -56,8 +57,8 @@ object Migration extends Logging {
 		}
 	}
 
-	private def writeFile(file:File, content:String):Unit	=
-		file.writeString(JsonIo.charset, content)
+	private def writeFile(file:Path, content:String):Unit	=
+		MoreFiles.writeString(file, JsonIo.charset, content)
 }
 
 trait Migration {

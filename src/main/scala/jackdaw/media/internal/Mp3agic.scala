@@ -1,6 +1,6 @@
 package jackdaw.media
 
-import java.io.File
+import java.nio.file.*
 
 import com.mpatric.mp3agic.*
 
@@ -13,10 +13,10 @@ import jackdaw.util.Checked
 object Mp3agic extends Inspector with Logging {
 	def name	= "Mp3agic"
 
-	def readMetadata(input:File):Checked[Metadata] =
+	def readMetadata(input:Path):Checked[Metadata] =
 		for {
 			_		<-	recognizeFile(input)
-			mp3file	<-	Catch.exception in new Mp3File(input.getAbsolutePath) leftMap { e =>
+			mp3file	<-	Catch.exception in new Mp3File(input.normalize.toString) leftMap { e =>
 							ERROR("cannot create Mp3File", e)
 							Checked problem1 "cannot create Mp3File"
 						}
@@ -42,6 +42,6 @@ object Mp3agic extends Inspector with Logging {
 			)
 		}
 
-	private val recognizeFile:File=>Checked[Unit]	=
-		MediaUtil requireFileSuffixIn (".mp3")
+	private val recognizeFile:Path=>Checked[Unit]	=
+		MediaUtil.requireFileSuffixIn(".mp3")
 }

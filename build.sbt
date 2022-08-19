@@ -4,9 +4,9 @@ ThisBuild / versionScheme := Some("early-semver")
 
 name			:= "jackdaw"
 organization	:= "de.djini"
-version			:= "1.44.0"
+version			:= "1.45.0"
 
-scalaVersion	:= "3.1.1"
+scalaVersion	:= "3.1.3"
 scalacOptions	++= Seq(
 	"-feature",
 	"-deprecation",
@@ -18,12 +18,12 @@ scalacOptions	++= Seq(
 
 conflictManager		:= ConflictManager.strict withOrganization "^(?!(org\\.scala-lang|org\\.scala-js)(\\..*)?)$"
 libraryDependencies	++= Seq(
-	"de.djini"		%%	"scutil-jdk"	% "0.220.0"	% "compile",
-	"de.djini"		%%	"scutil-gui"	% "0.220.0"	% "compile",
-	"de.djini"		%%	"scaudio"		% "0.220.0"	% "compile",
-	"de.djini"		%%	"scjson-io"		% "0.248.0"	% "compile",
-	"de.djini"		%%	"screact"		% "0.233.0"	% "compile",
-	"de.djini"		%%	"sc2d"			% "0.44.0"	% "compile",
+	"de.djini"		%%	"scutil-jdk"	% "0.230.0"	% "compile",
+	"de.djini"		%%	"scutil-gui"	% "0.230.0"	% "compile",
+	"de.djini"		%%	"scaudio"		% "0.232.0"	% "compile",
+	"de.djini"		%%	"scjson-io"		% "0.258.0"	% "compile",
+	"de.djini"		%%	"screact"		% "0.243.0"	% "compile",
+	"de.djini"		%%	"sc2d"			% "0.46.0"	% "compile",
 	"de.djini"		%	"jkeyfinder"	% "0.4.1"	% "compile",
 	"javazoom"		%	"jlayer"		% "1.0.1"	% "compile",
 	"com.mpatric"	%	"mp3agic"		% "0.9.1"	% "compile",

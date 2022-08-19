@@ -1,13 +1,13 @@
 package jackdaw.media
 
-import java.io.File
+import java.nio.file.Path
 
 import jackdaw.util.Checked
 
 object Opusdec extends Decoder {
 	def name	= "opusdec"
 
-	def convertToWav(input:File, output:File, preferredFrameRate:Int, preferredChannelCount:Int):Checked[Unit] =
+	def convertToWav(input:Path, output:Path, preferredFrameRate:Int, preferredChannelCount:Int):Checked[Unit] =
 		for {
 			_	<-	recognizeFile(input)
 			_	<-	MediaUtil requireCommand "opusdec"
@@ -15,12 +15,12 @@ object Opusdec extends Decoder {
 						"opusdec",
 						"--quiet",
 						"--rate",	preferredFrameRate.toString,
-						input.getPath,
-						output.getPath
+						input.toString,
+						output.toString
 					)
 		}
 		yield ()
 
-	private val recognizeFile:File=>Checked[Unit]	=
+	private val recognizeFile:Path=>Checked[Unit]	=
 		MediaUtil.requireFileSuffixIn(".opus")
 }

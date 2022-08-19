@@ -1,6 +1,7 @@
 package jackdaw.remote
 
-import java.io.*
+import java.io.InputStream
+import java.nio.file.Path
 
 import scutil.lang.implicits.*
 import jackdaw.player.*
@@ -125,7 +126,7 @@ final class Input(val st:InputStream) {
 		)
 	def readPlayerAction_PlayerSetFile():PlayerAction	=
 		PlayerAction.PlayerSetFile(
-			file	= readOption(readFile())
+			file	= readOption(readPath())
 		)
 	def readPlayerAction_PlayerSetRhythm():PlayerAction	=
 		PlayerAction.PlayerSetRhythm(
@@ -180,8 +181,8 @@ final class Input(val st:InputStream) {
 	def readPlayerAction_PlayerLoopDisable():PlayerAction	=
 		PlayerAction.PlayerLoopDisable
 
-	def readFile():File	=
-		new File(readString())
+	def readPath():Path	=
+		Path.of(readString())
 	def readRhythm():Rhythm	=
 		Rhythm(
 			anchor	= readDouble(),

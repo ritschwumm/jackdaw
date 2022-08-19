@@ -1,5 +1,6 @@
 package jackdaw.persistence
 
+import java.nio.file.*
 import java.io.*
 
 import scutil.core.implicits.*
@@ -10,9 +11,9 @@ import jackdaw.curve.BandCurve
 
 /** loading and saving an BandCurvePersister from/to a File */
 final class BandCurvePersister extends Persister[BandCurve] with Logging {
-	def load(file:File):Option[BandCurve] = {
+	def load(file:Path):Option[BandCurve] = {
 		try {
-			new ObjectInputStream(file.newInputStream()) use { in =>
+			new ObjectInputStream(Files.newInputStream(file)) use { in =>
 				val	fragmentRate	= in.readDouble
 				val	rasterFrames	= in.readInt
 				val	chunkCount		= in.readInt
@@ -32,9 +33,9 @@ final class BandCurvePersister extends Persister[BandCurve] with Logging {
 		}
 	}
 
-	def save(file:File)(curve:BandCurve):Unit	= {
+	def save(file:Path)(curve:BandCurve):Unit	= {
 		try {
-			new ObjectOutputStream(file.newOutputStream()) use { out =>
+			new ObjectOutputStream(Files.newOutputStream(file)) use { out =>
 				out writeDouble	curve.fragmentRate
 				out writeInt	curve.rasterFrames
 				out writeInt	curve.chunkCount

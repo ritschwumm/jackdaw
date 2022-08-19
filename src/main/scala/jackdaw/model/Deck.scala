@@ -1,6 +1,6 @@
 package jackdaw.model
 
-import java.io.File
+import java.nio.file.Path
 
 import scutil.core.implicits.*
 import scutil.jdk.implicits.*
@@ -109,7 +109,7 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 	val bandCurve:Signal[Option[BandCurve]]		= (trackWrap flatMap { it => OptionSignal(it.bandCurve) }).unwrap
 	val metadata:Signal[Option[Metadata]]		= (trackWrap flatMap { it => OptionSignal(it.metadata)	}).unwrap
 	val rhythm:Signal[Option[Rhythm]]			= (trackWrap flatMap { it => OptionSignal(it.rhythm)	}).unwrap
-	val wav:Signal[Option[File]]				= (trackWrap flatMap { it => OptionSignal(it.wav)		}).unwrap
+	val wav:Signal[Option[Path]]				= (trackWrap flatMap { it => OptionSignal(it.wav)		}).unwrap
 	val key:Signal[Option[MusicKey]]			= (trackWrap flatMap { it => OptionSignal(it.key)		}).unwrap
 	val fileName:Signal[Option[String]]			= signal { track.current map	{ _.fileName				} }
 	val cuePoints:Signal[Option[Seq[Double]]]	= signal { track.current map	{ _.cuePoints.current		} }
@@ -265,7 +265,7 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 	//------------------------------------------------------------------------------
 	//## actions
 
-	def loadTrack(file:File):Unit	= {
+	def loadTrack(file:Path):Unit	= {
 		// NOTE ugly hack
 		val done	= track.current.exists { _.file ==== file }
 		if (done) {

@@ -1,6 +1,6 @@
 package jackdaw.model
 
-import java.io.File
+import java.nio.file.*
 
 import scala.ref.WeakReference
 
@@ -8,6 +8,7 @@ import scutil.core.implicits.*
 import scutil.jdk.implicits.*
 import scutil.gui.SwingUtil.*
 import scutil.log.*
+import scutil.io.*
 
 import scaudio.sample.*
 
@@ -23,17 +24,17 @@ import jackdaw.persistence.*
 import jackdaw.persistence.JsonProtocol.given
 
 object Track extends Logging {
-	private var cache:Map[File,WeakReference[Track]]	= Map.empty
+	private var cache:Map[Path,WeakReference[Track]]	= Map.empty
 
-	private def insert(file:File, track:Track):Unit	= {
+	private def insert(file:Path, track:Track):Unit	= {
 		cache	=
 			(cache filter { case (_, ref) => ref.get.isDefined }) +
 			(file -> WeakReference(track))
 	}
 
 	// NOTE different Track instances for the same File would be fatal
-	def load(file:File):Option[Track]	=
-		file.getCanonicalFile into { canon =>
+	def load(file:Path):Option[Track]	=
+		file.toRealPath() into { canon =>
 			cache get canon flatMap { _.get } orElse {
 				loadImpl(canon) doto {
 					_ foreach { track =>
@@ -43,7 +44,7 @@ object Track extends Logging {
 			}
 		}
 
-	private def loadImpl(file:File):Option[Track]	=
+	private def loadImpl(file:Path):Option[Track]	=
 		try {
 			Some(new Track(file) doto { _.load() })
 		}
@@ -57,14 +58,14 @@ object Track extends Logging {
 }
 
 /** a loaded audio File with all its meta data */
-final class Track private(val file:File) extends Observing with Logging {
-	val fileName	= file.getName
+final class Track private(val file:Path) extends Observing with Logging {
+	val fileName	= file.getFileName.toString
 
 	private val trackFiles	= Library trackFilesFor file
 
 	private val dataCell			= cell[TrackData](TrackData.empty)
 	private val dataLoadedCell		= cell[Boolean](false)
-	private val wavCell				= cell[Option[File]](None)
+	private val wavCell				= cell[Option[Path]](None)
 	private val sampleCell			= cell[Option[Sample]](None)
 	private val sampleLoadedCell	= cell[Boolean](false)
 	private val bandCurveCell		= cell[Option[BandCurve]](None)
@@ -72,7 +73,7 @@ final class Track private(val file:File) extends Observing with Logging {
 
 	val data:Signal[TrackData]				= dataCell.signal
 	val dataLoaded:Signal[Boolean]			= dataLoadedCell.signal
-	val wav:Signal[Option[File]]			= wavCell.signal
+	val wav:Signal[Option[Path]]			= wavCell.signal
 	val sample:Signal[Option[Sample]]		= sampleCell.signal
 	val sampleLoaded:Signal[Boolean]		= sampleLoadedCell.signal
 	val bandCurve:Signal[Option[BandCurve]]	= bandCurveCell.signal
@@ -181,11 +182,11 @@ final class Track private(val file:File) extends Observing with Logging {
 
 				Library touch trackFiles
 
-				val fileModified	= file.lastModifiedMilliInstant()
+				val fileModified	= MoreFiles.lastModified(file)
 
 				// load cached data
 				val dataVal:TrackData	=
-					trackFiles.data.exists
+					Files.exists(trackFiles.data)
 					.flatOption {
 						dataPersister load trackFiles.data
 					}
@@ -227,10 +228,10 @@ final class Track private(val file:File) extends Observing with Logging {
 				// NOTE symlinks have the same last modified date as the link target,
 				// otherwise it would make more sense to only check for a newer file
 				val wavFresh:Boolean	=
-					trackFiles.wav.exists &&
-					trackFiles.wav.lastModifiedMilliInstant() >= fileModified
-				val wavVal:Option[File]	=
-					(wavFresh option trackFiles.wav)
+					Files.exists(trackFiles.wav) &&
+					MoreFiles.lastModified(trackFiles.wav) >= fileModified
+				val wavVal:Option[Path]	=
+					wavFresh.option(trackFiles.wav)
 					.someEffect { _ =>
 						INFO("using cached wav")
 					}
@@ -254,7 +255,7 @@ final class Track private(val file:File) extends Observing with Logging {
 				val sampleVal:Option[Sample]	=
 					wavVal flatMap { wavFile =>
 						INFO("getting sample")
-						(Wav load wavFile)
+						Wav.load(wavFile)
 						.leftEffect	{	e =>
 							ERROR("cannot get sample", e)
 						}
@@ -267,8 +268,8 @@ final class Track private(val file:File) extends Observing with Logging {
 
 				// provide curve
 				val curveFresh:Boolean	=
-					trackFiles.curve.exists &&
-					trackFiles.curve.lastModifiedMilliInstant() >= trackFiles.wav.lastModifiedMilliInstant()
+					Files.exists(trackFiles.curve) &&
+					MoreFiles.lastModified(trackFiles.curve) >= MoreFiles.lastModified(trackFiles.wav)
 				val curveVal:Option[BandCurve]	=
 					curveFresh
 					.flatOption	{

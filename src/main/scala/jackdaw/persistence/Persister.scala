@@ -1,8 +1,8 @@
 package jackdaw.persistence
 
-import java.io.File
+import java.nio.file.Path
 
 trait Persister[T] {
-	def load(file:File):Option[T]
-	def save(file:File)(value:T):Unit
+	def load(file:Path):Option[T]
+	def save(file:Path)(value:T):Unit
 }

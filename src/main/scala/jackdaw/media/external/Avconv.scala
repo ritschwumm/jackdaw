@@ -1,25 +1,25 @@
 package jackdaw.media
 
-import java.io.File
+import java.nio.file.Path
 
 import jackdaw.util.Checked
 
 object Avconv extends Decoder {
 	def name	= "avconv"
 
-	def convertToWav(input:File, output:File, preferredFrameRate:Int, preferredChannelCount:Int):Checked[Unit] =
+	def convertToWav(input:Path, output:Path, preferredFrameRate:Int, preferredChannelCount:Int):Checked[Unit] =
 		for {
 			// no suffix check
 			_	<- MediaUtil requireCommand "avconv"
 			_	<-
 					MediaUtil.runCommand(
 						"avconv",	"-y",
-						"-i",		input.getPath,
+						"-i",		input.toString,
 						"-vn",
 						"-acodec",	"pcm_s16le",
 						"-ar",		preferredFrameRate.toString,
 						"-ac",		preferredChannelCount.toString,
-						output.getPath
+						output.toString
 					)
 		}
 		yield ()

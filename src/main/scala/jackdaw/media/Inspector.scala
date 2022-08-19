@@ -1,6 +1,6 @@
 package jackdaw.media
 
-import java.io.File
+import java.nio.file.Path
 
 import jackdaw.util.Checked
 
@@ -19,7 +19,7 @@ object Inspector {
 			JOgg
 		)
 
-	def readMetadata(input:File):Option[Metadata]	=
+	def readMetadata(input:Path):Option[Metadata]	=
 		MediaUtil
 		.worker[Inspector,Metadata](
 			all,
@@ -33,5 +33,5 @@ trait Inspector {
 	def name:String
 
 	/** read metadata */
-	def readMetadata(input:File):Checked[Metadata]
+	def readMetadata(input:Path):Checked[Metadata]
 }

@@ -1,12 +1,13 @@
 package jackdaw.library
 
-import java.io.File
+import java.nio.file.*
 
 import scutil.core.implicits.*
 import scutil.jdk.implicits.*
 import scutil.text.Human
 import scutil.log.*
 import scutil.time.*
+import scutil.io.*
 
 import jackdaw.Config
 import jackdaw.migration.*
@@ -25,7 +26,7 @@ object Library extends Logging {
 		// this is done once a startup because scanning the filesystem later
 		// will wreck havoc with the os scheduler
 		content	= findTrackFiles()
-				.sortBy	{ _.meta.lastModifiedMilliInstant() }
+				.sortBy	{ it => MoreFiles.lastModified(it.meta) }
 				.reverse
 
 		INFO("migrating library")
@@ -35,13 +36,13 @@ object Library extends Logging {
 		cleanup(content)
 	}
 
-	def trackFilesFor(file:File):TrackFiles	=
+	def trackFilesFor(file:Path):TrackFiles	=
 		TrackFiles(metaBase /+ localPath(file))
 
 	def touch(tf:TrackFiles):Unit	= synchronized {
 		// provide directory
-		tf.meta.mkdirs()
-		tf.meta setLastModifiedMilliInstant MilliInstant.now()
+		Files.createDirectories(tf.meta)
+		MoreFiles.setLastModified(tf.meta, MilliInstant.now())
 
 		// migrate if necessary
 		autoMigrate(tf)
@@ -72,8 +73,8 @@ object Library extends Logging {
 		}
 
 		deleteTracks foreach { it =>
-			it.wav.delete()
-			it.curve.delete()
+			Files.delete(it.wav)
+			Files.delete(it.curve)
 		}
 
 		// inform user
@@ -102,17 +103,17 @@ object Library extends Logging {
 
 	/** first the ones where metadata was modified first */
 	private def findTrackFiles():Seq[TrackFiles]	= {
-		def walk(dir:File):Seq[TrackFiles]	=  {
+		def walk(dir:Path):Seq[TrackFiles]	=  {
 			val candidate	= TrackFiles(dir)
-				 if (seemsLegit(candidate))	Vector(candidate)
-			else if (dir.isDirectory)		dir.children.flattenMany flatMap walk
-			else							Vector.empty
+				 if (seemsLegit(candidate))		Vector(candidate)
+			else if (Files.isDirectory(dir))	MoreFiles.listFiles(dir).flattenMany flatMap walk
+			else								Vector.empty
 		}
 		walk(metaBase)
 	}
 
 	private def seemsLegit(it:TrackFiles):Boolean	=
-		it.meta.isDirectory && {
+		Files.isDirectory(it.meta) && {
 			val standardFiles	=
 					Set(
 						it.wav,
@@ -121,23 +122,27 @@ object Library extends Logging {
 					)
 			val migrationFiles	=
 					Migration involved it
-			(standardFiles ++ migrationFiles) exists { _.isFile }
+			(standardFiles ++ migrationFiles) exists { Files.isRegularFile(_) }
 		}
 
 	private def spaceNeeded(it:TrackFiles):Long	=
-		it.wav.length	+
-		it.curve.length
+		sizeOrZero(it.wav)	+
+		sizeOrZero(it.curve)
+
+	private def sizeOrZero(file:Path):Long	=
+		if (Files.exists(file))	Files.size(file)
+		else					0
 
 	//------------------------------------------------------------------------------
 
-	private def localPath(file:File):Seq[String]	=
+	private def localPath(file:Path):Seq[String]	=
 		file
 		.selfAndParentChain
 		.reverse
 		.zipWithIndex
 		.mapFilter { case (file, index) =>
-			val name	= file.getName.optionNonEmpty
-			if (index == 0)	name orElse prefixPath(file.getPath)
+			val name	= Option(file.getFileName).map(_.toString).flatMap(_.optionNonEmpty)
+			if (index == 0)	name orElse prefixPath(file.toString)
 			else			name
 		}
 

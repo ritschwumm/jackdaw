@@ -1,6 +1,6 @@
 package jackdaw.media
 
-import java.io.File
+import java.nio.file.Path
 
 import scutil.jdk.implicits.*
 
@@ -9,13 +9,13 @@ import jackdaw.util.Checked
 object Vorbiscomment extends Inspector {
 	def name	= "vorbiscomment"
 
-	def readMetadata(input:File):Checked[Metadata] =
+	def readMetadata(input:Path):Checked[Metadata] =
 		for {
 			_		<-	recognizeFile(input)
 			_		<-	MediaUtil requireCommand "vorbiscomment"
 			result	<-	MediaUtil.runCommand(
 							"vorbiscomment",
-							input.getPath
+							input.toString
 						)
 		}
 		yield {
@@ -28,6 +28,6 @@ object Vorbiscomment extends Inspector {
 			)
 		}
 
-	private val recognizeFile:File=>Checked[Unit]	=
+	private val recognizeFile:Path=>Checked[Unit]	=
 		MediaUtil requireFileSuffixIn (".ogg")
 }

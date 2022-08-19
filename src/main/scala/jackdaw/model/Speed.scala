@@ -1,6 +1,6 @@
 package jackdaw.model
 
-import java.io.File
+import java.nio.file.Path
 
 import scala.math.*
 
@@ -54,7 +54,7 @@ final class Speed extends Observing {
 			)
 		}
 
-	def persist(file:File):Unit	= {
+	def persist(file:Path):Unit	= {
 		val persister	= new JsonPersister[Double]
 
 		persister load file foreach {

@@ -1,6 +1,6 @@
 package jackdaw.remote
 
-import java.io.*
+import java.nio.file.Path
 
 import scutil.jdk.implicits.*
 import scutil.core.implicits.*
@@ -17,10 +17,10 @@ object EngineStub extends Logging {
 	// TODO find a better way of forking
 	private object vm {
 		val binary	=
-			(new File(SystemProperties.java.home) / "bin" / "java").getCanonicalPath
+			(Path.of(SystemProperties.java.home) / "bin" / "java").toRealPath().getPathString
 
 		val userDir	=
-			new File(SystemProperties.user.dir)
+			Path.of(SystemProperties.user.dir)
 
 		val classpath	=
 			SystemProperties.java.clazz.path
@@ -98,7 +98,7 @@ object EngineStub extends Logging {
 				EngineStub.vm.mainClass,	port.toString
 			)
 		val	builder		= new ProcessBuilder(command.toJList)
-		builder directory		EngineStub.vm.userDir
+		builder directory		EngineStub.vm.userDir.toFile
 		builder redirectOutput	ProcessBuilder.Redirect.INHERIT
 		builder redirectError	ProcessBuilder.Redirect.INHERIT
 		// builder.environment() putAll env.toJMap

@@ -304,7 +304,7 @@ final class DeckUI(deck:Deck, keyboard:Signal[Set[Key]], keyTarget:Signal[Boolea
 				files
 				.invalidEffect	{ es => ERROR log es.toSeq.map(LogValue.throwable)	}
 				.toOption
-				.map			{ _.head }
+				.map			{ _.head.toPath }
 				.foreach		(deck.loadTrack)
 			}
 		}
@@ -312,6 +312,6 @@ final class DeckUI(deck:Deck, keyboard:Signal[Set[Key]], keyTarget:Signal[Boolea
 
 	DndFileExport.install(
 		component,
-		_ => deck.trackSignal.current map { it => Nes one it.file }
+		_ => deck.trackSignal.current map { it => Nes one it.file.toFile }
 	)
 }
