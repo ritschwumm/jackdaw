@@ -32,13 +32,13 @@ object BandCurve {
 			var	channel	= 0
 			var mono	= 0.0
 			while (channel < sample.channels.size) {
-				mono	+= sample channels channel get frame
+				mono	+= sample.channels(channel).get(frame)
 				channel	+= 1
 			}
 			mono	/= sample.channels.size
 
 			// val (valueLow, valueMiddle, valueHigh)	= equalizer nextBands mono
-			equalizer step mono
+			equalizer.step(mono)
 			val valueLow	= equalizer.l
 			val valueMiddle	= equalizer.m
 			val valueHigh	= equalizer.h
@@ -85,10 +85,10 @@ final case class BandCurve(
 	valuesMiddle:Array[Float],
 	valuesHigh:Array[Float]
 ) {
-	@inline def rangeFull(start:Int, size:Int):Float 	= rangeImpl(valuesFull,		start, size)
-	@inline def rangeLow(start:Int, size:Int):Float 	= rangeImpl(valuesLow,		start, size)
+	@inline def rangeFull(start:Int, size:Int):Float	= rangeImpl(valuesFull,		start, size)
+	@inline def rangeLow(start:Int, size:Int):Float		= rangeImpl(valuesLow,		start, size)
 	@inline def rangeMiddle(start:Int, size:Int):Float	= rangeImpl(valuesMiddle,	start, size)
-	@inline def rangeHigh(start:Int, size:Int):Float 	= rangeImpl(valuesHigh,		start, size)
+	@inline def rangeHigh(start:Int, size:Int):Float	= rangeImpl(valuesHigh,		start, size)
 
 	def rangeImpl(values:Array[Float], start:Int, size:Int):Float = {
 		val	end		= start + size

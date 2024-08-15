@@ -119,8 +119,8 @@ final class CacheSample(peer:Sample) extends Sample {
 	private def provideChunk(index:Int):Boolean	= {
 		if (chunks(index) ne null) {
 			// refresh existing chunk
-			lru removeEqual index
-			lru push index
+			lru.removeEqual(index)
+			lru.push(index)
 			false
 		}
 		else if (!lru.full) {
@@ -128,7 +128,7 @@ final class CacheSample(peer:Sample) extends Sample {
 			// TODO cache should be taken from a global pool
 			val buffer	= new Chunk(chunkSamples)
 			chunks(index)	= buffer
-			lru push index
+			lru.push(index)
 			load(index, buffer)
 			true
 		}
@@ -136,9 +136,9 @@ final class CacheSample(peer:Sample) extends Sample {
 			// reuse old chunk
 			val from	= lru.shift()
 			val buffer	= chunks(from)
-			chunks(from) 	= null
+			chunks(from)	= null
 			chunks(index)	= buffer
-			lru push index
+			lru.push(index)
 			load(index, buffer)
 			true
 		}
@@ -152,7 +152,7 @@ final class CacheSample(peer:Sample) extends Sample {
 		while (frameIndex < chunkFrames) {
 			var channelIndex	= 0
 			while (channelIndex < channelCount) {
-				chunk(outSample)	= peer channels channelIndex get inFrame
+				chunk(outSample)	= peer.channels(channelIndex).get(inFrame)
 				channelIndex	+= 1
 				outSample		+= 1
 			}
@@ -172,6 +172,6 @@ final class CacheSample(peer:Sample) extends Sample {
 
 	@inline
 	def writeBarrier():Unit	= {
-        barrier lazySet false
+        barrier.lazySet(false)
     }
 }

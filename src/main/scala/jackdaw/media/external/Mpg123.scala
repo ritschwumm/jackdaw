@@ -13,7 +13,7 @@ object Mpg123 extends Inspector with Decoder {
 	def readMetadata(input:Path):Checked[Metadata] =
 		for {
 			_		<-	recognizeFile(input)
-			_		<-	MediaUtil requireCommand "mpg123"
+			_		<-	MediaUtil.requireCommand("mpg123")
 			result	<-	MediaUtil.runCommand(
 							"mpg123",
 							"-n",	"1",
@@ -23,7 +23,7 @@ object Mpg123 extends Inspector with Decoder {
 						)
 		}
 		yield {
-			val extract	= MediaUtil extractFrom result.err
+			val extract	= MediaUtil.extractFrom(result.err)
 			Metadata(
 				title	= extract(re"""Title:\s+(.*?)\s+Artist:\s+(?:.*)"""),
 				artist	= extract(re"""Title:\s+(?:.*?)\s+Artist:\s+(.*)"""),
@@ -36,7 +36,7 @@ object Mpg123 extends Inspector with Decoder {
 	def convertToWav(input:Path, output:Path, preferredFrameRate:Int, preferredChannelCount:Int):Checked[Unit] =
 		for {
 			_	<-	recognizeFile(input)
-			_	<-	MediaUtil requireCommand "mpg123"
+			_	<-	MediaUtil.requireCommand("mpg123")
 			_	<-	MediaUtil.runCommand(
 						"mpg123",
 						"-w",	output.toString,

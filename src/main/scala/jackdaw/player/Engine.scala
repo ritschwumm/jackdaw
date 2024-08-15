@@ -1,6 +1,5 @@
 package jackdaw.player
 
-import scutil.lang.implicits.*
 import scutil.lang.*
 import scutil.log.*
 
@@ -19,8 +18,8 @@ object Engine {
 	// TODO using should return an Io
 	def create(output:Output, feedbackTarget:Target[EngineFeedback]):IoResource[EngineAction=>Unit]	=
 		for {
-			incomingActionQueue		<-	IoResource delay new Transfer[EngineAction]
-			loaderFeedbackQueue		<-	IoResource delay new Transfer[LoaderFeedback]
+			incomingActionQueue		<-	IoResource.delay { new Transfer[EngineAction] }
+			loaderFeedbackQueue		<-	IoResource.delay { new Transfer[LoaderFeedback] }
 			loaderTarget1			<-	Loader.create(loaderFeedbackQueue.asTarget)
 			loaderTarget2			<-	Loader.create(loaderFeedbackQueue.asTarget)
 			loaderTarget3			<-	Loader.create(loaderFeedbackQueue.asTarget)
@@ -37,7 +36,7 @@ object Engine {
 			output					<-	output.runProducerUsingConsumer(producer)
 		}
 		yield {
-			incomingActionQueue send _
+			incomingActionQueue.send(_)
 		}
 }
 
@@ -89,8 +88,8 @@ extends FrameProducer with Logging {
 			phoneBuffer.mul(phoneScale, phoneScale)
 		}
 
-		peakDetector put speakerBuffer.left
-		peakDetector put speakerBuffer.right
+		peakDetector.put(speakerBuffer.left)
+		peakDetector.put(speakerBuffer.right)
 
 		metronome.step(
 			player1.isRunning	||
@@ -112,34 +111,34 @@ extends FrameProducer with Logging {
 	//## incoming loader communication
 
 	private def receiveLoading():Unit	= {
-		loaderFeedbackQueue receiveAll reactLoading
+		loaderFeedbackQueue.receiveAll(reactLoading)
 	}
 
 	private val reactLoading:Effect[LoaderFeedback]	=
 		_ match {
-			case LoaderExecute(task)	=> task()
+			case LoaderFeedback.Execute(task)	=> task()
 		}
 
 	//------------------------------------------------------------------------------
 	//## incoming model communication
 
 	private def receiveActions():Unit	= {
-		incomingActionQueue receiveAll reactAction
+		incomingActionQueue.receiveAll(reactAction)
 	}
 
 	private val reactAction:Effect[EngineAction]	=
 		_ match {
 			case EngineAction.ChangeControl(speakerValue, phoneValue)	=>
-				speaker	target	speakerValue
-				phone	target	phoneValue
+				speaker	.target(speakerValue)
+				phone	.target(phoneValue)
 			case EngineAction.SetBeatRate(beatRate)		=>
-				metronome setBeatRate beatRate
+				metronome.setBeatRate(beatRate)
 				player1.metronomeBeatRateChanged()
 				player2.metronomeBeatRateChanged()
 				player3.metronomeBeatRateChanged()
-			case EngineAction.ControlPlayer(1, action)	=> player1 react action
-			case EngineAction.ControlPlayer(2, action)	=> player2 react action
-			case EngineAction.ControlPlayer(3, action)	=> player3 react action
+			case EngineAction.ControlPlayer(1, action)	=> player1.react(action)
+			case EngineAction.ControlPlayer(2, action)	=> player2.react(action)
+			case EngineAction.ControlPlayer(3, action)	=> player3.react(action)
 			case EngineAction.ControlPlayer(x, _)		=> ERROR("unexpected player", x)
 		}
 
@@ -147,7 +146,7 @@ extends FrameProducer with Logging {
 	//## outgoing model communication
 
 	private def sendFeedback():Unit	= {
-		feedbackTarget send mkFeedback
+		feedbackTarget.send(mkFeedback)
 	}
 
 	// NOTE this resets the peak detectors

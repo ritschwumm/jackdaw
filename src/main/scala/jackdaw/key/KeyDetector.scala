@@ -17,7 +17,7 @@ object KeyDetector {
 				var out	= 0f
 				var i = 0
 				while (i < channelCount) {
-					out	+= channels(i) get frame
+					out	+= channels(i).get(frame)
 					i	+= 1
 				}
 				out / channelCount
@@ -33,10 +33,10 @@ object KeyDetector {
 		val audio	= new Audio {
 			def frameCount	= sample.frameCount
 			def frameRate	= sample.frameRate.toDouble
-			def get(frame:Int):Float	= mono get frame
+			def get(frame:Int):Float	= mono.get(frame)
 		}
 
-		val result	= KeyFinder examine audio
+		val result	= KeyFinder.examine(audio)
 		convertKey(result.key)
 	}
 

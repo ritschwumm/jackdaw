@@ -17,9 +17,10 @@ object V4toCurrent extends Migration {
 
 	def convert(it:JsonValue):Either[JsonError,JsonValue]	=
 		{
-			import V4.LocalProtocol.{ given, * }
+			import V4.LocalProtocol.given
 			JsonIo.readAst[TrackData](it)
-		} flatMap { it =>
+		}
+		.flatMap { it =>
 			import JsonProtocol.given
 			JsonIo.writeAst[TrackData](it)
 		}

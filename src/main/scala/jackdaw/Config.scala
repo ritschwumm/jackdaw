@@ -9,7 +9,7 @@ import jackdaw.range.PitchMath.*
 import jackdaw.util.AppDirs
 
 object Config {
-	val guiUpdateInterval		= 40.millis
+	val guiUpdateInterval		= 40.duration.millis
 
 	// how much more block should be in the engine feed back queue after update
 	val guiQueueOvershot		= 10
@@ -24,7 +24,7 @@ object Config {
 	// how often to talk to the loader
 	val loaderIntervalFrames	= 1024
 
-	val preloadSpread			= 1.seconds
+	val preloadSpread			= 1.duration.seconds
 
 	val outputConfig	= OutputConfig(Seq.empty, 44100, 1024, 4, true)
 
@@ -35,14 +35,14 @@ object Config {
 
 	val filterLow		= 20.0	// Hz above zero
 	val filterHigh		= 10.0	// Hz below nyquist
-	val filterQ			= BiQuadCoeffs.sqrt2half * 1.5
+	val filterQ			= BiQuadCoeffs.flatCornerQ * 1.5
 
 	val detectBpsRange	= (bpm(60.0), bpm(220.0))
 	val rhythmBpsRange	= (bpm(60.0), bpm(220.0))
 
 	val curveRaster		= 256
 
-	val dataBase		= AppDirs forApp "jackdaw"
+	val dataBase		= AppDirs.forApp("jackdaw")
 
 	// at least the number of decks
 	val minCacheCount	= 3

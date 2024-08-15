@@ -10,9 +10,9 @@ object Oggdec extends Decoder {
 	def convertToWav(input:Path, output:Path, preferredFrameRate:Int, preferredChannelCount:Int):Checked[Unit] =
 		for {
 			_	<-	recognizeFile(input)
-			_	<-	MediaUtil requireCommand "oggdec"
+			_	<-	MediaUtil.requireCommand("oggdec")
 			_	<-	MediaUtil.runCommand(
-						"oggdec", 	// or ogg123
+						"oggdec",	// or ogg123
 						"-o",	output.toString,
 						"-b",	"16",			// 16 bit
 						"-e",	"0",			// little endian

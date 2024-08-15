@@ -12,7 +12,7 @@ object FFprobe extends Inspector {
 	def readMetadata(input:Path):Checked[Metadata] =
 		for {
 			// no suffix check
-			_		<-	MediaUtil requireCommand "ffprobe"
+			_		<-	MediaUtil.requireCommand("ffprobe")
 			result	<-	MediaUtil.runCommand(
 							"ffprobe",	input.toString
 							/*
@@ -25,7 +25,7 @@ object FFprobe extends Inspector {
 						)
 		}
 		yield {
-			val extract	= MediaUtil extractFrom result.err
+			val extract	= MediaUtil.extractFrom(result.err)
 			Metadata(
 				title	= extract(re"""    title\s*: (.*)"""),
 				artist	= extract(re"""    artist\s*: (.*)"""),

@@ -24,7 +24,7 @@ object Inspector {
 		.worker[Inspector,Metadata](
 			all,
 			_.name,
-			_ readMetadata input
+			_.readMetadata(input)
 		)
 }
 

@@ -44,7 +44,7 @@ object ButtonStyleFactory {
 		draft(	f1,	f7	)
 	))
 	// val STOP	= outlineButtonStyle(poly(
-	// 	draft(	a1,	g1,	g7,	a7, a1	)
+	//		draft(	a1,	g1,	g7,	a7, a1	)
 	// ))
 
 	val EJECT	= outlineButtonStyle(poly(
@@ -82,14 +82,14 @@ object ButtonStyleFactory {
 			poly(
 				draft(	/*f1,g2*/g4, g6, f7, b7, a6, a4/*a2,b1*/	)
 			),
-			DIGITS lift digit
+			DIGITS.lift(digit)
 		)
 	def LOOP_OFF(digit:Int):ButtonStyle	=
 		loopButtonStyle(
 			poly(
 				draft(	e1, f1, g2, g6, f7, b7, a6, a2, b1, c1	)
 			),
-			DIGITS lift digit
+			DIGITS.lift(digit)
 		)
 	val LOOP_RESET:ButtonStyle	= outlineButtonStyle(poly(
 		draft(	a7, f7, d5	)
@@ -112,7 +112,7 @@ object ButtonStyleFactory {
 			poly(
 				draft(	a1,	g1,	g7,	a7,	a1	)
 			),
-			DIGITS lift digit
+			DIGITS.lift(digit)
 		)
 
 	def TRIAL(state:Option[Boolean]):ButtonStyle	=
@@ -157,9 +157,9 @@ object ButtonStyleFactory {
 			Vector(
 				StrokeShape(shape, shapePaint, shapeStroke)
 			) ++
-			(digit map { it =>
+			digit.map { it =>
 				StrokeShape(it, shapePaint, Style.button.label.stroke)
-			}).toVector
+			}.toVector
 		}
 
 	// fills the inner part
@@ -170,9 +170,9 @@ object ButtonStyleFactory {
 				FillShape(shape, shapePaint),
 				StrokeShape(shape, shapePaint, shapeStroke)
 			) ++
-			(digit map { it =>
+			digit.map { it =>
 				StrokeShape(it, Style.button.label.color, Style.button.label.stroke)
-			}).toVector
+			}.toVector
 		}
 
 	private def trialButtonStyle(base:Poly, state:Option[Boolean]):ButtonStyle	=
@@ -204,8 +204,8 @@ object ButtonStyleFactory {
 	def digitCount	= DIGITS.size
 
 	private lazy val DIGITS:Seq[Shape]	=
-		LEDShape shapes (
-			(smallisher + 1	spanTo	biggisher - 1)	rectangleWith
-			(smallish   + 1	spanTo	biggish   - 1)
+		LEDShape.shapes(
+			(smallisher + 1).spanTo(biggisher - 1)	`rectangleWith`
+			(smallish   + 1).spanTo(biggish   - 1)
 		)
 }

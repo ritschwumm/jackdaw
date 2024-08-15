@@ -38,7 +38,7 @@ final case class TrackData(
 	def removeCuePoint(nearFrame:Double):TrackData	=
 		(	for {
 				index		<- nearestCuePointIndex(nearFrame)
-				cuePoints	<- cuePoints removeAt index
+				cuePoints	<- cuePoints.removeAt(index)
 			}
 			yield copy(cuePoints = cuePoints)
 		)
@@ -48,7 +48,7 @@ final case class TrackData(
 		cuePoints
 		.map	{ frame => abs(frame - nearFrame) }
 		.zipWithIndex
-		.sortBy	{ _._1 }(Ordering.Double.TotalOrdering)
+		.sortBy	(_._1)(Ordering.Double.TotalOrdering)
 		.headOption
-		.map	{ _._2 }
+		.map	(_._2)
 }

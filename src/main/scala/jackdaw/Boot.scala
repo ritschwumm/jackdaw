@@ -1,6 +1,5 @@
 package jackdaw
 
-import scutil.core.implicits.*
 import scutil.lang.*
 import scutil.gui.SwingUtil.edt
 import scutil.platform.ExceptionUtil
@@ -8,6 +7,7 @@ import scutil.log.*
 
 object Boot extends Logging {
 	def main(args:Array[String]):Unit	= {
+		// TODO does this still do anything?
 		System.setProperty("apple.awt.application.name", BuildInfo.name)
 
 		ExceptionUtil logAllExceptions { (thread,throwable) =>

@@ -12,7 +12,7 @@ import jackdaw.remote.EngineStub
 
 object Model {
 	def create(engine:EngineStub):IoResource[Model]	=
-		swingClock map (new Model(engine, _))
+		swingClock.map(new Model(engine, _))
 
 	private def swingClock:IoResource[Events[MilliInstant]]	=
 		IoResource.unsafe.disposing {
@@ -33,26 +33,26 @@ final class Model(engine:EngineStub, clock:Events[MilliInstant]) extends Observi
 	//## receive feedback from engine
 
 	private val nanoChange:Events[Long]	=
-		((clock tag System.nanoTime) stateful System.nanoTime) { (old,cur) =>
+		clock.tag(System.nanoTime).stateful(System.nanoTime) { (old,cur) =>
 			(cur, cur - old)
 		}
 
-	private val timedFeedback	= nanoChange map engine.feedbackTimed
+	private val timedFeedback	= nanoChange.map(engine.feedbackTimed)
 
-	private val engineFeedback	= timedFeedback.flattenOption hold EngineFeedback.empty
+	private val engineFeedback	= timedFeedback.flattenOption.hold(EngineFeedback.empty)
 
-	// private val engineFeedback	= (clock tag engine.feedbackAll).filterOption hold EngineFeedback.empty
-	private val playerFeedback1	= engineFeedback map { _.player1 }
-	private val playerFeedback2	= engineFeedback map { _.player2 }
-	private val playerFeedback3	= engineFeedback map { _.player3 }
+	// private val engineFeedback	= clock.tag(engine.feedbackAll).filterOption.hold(EngineFeedback.empty)
+	private val playerFeedback1	= engineFeedback.map(_.player1)
+	private val playerFeedback2	= engineFeedback.map(_.player2)
+	private val playerFeedback3	= engineFeedback.map(_.player3)
 
 	//------------------------------------------------------------------------------
 	//## forward outgoing events from engine
 
-	val masterPeak	= engineFeedback	map { _.masterPeak }
-	val masterPeak1	= playerFeedback1	map { _.masterPeak }
-	val masterPeak2	= playerFeedback2	map { _.masterPeak }
-	val masterPeak3	= playerFeedback3	map { _.masterPeak }
+	val masterPeak	= engineFeedback	.map(_.masterPeak)
+	val masterPeak1	= playerFeedback1	.map(_.masterPeak)
+	val masterPeak2	= playerFeedback2	.map(_.masterPeak)
+	val masterPeak3	= playerFeedback3	.map(_.masterPeak)
 
 	//------------------------------------------------------------------------------
 	//## child models
@@ -67,10 +67,10 @@ final class Model(engine:EngineStub, clock:Events[MilliInstant]) extends Observi
 	//## send incoming events to engine
 
 	private def enqueuePlayerAction(playerId:Int)(action:PlayerAction):Unit	= {
-		engine enqueueAction EngineAction.ControlPlayer(playerId, action)
+		engine.enqueueAction(EngineAction.ControlPlayer(playerId, action))
 	}
 
-	speed.beatRate	map EngineAction.SetBeatRate.apply	observeNow engine.enqueueAction
+	speed.beatRate.map(EngineAction.SetBeatRate.apply).observeNow(engine.enqueueAction)
 
 	private val changeControl:Signal[EngineAction]	=
 		signal {
@@ -79,5 +79,5 @@ final class Model(engine:EngineStub, clock:Events[MilliInstant]) extends Observi
 				phone	= mix.master.phoneGain.current
 			)
 		}
-	changeControl	observeNow engine.enqueueAction
+	changeControl.observeNow(engine.enqueueAction)
 }

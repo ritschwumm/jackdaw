@@ -40,10 +40,10 @@ final class MeterUI(value:Signal[Float], meterRange:MeterRange, vertical:Boolean
 		)
 
 	private val gradientColors	=
-		active map { case (_, color)	=> color }
+		active.map { (_, color)	=> color }
 
 	private val gradientFractions	=
-		active map { case (value, _)	=>
+		active.map { (value, _)	=>
 			linear2fraction(value).toFloat
 		}
 
@@ -54,28 +54,28 @@ final class MeterUI(value:Signal[Float], meterRange:MeterRange, vertical:Boolean
 
 	val component:JComponent	= canvas.component
 	component.putClientProperty("STRONG_REF", this)
-	component setBorder	Style.meter.border
+	component.setBorder(Style.meter.border)
 
 	//------------------------------------------------------------------------------
 	//## input
 
-	private val orientation	= SgOrientation trueVertical vertical
+	private val orientation	= SgOrientation.trueVertical(vertical)
 	private val miniMax		= SgSpan.one
 
 	private val fraction2gui:Signal[SgLinearTransform1D]	=
-		canvas.bounds map { it =>
+		canvas.bounds.map { it =>
 			SgLinearTransform1D.fromTo(
 				orientation.cata(miniMax, miniMax.swap),
-				it get orientation
+				it.get(orientation)
 			)
 		}
 
 	private val activeImage:Signal[BufferedImage]	=
-		canvas.bounds map { it =>
+		canvas.bounds.map { it =>
 			val size	=
 				IntPoint(
-					it.x.size.toInt optionBy { _ > 0 } getOrElse 1,
-					it.y.size.toInt optionBy { _ > 0 } getOrElse 1
+					it.x.size.toInt.optionBy(_ > 0).getOrElse(1),
+					it.y.size.toInt.optionBy(_ > 0).getOrElse(1)
 				)
 
 			// NOTE for y start and end are swapped
@@ -89,9 +89,9 @@ final class MeterUI(value:Signal[Float], meterRange:MeterRange, vertical:Boolean
 					gradientColors
 				)
 
-			(ImageUtil forComponent component).renderImage(size, false, g => {
-				g setPaint gradient
-				g .fillRect	(0,0, size.x, size.y)
+			ImageUtil.forComponent(component).renderImage(size, false, g => {
+				g.setPaint(gradient)
+				g.fillRect(0,0, size.x, size.y)
 			})
 		}
 
@@ -151,7 +151,7 @@ final class MeterUI(value:Signal[Float], meterRange:MeterRange, vertical:Boolean
 		}
 
 	private def stripeShape(bounds:SgRectangle, span:SgSpan):Shape	=
-		GeomUtil normalRectangle (
+		GeomUtil.normalRectangle(
 			bounds.set(
 				orientation,
 				span
@@ -161,5 +161,5 @@ final class MeterUI(value:Signal[Float], meterRange:MeterRange, vertical:Boolean
 	//------------------------------------------------------------------------------
 	//## wiring
 
-	figures observe canvas.figures.set
+	figures.observe(canvas.figures.set)
 }

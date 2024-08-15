@@ -1,10 +1,8 @@
 package jackdaw.data
 
-object RhythmUnit {
-	case object Phrase	extends RhythmUnit
-	case object Measure	extends RhythmUnit
-	case object Beat	extends RhythmUnit
+enum RhythmUnit {
+	case Phrase
+	case Measure
+	case Beat
 }
-
-sealed abstract class RhythmUnit
 

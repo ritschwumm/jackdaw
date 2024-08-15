@@ -1,11 +1,12 @@
 package jackdaw.model
 
+import scala.annotation.nowarn
+
 import java.nio.file.*
 
 import scala.ref.WeakReference
 
 import scutil.core.implicits.*
-import scutil.jdk.implicits.*
 import scutil.gui.SwingUtil.*
 import scutil.log.*
 import scutil.io.*
@@ -35,9 +36,9 @@ object Track extends Logging {
 	// NOTE different Track instances for the same File would be fatal
 	def load(file:Path):Option[Track]	=
 		file.toRealPath() into { canon =>
-			cache get canon flatMap { _.get } orElse {
+			cache.get(canon).flatMap(_.get) `orElse` {
 				loadImpl(canon) doto {
-					_ foreach { track =>
+					_.foreach { track =>
 						insert(canon, track)
 					}
 				}
@@ -46,7 +47,7 @@ object Track extends Logging {
 
 	private def loadImpl(file:Path):Option[Track]	=
 		try {
-			Some(new Track(file) doto { _.load() })
+			Some(new Track(file).doto(_.load()))
 		}
 		catch { case e:Exception	=>
 			ERROR(e)
@@ -61,7 +62,7 @@ object Track extends Logging {
 final class Track private(val file:Path) extends Observing with Logging {
 	val fileName	= file.getFileName.toString
 
-	private val trackFiles	= Library trackFilesFor file
+	private val trackFiles	= Library.trackFilesFor(file)
 
 	private val dataCell			= cell[TrackData](TrackData.empty)
 	private val dataLoadedCell		= cell[Boolean](false)
@@ -81,15 +82,16 @@ final class Track private(val file:Path) extends Observing with Logging {
 
 	//------------------------------------------------------------------------------
 
-	val annotation	= data map { _.annotation	}
-	val cuePoints	= data map { _.cuePoints	}
-	val rhythm		= data map { _.rhythm		}
-	val metadata	= data map { _.metadata	map { _.data	} }
-	val measure		= data map { _.measure	map { _.data	} }
-	val key			= data map { _.key		map { _.data	} }
+	val annotation	= data.map(_.annotation)
+	val cuePoints	= data.map(_.cuePoints)
+	val rhythm		= data.map(_.rhythm)
+	val metadata	= data.map(_.metadata	.map(_.data))
+	val measure		= data.map(_.measure	.map(_.data))
+	val key			= data.map(_.key		.map(_.data))
 
 	//------------------------------------------------------------------------------
 
+	@nowarn("msg=unused local definition")
 	def setAnnotation(it:String):Unit	= {
 		modifyData(TrackData.L.annotation set it)
 	}
@@ -98,16 +100,16 @@ final class Track private(val file:Path) extends Observing with Logging {
 		val snap:Double=>Double	=
 			rhythm.current.cata(
 				identity,
-				rhythm => rhythm raster rhythmUnit round _
+				rhythm => rhythm.raster(rhythmUnit).round(_)
 			)
 		modifyData {
-			_ addCuePoint snap(nearFrame)
+			_.addCuePoint(snap(nearFrame))
 		}
 	}
 
 	def removeCuePoint(nearFrame:Double):Unit	= {
 		modifyData {
-			_ removeCuePoint nearFrame
+			_.removeCuePoint(nearFrame)
 		}
 	}
 
@@ -115,35 +117,36 @@ final class Track private(val file:Path) extends Observing with Logging {
 		updateRhythm(position, data.current.rhythm.isEmpty)
 	}
 
+	@nowarn("msg=unused local definition")
 	private def updateRhythm(position:Double, activate:Boolean):Unit	= {
 		val it	=
 			activate.cata(
 				None,
-				detectedRhythm(position) orElse fakeRhythm(position)
+				detectedRhythm(position) `orElse` fakeRhythm(position)
 			)
 		modifyData(TrackData.L.rhythm set it)
 	}
 
 	private def fakeRhythm(position:Double):Option[Rhythm]	=
-		sample.current map { it =>
+		sample.current.map { it =>
 			Rhythm.fake(position, it.frameRate)
 		}
 
 	private def detectedRhythm(position:Double):Option[Rhythm]	=
-		measure.current map { measure =>
+		measure.current.map { measure =>
 			Rhythm.default(position, measure)
 		}
 
 	def setRhythmAnchor(position:Double):Unit	= {
-		modifyRhythm { _ copy (anchor=position) }
+		modifyRhythm { _.copy(anchor=position) }
 	}
 
 	def moveRhythmBy(offset:Double):Unit	= {
-		modifyRhythm { _ moveBy offset }
+		modifyRhythm { _.moveBy(offset) }
 	}
 
 	def resizeRhythmBy(factor:Double):Unit	= {
-		modifyRhythm { _ resizeBy factor }
+		modifyRhythm { _.resizeBy(factor) }
 	}
 
 	/** changes the rhythm size so lines under the cursor move with a constant offset */
@@ -152,6 +155,7 @@ final class Track private(val file:Path) extends Observing with Logging {
 	}
 
 	/** does not modify if the rhythm would not be useful afterwards */
+	@nowarn("msg=unused local definition")
 	private def modifyRhythm(func:Rhythm=>Rhythm):Unit	= {
 		modifyData(TrackData.L.rhythm mod { curr	=>
 			val valid	=
@@ -165,7 +169,7 @@ final class Track private(val file:Path) extends Observing with Logging {
 						beat <= rate / Config.rhythmBpsRange._1
 				}
 				yield rhythm
-			valid orElse curr
+			valid `orElse` curr
 		})
 	}
 
@@ -175,12 +179,13 @@ final class Track private(val file:Path) extends Observing with Logging {
 	private val curvePersister	= new BandCurvePersister
 
 	// NOTE using swing here is ugly
+	@nowarn("msg=unused local definition")
 	def load():Unit	= {
 		worker {
 			try {
 				INFO("loading file", file)
 
-				Library touch trackFiles
+				Library.touch(trackFiles)
 
 				val fileModified	= MoreFiles.lastModified(file)
 
@@ -188,7 +193,7 @@ final class Track private(val file:Path) extends Observing with Logging {
 				val dataVal:TrackData	=
 					Files.exists(trackFiles.data)
 					.flatOption {
-						dataPersister load trackFiles.data
+						dataPersister.load(trackFiles.data)
 					}
 					.someEffect	{ _ =>
 						INFO("using cached data")
@@ -197,7 +202,7 @@ final class Track private(val file:Path) extends Observing with Logging {
 						INFO("initializing data")
 						TrackData.empty
 					}
-				edt { dataCell set dataVal }()
+				edt { dataCell.set(dataVal) }()
 
 				// provide metadata
 				val metadataVal:Option[Stamped[Metadata]]	=
@@ -210,7 +215,7 @@ final class Track private(val file:Path) extends Observing with Logging {
 					}
 					.orElse {
 						INFO("reading metadata")
-						Inspector readMetadata file map { Stamped(fileModified, _) }
+						Inspector.readMetadata(file).map(Stamped(fileModified, _))
 					}
 					.noneEffect {
 						WARN("cannot read metadata")
@@ -222,7 +227,7 @@ final class Track private(val file:Path) extends Observing with Logging {
 				}()
 
 				// loaded enough to switch the track into the deck
-				edt { dataLoadedCell set true }()
+				edt { dataLoadedCell.set(true) }()
 
 				// provide wav
 				// NOTE symlinks have the same last modified date as the link target,
@@ -244,16 +249,16 @@ final class Track private(val file:Path) extends Observing with Logging {
 									Track.preferredFrameRate,
 									Track.preferredChannelCount
 								)
-						success option trackFiles.wav
+						success.option(trackFiles.wav)
 					}
 					.noneEffect {
 						WARN("cannot decode wav")
 					}
-				edt { wavCell set wavVal }()
+				edt { wavCell.set(wavVal) }()
 
 				// provide sample
 				val sampleVal:Option[Sample]	=
-					wavVal flatMap { wavFile =>
+					wavVal.flatMap { wavFile =>
 						INFO("getting sample")
 						Wav.load(wavFile)
 						.leftEffect	{	e =>
@@ -261,10 +266,10 @@ final class Track private(val file:Path) extends Observing with Logging {
 						}
 						.toOption
 					}
-				edt { sampleCell set sampleVal }()
+				edt { sampleCell.set(sampleVal) }()
 
 				// loaded enough to actually play the track
-				edt { sampleLoadedCell set true }()
+				edt { sampleLoadedCell.set(true) }()
 
 				// provide curve
 				val curveFresh:Boolean	=
@@ -273,23 +278,23 @@ final class Track private(val file:Path) extends Observing with Logging {
 				val curveVal:Option[BandCurve]	=
 					curveFresh
 					.flatOption	{
-						curvePersister load trackFiles.curve
+						curvePersister.load(trackFiles.curve)
 					}
 					.someEffect	{ _ =>
 						INFO("using cached curve")
 					}
 					.orElse	{
-						sampleVal map { sampleVal =>
+						sampleVal.map { sampleVal =>
 							INFO("calculating curve")
 							BandCurve
 							.calculate	(sampleVal, Config.curveRaster)
-							.doto		(curvePersister save trackFiles.curve)
+							.doto		(curvePersister.save(trackFiles.curve))
 						}
 					}
 					.noneEffect {
 						WARN("cannot provide curve")
 					}
-				edt { bandCurveCell set curveVal }()
+				edt { bandCurveCell.set(curveVal) }()
 
 				// provide measure
 				// TODO can use cached much earlier, before the curve is calculated!
@@ -302,14 +307,14 @@ final class Track private(val file:Path) extends Observing with Logging {
 						INFO("using cached beat rate")
 					}
 					.orElse {
-						curveVal map { curveVal =>
+						curveVal.map { curveVal =>
 							INFO("detecting beat rate")
 							val out:Double	=
-									MeasureDetector.measureFrames(
-										curveVal,
-										Config.detectBpsRange,
-										Schema.default.beatsPerMeasure
-									)
+								MeasureDetector.measureFrames(
+									curveVal,
+									Config.detectBpsRange,
+									Schema.default.beatsPerMeasure
+								)
 							Stamped(fileModified, out)
 						}
 					}
@@ -332,9 +337,9 @@ final class Track private(val file:Path) extends Observing with Logging {
 						INFO("using cached key")
 					}
 					.orElse {
-						sampleVal map { sampleVal =>
+						sampleVal.map { sampleVal =>
 							INFO("detecting key")
-							val out:MusicKey	= KeyDetector findKey sampleVal
+							val out:MusicKey	= KeyDetector.findKey(sampleVal)
 							Stamped(fileModified, out)
 						}
 					}
@@ -348,19 +353,19 @@ final class Track private(val file:Path) extends Observing with Logging {
 				}()
 
 				INFO("track loaded")
-				edt { fullyLoadedCell set true }()
+				edt { fullyLoadedCell.set(true) }()
 			}
 			catch { case e:Exception =>
 				ERROR("track could not be loaded", e)
-				edt { dataLoadedCell	set false }()
-				edt { fullyLoadedCell	set false }()
+				edt { dataLoadedCell.set(false) }()
+				edt { fullyLoadedCell.set(false) }()
 			}
 		}
 	}
 
 	private def modifyData(func:TrackData=>TrackData):Unit	= {
 		val modified	= func(dataCell.current)
-		dataCell set modified
-		(dataPersister save trackFiles.data)(modified)
+		dataCell.set(modified)
+		dataPersister.save(trackFiles.data)(modified)
 	}
 }

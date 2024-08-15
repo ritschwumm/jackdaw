@@ -10,7 +10,7 @@ object Opusdec extends Decoder {
 	def convertToWav(input:Path, output:Path, preferredFrameRate:Int, preferredChannelCount:Int):Checked[Unit] =
 		for {
 			_	<-	recognizeFile(input)
-			_	<-	MediaUtil requireCommand "opusdec"
+			_	<-	MediaUtil.requireCommand("opusdec")
 			_	<-	MediaUtil.runCommand(
 						"opusdec",
 						"--quiet",

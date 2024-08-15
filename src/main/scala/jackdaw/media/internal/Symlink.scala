@@ -14,7 +14,7 @@ object Symlink extends Decoder with Logging {
 	def convertToWav(input:Path, output:Path, preferredFrameRate:Int, preferredChannelCount:Int):Checked[Unit] =
 		for {
 			_	<-	recognizeFile(input)
-			_ 	<-	try {
+			_	<-	try {
 						// TODO should ensure the wav file is compatible
 						DEBUG(show"decoding with ${name}")
 						Files.deleteIfExists		(output)
@@ -23,7 +23,7 @@ object Symlink extends Decoder with Logging {
 					}
 					catch { case e:Exception =>
 						ERROR(show"${name} failed", e)
-						Checked fail1 show"${name} failed: ${e.getMessage}"
+						Checked.fail1(show"${name} failed: ${e.getMessage}")
 					}
 		}
 		yield ()

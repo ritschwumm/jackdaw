@@ -6,7 +6,13 @@ import scutil.lang.*
 import scala.collection.mutable
 
 /** last recently used cache, unsynchronized */
-final class LRU[S,T](size:Int, create:S=>T, touch:Effect[T] = (t:T)=>(), delete:Effect[T] = (t:T)=>()) extends AutoCloseable {
+final class LRU[S,T](
+	size:Int,
+	create:S=>T,
+	touch:Effect[T]		= (_:T)=>(),
+	delete:Effect[T]	= (_:T)=>()
+)
+extends AutoCloseable {
 	private val keys	= mutable.Queue.empty[S]
 	private val cache	= mutable.Map.empty[S,T]
 
@@ -35,13 +41,13 @@ final class LRU[S,T](size:Int, create:S=>T, touch:Effect[T] = (t:T)=>(), delete:
 	/** remove items matching a predicate */
 	def pruneIf(predicate:Predicate[S]):Unit	= {
 		val	ks	= keys dequeueAll predicate
-		val vs	= ks map cache
+		val vs	= ks.map(cache)
 		cache --= ks
-		vs foreach delete
+		vs.foreach(delete)
 	}
 
 	// TODO using do we have to call this?
 	def close():Unit	= {
-		cache.values foreach delete
+		cache.values.foreach(delete)
 	}
 }

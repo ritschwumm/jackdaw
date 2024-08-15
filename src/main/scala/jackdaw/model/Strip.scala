@@ -22,17 +22,17 @@ final class Strip(initialSpeaker:Double, initialPhone:Double, val meterRange:Met
 	val	speaker	= cell(initialSpeaker)	// VolumeRange
 	val	phone	= cell(initialPhone)	// VolumeRange
 
-	val speakerGain:Signal[Double]	= speaker	map	Strip.strip2gain
-	val phoneGain:Signal[Double]	= phone		map	Strip.strip2gain
+	val speakerGain:Signal[Double]	= speaker.signal	.map(Strip.strip2gain)
+	val phoneGain:Signal[Double]	= phone.signal		.map(Strip.strip2gain)
 
 	def moveSpeaker(steps:Int, fine:Boolean):Unit	= {
-		speaker modify modifier(steps, fine)
+		speaker.modify(modifier(steps, fine))
 	}
 
 	def movePhone(steps:Int, fine:Boolean):Unit	= {
-		phone modify modifier(steps, fine)
+		phone.modify(modifier(steps, fine))
 	}
 
 	private def modifier(steps:Int, fine:Boolean):Double=>Double	=
-			it => VolumeRange clamp (it + steps * (Strip step fine))
+		it => VolumeRange.clamp(it + steps * (Strip step fine))
 }

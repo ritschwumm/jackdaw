@@ -8,13 +8,13 @@ import scutil.gui.geom.*
 
 /** swing geometry utility functions */
 object GeomUtil {
-	val bottomRightInsets	= SgRectangleInsets symmetric SgSpanInsets.startEnd(0,1)
+	val bottomRightInsets	= SgRectangleInsets.symmetric(SgSpanInsets.startEnd(0, 1))
 
 	def normalRectangle(bounds:SgRectangle):Shape	=
 		bounds.normalize.toAwtRectangle2D
 
 	def smallerRectangle(bounds:SgRectangle):Shape	=
-		(bounds.normalize inset bottomRightInsets).toAwtRectangle2D
+		bounds.normalize.inset(bottomRightInsets).toAwtRectangle2D
 
 	def spanDeflate(span:SgSpan, size:Double):SgSpan	=
 		SgSpan.startEnd(span.start + size/2, span.end - size/2)

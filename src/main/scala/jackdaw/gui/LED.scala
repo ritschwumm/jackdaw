@@ -1,47 +1,32 @@
 package jackdaw.gui
 
 object LED {
-	sealed trait Horizontal
-	case object L	extends Horizontal
-	case object R	extends Horizontal
+	enum Horizontal {
+		case L, R
+	}
 
-	sealed trait Vertical
-	case object T	extends Vertical
-	case object C	extends Vertical
-	case object B	extends Vertical
+	enum Vertical {
+		case T, C, B
+	}
 
-	sealed trait Point
-	case object LT	extends Point
-	case object RT	extends Point
-	case object LC	extends Point
-	case object RC	extends Point
-	case object LB	extends Point
-	case object RB	extends Point
+	enum Point {
+		case LT, RT, LC, RC, LB, RB
+	}
 
-	sealed trait Segment
-	case object HT	extends Segment
-	case object HC	extends Segment
-	case object HB	extends Segment
-	case object VLU	extends Segment
-	case object VRU	extends Segment
-	case object VLL	extends Segment
-	case object VRL	extends Segment
+	enum Segment {
+		case HT, HC, HB, VLU, VRU, VLL, VRL
+	}
 
-	sealed trait Number
-	case object N0	extends Number
-	case object N1	extends Number
-	case object N2	extends Number
-	case object N3	extends Number
-	case object N4	extends Number
-	case object N5	extends Number
-	case object N6	extends Number
-	case object N7	extends Number
-	case object N8	extends Number
-	case object N9	extends Number
+	enum Number {
+		case N0, N1, N2, N3, N4, N5, N6, N7, N8, N9
+	}
 
 	//------------------------------------------------------------------------------
 
-	val pointPositions:Map[Point,(Horizontal,Vertical)]	=
+	val pointPositions:Map[Point,(Horizontal,Vertical)]	={
+		import Point.*
+		import Horizontal.*
+		import Vertical.*
 		Map(
 			LT	-> ((L,T)),
 			RT	-> ((R,T)),
@@ -50,8 +35,11 @@ object LED {
 			LB	-> ((L,B)),
 			RB	-> ((R,B))
 		)
+	}
 
-	val segmentPoints:Map[Segment,(Point,Point)]	=
+	val segmentPoints:Map[Segment,(Point,Point)]	= {
+		import Point.*
+		import Segment.*
 		Map(
 			HT	-> (LT -> RT),
 			HC	-> (LC -> RC),
@@ -61,8 +49,11 @@ object LED {
 			VLL	-> (LC -> LB),
 			VRL	-> (RC -> RB)
 		)
+	}
 
-	val numberSegments:Map[Number,Set[Segment]]	=
+	val numberSegments:Map[Number,Set[Segment]]	= {
+		import Number.*
+		import Segment.*
 		Map(
 			N0	-> Set(HT, HB,		VLU, VLL, VRU, VRL),
 			N1	-> Set(				VRU, VRL),
@@ -75,5 +66,6 @@ object LED {
 			N8	-> Set(HT, HC, HB,	VLU, VLL, VRU, VRL),
 			N9	-> Set(HT, HC, HB,	VLU, VRU, VRL)
 		)
+	}
 }
 

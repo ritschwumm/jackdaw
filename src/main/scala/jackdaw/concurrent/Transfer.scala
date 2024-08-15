@@ -11,7 +11,7 @@ final class Transfer[T] {
 	private val queue	= new ConcurrentLinkedQueue[T]
 
 	def available:Int		= queue.size
-	def send(item:T):Unit	= queue offer item
+	def send(item:T):Unit	= queue.offer(item)
 	def receive():Option[T]	= Option(queue.poll)
 
 	@tailrec

@@ -10,7 +10,7 @@ object FFmpeg extends Decoder {
 	def convertToWav(input:Path, output:Path, preferredFrameRate:Int, preferredChannelCount:Int):Checked[Unit] =
 		for {
 			// no suffix check
-			_	<-	MediaUtil requireCommand "ffmpeg"
+			_	<-	MediaUtil.requireCommand("ffmpeg")
 			_	<-	MediaUtil.runCommand(
 						"ffmpeg",	"-y",
 						"-i",		input.toString,

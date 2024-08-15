@@ -15,8 +15,8 @@ object AppDirs {
 				// Platform.homeDir / "Library" / "Cache" / name,
 				Platform.homeDir / ("." + name)
 			case Some(OperatingSystem.Windows)	=>
-				val appData	= (Platform env "LOCALAPPDATA") orElse (Platform env "APPDATA") map (Path.of(_))
-				(appData getOrElse Platform.homeDir) / name
+				val appData	= Platform.env("LOCALAPPDATA") `orElse` Platform.env("APPDATA") `map` (Path.of(_))
+				appData.getOrElse(Platform.homeDir) / name
 			case None	=>
 				Platform.homeDir / name
 		}

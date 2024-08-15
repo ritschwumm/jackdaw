@@ -22,7 +22,7 @@ object ImageUtil {
 final class ImageUtil(graphicsConfiguration:GraphicsConfiguration) {
 	def renderImage(size:IntPoint, transparent:Boolean, paint:Effect[Graphics2D]):BufferedImage	=
 		createImage(size, transparent) doto {
-			_.createGraphics.asInstanceOf[Graphics2D] use paint
+			_.createGraphics.asInstanceOf[Graphics2D].use(paint)
 		}
 
 	def createImage(size:IntPoint, transparent:Boolean):BufferedImage	=

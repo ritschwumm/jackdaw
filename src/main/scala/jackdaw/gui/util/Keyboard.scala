@@ -21,13 +21,15 @@ object Keyboard {
 		for {
 			keysCell	<-	IoResource.unsafe.releasable(cell(Set.empty[Key]))
 			state		=	new AtomicReference(Map.empty[Key,Option[Long]])
-			update		= 	(now:Long) => {
-								keysCell set state.updateAndGet{ state =>
-									state filter {
-										case (key, Some(when))	=> now - when < maxAge
-										case (key, None)		=> true
-									}
-								}.keySet
+			update		=	(now:Long) => {
+								keysCell.set(
+									state.updateAndGet{ state =>
+										state filter {
+											case (key, Some(when))	=> now - when < maxAge
+											case (key, None)		=> true
+										}
+									}.keySet
+								)
 							}
 			_				<-	globalEvent {
 									case ev:KeyEvent	=>

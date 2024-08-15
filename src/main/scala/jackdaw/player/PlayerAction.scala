@@ -4,8 +4,9 @@ import java.nio.file.Path
 
 import jackdaw.data.*
 
-object PlayerAction {
-	final case class PlayerChangeControl(
+/** changes to a Player's state */
+enum PlayerAction {
+	case ChangeControl(
 		trim:Double,
 		filter:Double,
 		low:Double,
@@ -14,35 +15,31 @@ object PlayerAction {
 		speaker:Double,
 		phone:Double
 	)
-	extends PlayerAction
 
-	final case class PlayerSetNeedSync(needSync:Boolean)	extends PlayerAction
+	case SetNeedSync(needSync:Boolean)
 
-	final case class PlayerSetFile(file:Option[Path])		extends PlayerAction
-	final case class PlayerSetRhythm(rhythm:Option[Rhythm])	extends PlayerAction
+	case SetFile(file:Option[Path])
+	case SetRhythm(rhythm:Option[Rhythm])
 
-	final case class PlayerSetRunning(running:Boolean)		extends PlayerAction
+	case SetRunning(running:Boolean)
 
-	final case class PlayerPitchAbsolute(pitch:Double, keepSync:Boolean)	extends PlayerAction
+	case PitchAbsolute(pitch:Double, keepSync:Boolean)
 
-	final case class PlayerPhaseAbsolute(position:RhythmValue)	extends PlayerAction
-	final case class PlayerPhaseRelative(offset:RhythmValue)	extends PlayerAction
+	case PhaseAbsolute(position:RhythmValue)
+	case PhaseRelative(offset:RhythmValue)
 
-	final case class PlayerPositionAbsolute(frame:Double)						extends PlayerAction
+	case PositionAbsolute(frame:Double)
 	// TODO raster could be a RhythmValue - when there's no rhythm, use PlayerPositionAbsolute
 	// TODO wrong: the RhythmValue here is used as a raster, but the current phase is kept stable.. untangle this.
-	final case class PlayerPositionJump(frame:Double, rhythmUnit:RhythmUnit)	extends PlayerAction
-	final case class PlayerPositionSeek(offset:RhythmValue)						extends PlayerAction
+	case PositionJump(frame:Double, rhythmUnit:RhythmUnit)
+	case PositionSeek(offset:RhythmValue)
 
-	final case class  PlayerDragAbsolute(v:Double)	extends PlayerAction
-	case object PlayerDragEnd						extends PlayerAction
+	case DragAbsolute(v:Double)
+	case DragEnd
 
-	final case class  PlayerScratchRelative(frames:Double)	extends PlayerAction
-	case object PlayerScratchEnd							extends PlayerAction
+	case ScratchRelative(frames:Double)
+	case ScratchEnd
 
-	final case class PlayerLoopEnable(preset:LoopDef)	extends PlayerAction
-	case object PlayerLoopDisable						extends PlayerAction
+	case LoopEnable(preset:LoopDef)
+	case LoopDisable
 }
-
-/** changes to a Player's state */
-sealed abstract class PlayerAction

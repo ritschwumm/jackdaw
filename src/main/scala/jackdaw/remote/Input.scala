@@ -111,7 +111,7 @@ final class Input(val st:InputStream) {
 			case x	=> sys error show"unexpected tag $x"
 		}
 	def readPlayerAction_PlayerChangeControl():PlayerAction	=
-		PlayerAction.PlayerChangeControl(
+		PlayerAction.ChangeControl(
 			trim	= readDouble(),
 			filter	= readDouble(),
 			low		= readDouble(),
@@ -121,65 +121,65 @@ final class Input(val st:InputStream) {
 			phone	= readDouble()
 		)
 	def readPlayerAction_PlayerSetNeedSync():PlayerAction	=
-		PlayerAction.PlayerSetNeedSync(
+		PlayerAction.SetNeedSync(
 			needSync	= readBoolean()
 		)
 	def readPlayerAction_PlayerSetFile():PlayerAction	=
-		PlayerAction.PlayerSetFile(
+		PlayerAction.SetFile(
 			file	= readOption(readPath())
 		)
 	def readPlayerAction_PlayerSetRhythm():PlayerAction	=
-		PlayerAction.PlayerSetRhythm(
+		PlayerAction.SetRhythm(
 			rhythm	= readOption(readRhythm())
 		)
 	def readPlayerAction_PlayerSetRunning():PlayerAction	=
-		PlayerAction.PlayerSetRunning(
+		PlayerAction.SetRunning(
 			running	= readBoolean()
 		)
 	def readPlayerAction_PlayerPitchAbsolute():PlayerAction	=
-		PlayerAction.PlayerPitchAbsolute(
+		PlayerAction.PitchAbsolute(
 			pitch		= readDouble(),
 			keepSync	= readBoolean()
 		)
 	def readPlayerAction_PlayerPhaseAbsolute():PlayerAction	=
-		PlayerAction.PlayerPhaseAbsolute(
+		PlayerAction.PhaseAbsolute(
 			position	= readRhythmValue()
 		)
 	def readPlayerAction_PlayerPhaseRelative():PlayerAction	=
-		PlayerAction.PlayerPhaseRelative(
+		PlayerAction.PhaseRelative(
 			offset		= readRhythmValue()
 		)
 	def readPlayerAction_PlayerPositionAbsolute():PlayerAction	=
-		PlayerAction.PlayerPositionAbsolute(
+		PlayerAction.PositionAbsolute(
 			frame	= readDouble()
 		)
 	def readPlayerAction_PlayerPositionJump():PlayerAction	=
-		PlayerAction.PlayerPositionJump(
+		PlayerAction.PositionJump(
 			frame		= readDouble(),
 			rhythmUnit	= readRhythmUnit()
 		)
 	def readPlayerAction_PlayerPositionSeek():PlayerAction	=
-		PlayerAction.PlayerPositionSeek(
+		PlayerAction.PositionSeek(
 			offset		= readRhythmValue()
 		)
 	def readPlayerAction_PlayerDragAbsolute():PlayerAction	=
-		PlayerAction.PlayerDragAbsolute(
+		PlayerAction.DragAbsolute(
 			v	= readDouble()
 		)
 	def readPlayerAction_PlayerDragEnd():PlayerAction	=
-		PlayerAction.PlayerDragEnd
+		PlayerAction.DragEnd
 	def readPlayerAction_PlayerScratchRelative():PlayerAction	=
-		PlayerAction.PlayerScratchRelative(
+		PlayerAction.ScratchRelative(
 			frames	= readDouble()
 		)
 	def readPlayerAction_PlayerScratchEnd():PlayerAction	=
-		PlayerAction.PlayerScratchEnd
+		PlayerAction.ScratchEnd
 	def readPlayerAction_PlayerLoopEnable():PlayerAction	=
-		PlayerAction.PlayerLoopEnable(
+		PlayerAction.LoopEnable(
 			preset	= readLoopDef()
 		)
 	def readPlayerAction_PlayerLoopDisable():PlayerAction	=
-		PlayerAction.PlayerLoopDisable
+		PlayerAction.LoopDisable
 
 	def readPath():Path	=
 		Path.of(readString())

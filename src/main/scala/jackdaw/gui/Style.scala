@@ -19,7 +19,7 @@ import jackdaw.BuildInfo
 /** constants for gui elements */
 object Style {
 	def setupLnF():Unit	= {
-		UIManager setLookAndFeel new MetalLookAndFeel
+		UIManager.setLookAndFeel(new MetalLookAndFeel)
 		/*
 		// set nimbus laf
 		UIManager.getInstalledLookAndFeels
@@ -53,7 +53,7 @@ object Style {
 	// for components with STRONG_BACKGROUND
 	// between STRONG_BACKGROUND and NORMAL_BACKGROUND
 	private val STRONG_OUTLINE		= Color.GRAY.darker.darker
-	private val STRONG_BORDER		= BorderFactory createLineBorder STRONG_OUTLINE
+	private val STRONG_BORDER		= BorderFactory.createLineBorder(STRONG_OUTLINE)
 
 	// for items with a track
 	// between WEAK_FOREGROUND and NORMAL_BACKGROUND
@@ -192,7 +192,7 @@ object Style {
 	}
 
 	object linear {
-		val size	= new Dimension(14,14)
+		val size	= new Dimension(14, 14)
 
 		// track and knob
 		object outline {
@@ -228,7 +228,7 @@ object Style {
 	}
 
 	object phase {
-		val size	= new Dimension(14,14)
+		val size	= new Dimension(14, 14)
 		val border	= STRONG_BORDER
 
 		object background {
@@ -272,7 +272,7 @@ object Style {
 			val stroke	= SIMPLE_STROKE
 		}
 		object loop {
-			val color	= DISABLED_BACKGROUND withAlpha 0.4f
+			val color	= DISABLED_BACKGROUND.withAlpha(0.4f)
 		}
 		object marker {
 			val color	= WEAK_FOREGROUND
@@ -324,7 +324,7 @@ object Style {
 
 	//------------------------------------------------------------------------------
 
-	private def bufferedImage(path:String):BufferedImage	= ImageIO read resource(path)
+	private def bufferedImage(path:String):BufferedImage	= ImageIO.read(resource(path))
 	//private def imageIcon(path:String):ImageIcon			= new ImageIcon(resource(path))
-	private def resource(path:String):URL					= getClass getResource path
+	private def resource(path:String):URL					= getClass.getResource(path)
 }

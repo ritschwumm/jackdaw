@@ -6,7 +6,7 @@ import javax.swing.*
 /** used to break cycles between UI components */
 final class DelayUI(child: =>UI) extends UI {
 	private val	panel	= new JPanel
-	panel setLayout new BorderLayout
+	panel.setLayout(new BorderLayout)
 
 	val component:JComponent	= panel
 

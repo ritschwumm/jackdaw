@@ -10,9 +10,9 @@ object GridBagUI {
 
 final class GridBagUI(subs:Seq[GridBagItem]) extends UI {
 	private val	panel	= new JPanel
-	panel setLayout new GridBagLayout
+	panel.setLayout(new GridBagLayout)
 
-	subs foreach { case GridBagItem(ui,constraint) =>
+	subs.foreach { case GridBagItem(ui,constraint) =>
 		panel.add(ui.component, constraint)
 	}
 

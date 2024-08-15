@@ -30,13 +30,13 @@ final class PhaseUI(value:Signal[Option[Double]], rhythm:Signal[Option[Rhythm]])
 
 	val component:JComponent	= canvas.component
 	component.putClientProperty("STRONG_REF", this)
-	component setBorder	Style.phase.border
+	component.setBorder(Style.phase.border)
 
 	//------------------------------------------------------------------------------
 	//## input
 
 	private val value2gui	=
-		canvas.bounds map { it =>
+		canvas.bounds.map { it =>
 			SgLinearTransform1D.fromTo(PhaseRange.span, it.x)
 		}
 
@@ -51,7 +51,7 @@ final class PhaseUI(value:Signal[Option[Double]], rhythm:Signal[Option[Rhythm]])
 			val rhythmCur		= rhythm.current
 			val guiNeutral		= value2guiCur(0.0)
 
-			val lineSpan		= trackBoundsCur.y inset PhaseUI.lineInsets
+			val lineSpan		= trackBoundsCur.y.inset(PhaseUI.lineInsets)
 
 			val bar	=
 				for {
@@ -60,7 +60,7 @@ final class PhaseUI(value:Signal[Option[Double]], rhythm:Signal[Option[Rhythm]])
 							// extreme values fill complete area
 							if (PhaseRange inside value) {
 								// NOTE hack to make it change less often
-								rint(value2guiCur(value)) spanTo guiNeutral rectangleWith trackBoundsCur.y
+								rint(value2guiCur(value)).spanTo(guiNeutral).rectangleWith(trackBoundsCur.y)
 							}
 							else {
 								trackBoundsCur
@@ -69,7 +69,7 @@ final class PhaseUI(value:Signal[Option[Double]], rhythm:Signal[Option[Rhythm]])
 					if !rect.empty
 				}
 				yield {
-					val shape	= GeomUtil normalRectangle rect
+					val shape	= GeomUtil.normalRectangle(rect)
 					FillShape(shape, Style.phase.bar.color)
 				}
 
@@ -94,7 +94,7 @@ final class PhaseUI(value:Signal[Option[Double]], rhythm:Signal[Option[Rhythm]])
 	//------------------------------------------------------------------------------
 	//## wiring
 
-	figures observe canvas.figures.set
+	figures.observe(canvas.figures.set)
 
 	//------------------------------------------------------------------------------
 	//## output
@@ -103,16 +103,15 @@ final class PhaseUI(value:Signal[Option[Double]], rhythm:Signal[Option[Rhythm]])
 		canvas.mouse.wheelRotation
 
 	private val leftJump:Events[Double]	=
-		canvas.mouse.leftPress							orElse
-		canvas.mouse.leftDrag							map
-		{ _.getX }										snapshot
-		value2gui										map
-		{ case (x, value2gui) => value2gui inverse x }	map
-		PhaseRange.clamp
+		canvas.mouse.leftPress.orElse(canvas.mouse.leftDrag)
+		.map(_.getX)
+		.snapshot(value2gui)
+		.map{ (x, value2gui) => value2gui.inverse(x) }
+		.map(PhaseRange.clamp)
 
 	private val middleReset:Events[Double]	=
-		canvas.mouse.rightPress tag 0.0
+		canvas.mouse.rightPress.tag(0.0)
 
 	val jump:Events[Double]	=
-		leftJump orElse middleReset
+		leftJump `orElse` middleReset
 }

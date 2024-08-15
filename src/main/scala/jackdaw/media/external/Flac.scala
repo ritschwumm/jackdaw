@@ -10,7 +10,7 @@ object Flac extends Decoder {
 	def convertToWav(input:Path, output:Path, preferredFrameRate:Int, preferredChannelCount:Int):Checked[Unit] =
 		for {
 			_	<-	recognizeFile(input)
-			_	<-	MediaUtil requireCommand "flac"
+			_	<-	MediaUtil.requireCommand("flac")
 			_	<-	MediaUtil.runCommand(
 						"flac",
 						"-o",				output.toString,

@@ -3,7 +3,6 @@ package jackdaw.player
 import java.nio.file.Path
 
 import scutil.core.implicits.*
-import scutil.io.implicits.*
 import scutil.lang.*
 import scutil.time.*
 import scutil.log.*
@@ -14,7 +13,7 @@ import jackdaw.concurrent.*
 
 object Loader extends Logging {
 	private val actorPriority:Int			= (Thread.NORM_PRIORITY+Thread.MAX_PRIORITY)/2
-	private val cycleDelay:MilliDuration	= 10.millis
+	private val cycleDelay:MilliDuration	= 10.duration.millis
 
 	def create(engineTarget:Target[LoaderFeedback]):IoResource[Target[LoaderAction]]	= {
 		val loader	= new Loader(engineTarget)
@@ -52,7 +51,7 @@ final class Loader(engineTarget:Target[LoaderFeedback]) extends Logging {
 	}
 
 	private def doPreload(sample:CacheSample, centerFrame:Int):Unit	= {
-		val changed		= sample provide centerFrame
+		val changed		= sample.provide(centerFrame)
 		if (changed) {
 			sample.writeBarrier()
 			// BETTER don't close over the sample, we already know it
@@ -63,6 +62,6 @@ final class Loader(engineTarget:Target[LoaderFeedback]) extends Logging {
 	}
 
 	private def doInEngine(task:Thunk[Unit]):Unit	= {
-		 engineTarget send LoaderExecute(task)
+		engineTarget.send(LoaderFeedback.Execute(task))
 	}
 }

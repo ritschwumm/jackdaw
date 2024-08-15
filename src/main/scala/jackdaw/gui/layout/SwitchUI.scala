@@ -11,9 +11,9 @@ final class SwitchUI(child:Signal[UI]) extends UI with Observing {
 		new JPanel {
 			override def getMaximumSize:Dimension	= getPreferredSize
 		}
-	panel setLayout new BorderLayout
+	panel.setLayout(new BorderLayout)
 
-	child observeNow { ui =>
+	child.observeNow { ui =>
 		panel.removeAll()
 		panel.add(ui.component, BorderLayout.CENTER)
 		panel.invalidate()

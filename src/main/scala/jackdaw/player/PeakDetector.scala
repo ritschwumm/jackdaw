@@ -19,7 +19,7 @@ final class PeakDetector {
 	}
 
 	def put(next:Float):Unit	= {
-		val abs	= if (next >= 0) 	next	else -next
+		val abs	= if (next >= 0)	next	else -next
 		peak	= if (abs > peak)	abs		else peak
 	}
 }

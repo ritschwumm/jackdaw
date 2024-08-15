@@ -9,26 +9,26 @@ final class MatchUI(synced:Signal[Option[Boolean]], pitched:Signal[Boolean]) ext
 	//------------------------------------------------------------------------------
 	//## components
 
-	private val syncUI		= new ButtonUI(ButtonStyleFactory.size, synced map ButtonStyleFactory.TRIAL, static(true))
-	private val	resetButton	= new ButtonUI(ButtonStyleFactory.size, static(ButtonStyleFactory.CROSS),	pitched)
-	private val	upButton	= new ButtonUI(ButtonStyleFactory.size, static(ButtonStyleFactory.PLUS),	static(true))
-	private val	downButton	= new ButtonUI(ButtonStyleFactory.size, static(ButtonStyleFactory.MINUS),	static(true))
-	private val	pushButton	= new ButtonUI(ButtonStyleFactory.size, static(ButtonStyleFactory.UP),		static(true))
-	private val	pullButton	= new ButtonUI(ButtonStyleFactory.size, static(ButtonStyleFactory.DOWN),	static(true))
+	private val syncUI		= new ButtonUI(ButtonStyleFactory.size, synced.map(ButtonStyleFactory.TRIAL),	static(true))
+	private val	resetButton	= new ButtonUI(ButtonStyleFactory.size, static(ButtonStyleFactory.CROSS),		pitched)
+	private val	upButton	= new ButtonUI(ButtonStyleFactory.size, static(ButtonStyleFactory.PLUS),		static(true))
+	private val	downButton	= new ButtonUI(ButtonStyleFactory.size, static(ButtonStyleFactory.MINUS),		static(true))
+	private val	pushButton	= new ButtonUI(ButtonStyleFactory.size, static(ButtonStyleFactory.UP),			static(true))
+	private val	pullButton	= new ButtonUI(ButtonStyleFactory.size, static(ButtonStyleFactory.DOWN),		static(true))
 
 	private val panel	=
 		VBoxUI(
-			syncUI,
+			BoxItem.Component(syncUI),
 			BoxItem.Strut(4+4),
-			resetButton,
+			BoxItem.Component(resetButton),
 			BoxItem.Strut(4+4),
-			upButton,
+			BoxItem.Component(upButton),
 			BoxItem.Strut(4),
-			downButton,
+			BoxItem.Component(downButton),
 			BoxItem.Strut(4),
-			pushButton,
+			BoxItem.Component(pushButton),
 			BoxItem.Strut(4+4),
-			pullButton
+			BoxItem.Component(pullButton),
 		)
 	val component	= panel.component
 
@@ -41,10 +41,10 @@ final class MatchUI(synced:Signal[Option[Boolean]], pitched:Signal[Boolean]) ext
 	val reset:Events[Unit]		= resetButton.actions
 
 	val pitch:Signal[Option[Boolean]]	=
-		upButton.pressed	upDown
+		upButton.pressed	`upDown`
 		downButton.pressed
 
 	val dragging:Signal[Option[Boolean]]	=
-		pushButton.pressed	upDown
+		pushButton.pressed	`upDown`
 		pullButton.pressed
 }

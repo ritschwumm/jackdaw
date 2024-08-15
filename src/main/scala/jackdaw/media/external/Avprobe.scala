@@ -12,7 +12,7 @@ object Avprobe extends Inspector {
 	def readMetadata(input:Path):Checked[Metadata] =
 		for {
 			// no suffix check
-			_		<- MediaUtil requireCommand "avprobe"
+			_		<- MediaUtil.requireCommand("avprobe")
 			result	<-
 					MediaUtil.runCommand(
 						"avprobe",	input.toString
@@ -26,7 +26,7 @@ object Avprobe extends Inspector {
 					)
 		}
 		yield {
-			val extract	= MediaUtil extractFrom result.err
+			val extract	= MediaUtil.extractFrom(result.err)
 			Metadata(
 				title	= extract(re"""    title\s*: (.*)"""),
 				artist	= extract(re"""    artist\s*: (.*)"""),

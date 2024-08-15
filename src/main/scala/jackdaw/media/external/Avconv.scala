@@ -10,7 +10,7 @@ object Avconv extends Decoder {
 	def convertToWav(input:Path, output:Path, preferredFrameRate:Int, preferredChannelCount:Int):Checked[Unit] =
 		for {
 			// no suffix check
-			_	<- MediaUtil requireCommand "avconv"
+			_	<- MediaUtil.requireCommand("avconv")
 			_	<-
 					MediaUtil.runCommand(
 						"avconv",	"-y",

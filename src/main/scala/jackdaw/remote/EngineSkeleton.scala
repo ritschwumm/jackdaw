@@ -19,13 +19,13 @@ object EngineSkeleton extends Logging {
 		create(port).use(identity).unsafeRun()
 	}
 
-	private val cycleDelay:MilliDuration	= 5.millis
+	private val cycleDelay:MilliDuration	= 5.duration.millis
 
 	def create(port:Int):IoResource[Io[Unit]]	= {
 		for {
 			_				<-	debugLifecycle("starting", "stopped")
 			tcpConnection	<-	TcpClient.open(port)
-			sendToStub		=	tcpConnection send (_:ToStub)
+			sendToStub		=	tcpConnection.send(_:ToStub)
 			sender			<-	Actor.create[EngineFeedback](
 									"skeleton sender",
 									Thread.NORM_PRIORITY,
@@ -36,7 +36,7 @@ object EngineSkeleton extends Logging {
 									}
 								)
 			output			=	Output.find(Config.outputConfig).getOrError("audio is not available")
-			_				<-	IoResource delay sendToStub(ToStub.Started(output.outputInfo.rate, output.outputInfo.headphone))
+			_				<-	IoResource.delay { sendToStub(ToStub.Started(output.outputInfo.rate, output.outputInfo.headphone)) }
 			enqueueAction	<-	Engine.create(output, sender)
 			_				<-	debugLifecycle("started", "stopping")
 		}

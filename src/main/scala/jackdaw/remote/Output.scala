@@ -79,26 +79,26 @@ final class Output(val st:OutputStream) {
 	}
 	def writePlayerAction(it:PlayerAction):Unit = {
 		it match {
-		case x@PlayerAction.PlayerChangeControl(_,_,_,_,_,_,_)	=> writeByte(0);	writePlayerChangeControl(x)
-		case x@PlayerAction.PlayerSetNeedSync(_)					=> writeByte(1);	writePlayerSetNeedSync(x)
-		case x@PlayerAction.PlayerSetFile(_)						=> writeByte(2);	writePlayerSetFile(x)
-		case x@PlayerAction.PlayerSetRhythm(_)					=> writeByte(3);	writePlayerSetRhythm(x)
-		case x@PlayerAction.PlayerSetRunning(_)					=> writeByte(4);	writePlayerSetRunning(x)
-		case x@PlayerAction.PlayerPitchAbsolute(_,_)				=> writeByte(5);	writePlayerPitchAbsolute(x)
-		case x@PlayerAction.PlayerPhaseAbsolute(_)				=> writeByte(6);	writePlayerPhaseAbsolute(x)
-		case x@PlayerAction.PlayerPhaseRelative(_)				=> writeByte(7);	writePlayerPhaseRelative(x)
-		case x@PlayerAction.PlayerPositionAbsolute(_)			=> writeByte(8);	writePlayerPositionAbsolute(x)
-		case x@PlayerAction.PlayerPositionJump(_,_)				=> writeByte(9);	writePlayerPositionJump(x)
-		case x@PlayerAction.PlayerPositionSeek(_)				=> writeByte(10);	writePlayerPositionSeek(x)
-		case x@PlayerAction.PlayerDragAbsolute(_)				=> writeByte(11);	writePlayerDragAbsolute(x)
-		case PlayerAction.PlayerDragEnd							=> writeByte(12);	writePlayerDragEnd(PlayerAction.PlayerDragEnd)
-		case x@PlayerAction.PlayerScratchRelative(_)				=> writeByte(13);	writePlayerScratchRelative(x)
-		case PlayerAction.PlayerScratchEnd						=> writeByte(14);	writePlayerScratchEnd(PlayerAction.PlayerScratchEnd)
-		case x@PlayerAction.PlayerLoopEnable(_)					=> writeByte(15);	writePlayerLoopEnable(x)
-		case PlayerAction.PlayerLoopDisable						=> writeByte(16);	writePlayerLoopDisable(PlayerAction.PlayerLoopDisable)
+		case x@PlayerAction.ChangeControl(_,_,_,_,_,_,_)	=> writeByte(0);	writePlayerChangeControl(x)
+		case x@PlayerAction.SetNeedSync(_)					=> writeByte(1);	writePlayerSetNeedSync(x)
+		case x@PlayerAction.SetFile(_)						=> writeByte(2);	writePlayerSetFile(x)
+		case x@PlayerAction.SetRhythm(_)					=> writeByte(3);	writePlayerSetRhythm(x)
+		case x@PlayerAction.SetRunning(_)					=> writeByte(4);	writePlayerSetRunning(x)
+		case x@PlayerAction.PitchAbsolute(_,_)				=> writeByte(5);	writePlayerPitchAbsolute(x)
+		case x@PlayerAction.PhaseAbsolute(_)				=> writeByte(6);	writePlayerPhaseAbsolute(x)
+		case x@PlayerAction.PhaseRelative(_)				=> writeByte(7);	writePlayerPhaseRelative(x)
+		case x@PlayerAction.PositionAbsolute(_)				=> writeByte(8);	writePlayerPositionAbsolute(x)
+		case x@PlayerAction.PositionJump(_,_)				=> writeByte(9);	writePlayerPositionJump(x)
+		case x@PlayerAction.PositionSeek(_)					=> writeByte(10);	writePlayerPositionSeek(x)
+		case x@PlayerAction.DragAbsolute(_)					=> writeByte(11);	writePlayerDragAbsolute(x)
+		case PlayerAction.DragEnd							=> writeByte(12);	writePlayerDragEnd(PlayerAction.DragEnd)
+		case x@PlayerAction.ScratchRelative(_)				=> writeByte(13);	writePlayerScratchRelative(x)
+		case PlayerAction.ScratchEnd						=> writeByte(14);	writePlayerScratchEnd(PlayerAction.ScratchEnd)
+		case x@PlayerAction.LoopEnable(_)					=> writeByte(15);	writePlayerLoopEnable(x)
+		case PlayerAction.LoopDisable						=> writeByte(16);	writePlayerLoopDisable(PlayerAction.LoopDisable)
 		}
 	}
-	def writePlayerChangeControl(it:PlayerAction.PlayerChangeControl):Unit	= {
+	def writePlayerChangeControl(it:PlayerAction.ChangeControl):Unit	= {
 		writeDouble(it.trim);
 		writeDouble(it.filter);
 		writeDouble(it.low);
@@ -107,50 +107,50 @@ final class Output(val st:OutputStream) {
 		writeDouble(it.speaker);
 		writeDouble(it.phone);
 	}
-	def writePlayerSetNeedSync(it:PlayerAction.PlayerSetNeedSync):Unit	= {
+	def writePlayerSetNeedSync(it:PlayerAction.SetNeedSync):Unit	= {
 		writeBoolean(it.needSync)
 	}
-	def writePlayerSetFile(it:PlayerAction.PlayerSetFile):Unit	= {
+	def writePlayerSetFile(it:PlayerAction.SetFile):Unit	= {
 		writeOption(it.file, writePath)
 	}
-	def writePlayerSetRhythm(it:PlayerAction.PlayerSetRhythm):Unit	= {
+	def writePlayerSetRhythm(it:PlayerAction.SetRhythm):Unit	= {
 		writeOption(it.rhythm, writeRhythm)
 	}
-	def writePlayerSetRunning(it:PlayerAction.PlayerSetRunning):Unit	= {
+	def writePlayerSetRunning(it:PlayerAction.SetRunning):Unit	= {
 		writeBoolean(it.running)
 	}
-	def writePlayerPitchAbsolute(it:PlayerAction.PlayerPitchAbsolute):Unit	= {
+	def writePlayerPitchAbsolute(it:PlayerAction.PitchAbsolute):Unit	= {
 		writeDouble(it.pitch)
 		writeBoolean(it.keepSync)
 	}
-	def writePlayerPhaseAbsolute(it:PlayerAction.PlayerPhaseAbsolute):Unit	= {
+	def writePlayerPhaseAbsolute(it:PlayerAction.PhaseAbsolute):Unit	= {
 		writeRhythmValue(it.position)
 	}
-	def writePlayerPhaseRelative(it:PlayerAction.PlayerPhaseRelative):Unit	= {
+	def writePlayerPhaseRelative(it:PlayerAction.PhaseRelative):Unit	= {
 		writeRhythmValue(it.offset)
 	}
-	def writePlayerPositionAbsolute(it:PlayerAction.PlayerPositionAbsolute):Unit	= {
+	def writePlayerPositionAbsolute(it:PlayerAction.PositionAbsolute):Unit	= {
 		writeDouble(it.frame)
 	}
-	def writePlayerPositionJump(it:PlayerAction.PlayerPositionJump):Unit	= {
+	def writePlayerPositionJump(it:PlayerAction.PositionJump):Unit	= {
 		writeDouble(it.frame)
 		writeRhythmUnit(it.rhythmUnit)
 	}
-	def writePlayerPositionSeek(it:PlayerAction.PlayerPositionSeek):Unit	= {
+	def writePlayerPositionSeek(it:PlayerAction.PositionSeek):Unit	= {
 		writeRhythmValue(it.offset)
 	}
-	def writePlayerDragAbsolute(it:PlayerAction.PlayerDragAbsolute):Unit	= {
+	def writePlayerDragAbsolute(it:PlayerAction.DragAbsolute):Unit	= {
 		writeDouble(it.v)
 	}
-	def writePlayerDragEnd(it:PlayerAction.PlayerDragEnd.type):Unit	= {}
-	def writePlayerScratchRelative(it:PlayerAction.PlayerScratchRelative):Unit	= {
+	def writePlayerDragEnd(it:PlayerAction.DragEnd.type):Unit	= {}
+	def writePlayerScratchRelative(it:PlayerAction.ScratchRelative):Unit	= {
 		writeDouble(it.frames)
 	}
-	def writePlayerScratchEnd(it:PlayerAction.PlayerScratchEnd.type):Unit	= {}
-	def writePlayerLoopEnable(it:PlayerAction.PlayerLoopEnable):Unit	= {
+	def writePlayerScratchEnd(it:PlayerAction.ScratchEnd.type):Unit	= {}
+	def writePlayerLoopEnable(it:PlayerAction.LoopEnable):Unit	= {
 		writeLoopDef(it.preset)
 	}
-	def writePlayerLoopDisable(it:PlayerAction.PlayerLoopDisable.type):Unit	= {}
+	def writePlayerLoopDisable(it:PlayerAction.LoopDisable.type):Unit	= {}
 
 	def writePath(it:Path):Unit	= {
 		writeString(it.toString)
@@ -189,13 +189,13 @@ final class Output(val st:OutputStream) {
 	}
 
 	def writeString(it:String):Unit	= {
-		writeByteArray(it getBytes "UTF-8")
+		writeByteArray(it.getBytes("UTF-8"))
 	}
 
 	//------------------------------------------------------------------------------
 
 	def writeByte(it:Byte):Unit	= {
-		st write it
+		st.write(it)
 	}
 	def writeShort(it:Short):Unit	= {
 		writeByte((it >> 8).toByte)
@@ -219,10 +219,10 @@ final class Output(val st:OutputStream) {
 	}
 
 	def writeFloat(it:Float):Unit	= {
-		writeInt(java.lang.Float floatToIntBits it)
+		writeInt(java.lang.Float.floatToIntBits(it))
 	}
 	def writeDouble(it:Double):Unit	= {
-		writeLong(java.lang.Double doubleToLongBits it)
+		writeLong(java.lang.Double.doubleToLongBits(it))
 	}
 
 	def writeBoolean(it:Boolean):Unit	= {
@@ -234,6 +234,6 @@ final class Output(val st:OutputStream) {
 
 	def writeByteArray(it:Array[Byte]):Unit	= {
 		writeInt(it.length)
-		st write it
+		st.write(it)
 	}
 }

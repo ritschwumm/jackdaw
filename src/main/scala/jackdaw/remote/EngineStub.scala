@@ -54,7 +54,7 @@ object EngineStub extends Logging {
 			_					<-	engineProcess(tcpServer.port)
 			_					=	DEBUG("initializing communication")
 			tcpConnection		<-	tcpServer.connect
-			sendToSkeleton		=	tcpConnection send (_:ToSkeleton)
+			sendToSkeleton		=	tcpConnection.send(_:ToSkeleton)
 			tmp					=	tcpConnection.receive() match {
 										case ToStub.Started(outputRate, phoneEnabled)	=> (outputRate, phoneEnabled)
 										case x@ToStub.Send(_)							=> sys error show"unexpected message ${x.toString}"
@@ -72,7 +72,7 @@ object EngineStub extends Logging {
 			_					<-	SimpleWorker.create(
 										"stub receiver",
 										Thread.NORM_PRIORITY,
-										Io delay {
+										Io.delay {
 											receiveAndAct(tcpConnection, feedbackSmoothing.asTarget)
 										}
 									)
@@ -83,7 +83,7 @@ object EngineStub extends Logging {
 			val phoneEnabled	= headphones
 
 			def feedbackTimed(deltaNanos:Long):Option[EngineFeedback]	=
-				feedbackSmoothing feedbackTimed deltaNanos
+				feedbackSmoothing.feedbackTimed(deltaNanos)
 
 			def enqueueAction(action:EngineAction):Unit	=
 				sendToSkeleton(ToSkeleton.Send(action))
@@ -98,10 +98,10 @@ object EngineStub extends Logging {
 				EngineStub.vm.mainClass,	port.toString
 			)
 		val	builder		= new ProcessBuilder(command.toJList)
-		builder directory		EngineStub.vm.userDir.toFile
-		builder redirectOutput	ProcessBuilder.Redirect.INHERIT
-		builder redirectError	ProcessBuilder.Redirect.INHERIT
-		// builder.environment() putAll env.toJMap
+		builder.directory(EngineStub.vm.userDir.toFile)
+		builder.redirectOutput(ProcessBuilder.Redirect.INHERIT)
+		builder.redirectError(ProcessBuilder.Redirect.INHERIT)
+		// builder.environment().putAll(env.toJMap)
 
 		IoResource.unsafe.disposing {
 			builder.start()
@@ -116,7 +116,7 @@ object EngineStub extends Logging {
 	private def receiveAndAct(tcpConnection:TcpConnection[ToStub,ToSkeleton], feedbackTarget:Target[EngineFeedback]):Boolean	=
 		try {
 			tcpConnection.receive() match {
-				case ToStub.Send(feedback)	=> feedbackTarget send feedback;			true
+				case ToStub.Send(feedback)	=> feedbackTarget.send(feedback);			true
 				case x@ToStub.Started(_, _)	=> ERROR("unexpected message", x.toString);	false
 			}
 		}

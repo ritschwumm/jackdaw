@@ -3,7 +3,6 @@ package jackdaw.migration
 import java.nio.file.*
 
 import scutil.core.implicits.*
-import scutil.jdk.implicits.*
 import scutil.log.*
 import scutil.io.*
 
@@ -24,17 +23,17 @@ object Migration extends Logging {
 			step	<- steps.toSet[Migration]
 			version	<- Set(step.oldVersion, step.newVersion)
 		}
-		yield tf dataByVersion version
+		yield tf.dataByVersion(version)
 
 	def migrate(tf:TrackFiles):Unit	= {
-		steps foreach migrateStep(tf)
+		steps.foreach(migrateStep(tf))
 	}
 
 	//------------------------------------------------------------------------------
 
 	private def migrateStep(tf:TrackFiles)(step:Migration):Unit	= {
-		val oldData	= tf dataByVersion step.oldVersion
-		val newData	= tf dataByVersion step.newVersion
+		val oldData	= tf.dataByVersion(step.oldVersion)
+		val newData	= tf.dataByVersion(step.newVersion)
 		if (Files.exists(oldData) && !Files.exists(newData)) {
 			INFO("migrating", oldData)
 			migrateFile(step, oldData, newData)
@@ -44,10 +43,10 @@ object Migration extends Logging {
 	private def migrateFile(step:Migration, oldFile:Path, newFile:Path):Unit	= {
 		val result	=
 			for {
-				strO	<- JsonIo readFileString oldFile
-				astO	<- JsonCodec decode strO
-				astN	<- step convert astO
-				strN	= JsonCodec encodePretty astN
+				strO	<- JsonIo.readFileString(oldFile)
+				astO	<- JsonCodec.decode(strO)
+				astN	<- step.convert(astO)
+				strN	= JsonCodec.encodePretty(astN)
 				_		= writeFile(newFile, strN)
 			}
 			yield ()

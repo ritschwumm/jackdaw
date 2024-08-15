@@ -14,8 +14,8 @@ object MeasureDetector {
 		}
 		val file	= new File(args(0))
 		// BETTER handle exceptions
-		val sample	= Wav load file
-		val curve	= BandCurve calculate (sample, 256)
+		val sample	= Wav.load(file)
+		val curve	= BandCurve.calculate(sample, 256)
 
 		val beatsPerMs		= 4
 		val framesPerMs		= measureFrames(curve, (bpm(60.0), bpm(200.0), beatsPerMs)
@@ -38,7 +38,7 @@ object MeasureDetector {
 	}
 
 	private def measureFrameCandidates(bpsRange:(Double,Double), measureBeats:Double, fragmentRate:Double):(Int,Int) = {
-		val fpm	= fragmentsPerMeasure(fragmentRate, measureBeats) _
+		val fpm	= fragmentsPerMeasure(fragmentRate, measureBeats)(_)
 		(
 			floor(fpm(bpsRange._2)).toInt,
 			ceil(fpm(bpsRange._1)).toInt
@@ -46,7 +46,7 @@ object MeasureDetector {
 	}
 
 	private def bestMeasureFragments(values:IndexedSeq[Float], fpmRange:(Int,Int)):Int =
-		(fpmRange._1 until fpmRange._2)
+		fpmRange._1.until(fpmRange._2)
 		.map { fpm => (fpm, differences(values, fpm)) }
 		.sortWith { _._2 < _._2 }
 		.apply(0)._1

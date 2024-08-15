@@ -20,24 +20,24 @@ final class TransportUI(cueable:Signal[Boolean], playable:Signal[Boolean], playi
 	//## cue point components
 
 	private val (cuePointUIs, cuePointActionEvents)	=
-		(cuePointsCount map { count =>
+		cuePointsCount.map { count =>
 			decouple {
 				val (uis, actions)	=
-					(0 until count map { index =>
-						val image	= ButtonStyleFactory CUE index
+					(0 until count).map { index =>
+						val image	= ButtonStyleFactory.CUE(index)
 						val button	=
-								new ButtonUI(
-									ButtonStyleFactory.size,
-									static(image),
-									cueable
-								)
-						val actions	= button.actions tag index
+							new ButtonUI(
+								ButtonStyleFactory.size,
+								static(image),
+								cueable
+							)
+						val actions	= button.actions.tag(index)
 						(button, actions)
-					})
+					}
 					.unzip
 				(uis, actions)
 			}
-		})
+		}
 		.untuple
 	typed[Signal[Seq[UI]]](cuePointUIs)
 	typed[Signal[Seq[Events[Int]]]](cuePointActionEvents)
@@ -47,8 +47,8 @@ final class TransportUI(cueable:Signal[Boolean], playable:Signal[Boolean], playi
 
 	private val cuePointsPanel:UI	=
 		new SwitchUI(
-			cuePointUIs map { items =>
-				new HBoxUI(items map BoxItem.Component.apply)
+			cuePointUIs.map { items =>
+				new HBoxUI(items.map(BoxItem.Component.apply))
 			}
 		)
 
@@ -81,11 +81,11 @@ final class TransportUI(cueable:Signal[Boolean], playable:Signal[Boolean], playi
 
 	val (loopSetUIs, loopSetActionEvents)	=
 		(
-			loopChoices map { case (choice, active) =>
+			loopChoices.map { (choice, active) =>
 				val style	=
-					active map {
-						_.cata(ButtonStyleFactory.LOOP_ON _, ButtonStyleFactory.LOOP_OFF _) apply choice.measures
-					}
+					active.map(
+						_.cata(ButtonStyleFactory.LOOP_ON(_), ButtonStyleFactory.LOOP_OFF(_)).apply(choice.measures)
+					)
 				val button	=
 					new ButtonUI(
 						size	= ButtonStyleFactory.size,
@@ -93,7 +93,7 @@ final class TransportUI(cueable:Signal[Boolean], playable:Signal[Boolean], playi
 						enabled	= canLoop
 					)
 				val action	=
-					button.actions tag Some(choice)
+					button.actions.tag(Some(choice))
 				(button, action)
 			}
 		)
@@ -107,17 +107,21 @@ final class TransportUI(cueable:Signal[Boolean], playable:Signal[Boolean], playi
 	private val loopUIs:Seq[UI]	=
 		loopSetUIs :+ loopResetUI
 	private val loopActions:Events[Option[LoopDef]]	=
-		(Events multiOrElse loopSetActionEvents)	orElse
-		(loopResetUI.actions tag None)
+		Events.multiOrElse(loopSetActionEvents)	`orElse`
+		loopResetUI.actions.tag(None)
 
 	private val loopPanel:UI	=
-		new HBoxUI(loopUIs map BoxItem.Component.apply intersperse BoxItem.Strut(2))
+		new HBoxUI(
+			loopUIs
+			.map(BoxItem.Component.apply)
+			.intersperse(BoxItem.Strut(2))
+		)
 
 	//------------------------------------------------------------------------------
 	//## playing components
 
 	private val playingIcon:Signal[ButtonStyle]	=
-		playing map { _.cata(ButtonStyleFactory.PLAY, ButtonStyleFactory.PAUSE) }
+		playing.map(_.cata(ButtonStyleFactory.PLAY, ButtonStyleFactory.PAUSE))
 
 	private val	playToggleButton	= new ButtonUI(ButtonStyleFactory.size, playingIcon,						canPlay)
 
@@ -133,24 +137,24 @@ final class TransportUI(cueable:Signal[Boolean], playable:Signal[Boolean], playi
 	private val panel	=
 		HBoxUI(
 			// cueStopButton,
-			playToggleButton,
+			BoxItem.Component(playToggleButton),
 			BoxItem.Strut(4-2),
-			ejectButton,
+			BoxItem.Component(ejectButton),
 			BoxItem.Strut(4),
-			seekBackwardButton,
+			BoxItem.Component(seekBackwardButton),
 			BoxItem.Strut(4),
-			seekForwardButton,
+			BoxItem.Component(seekForwardButton),
 			BoxItem.Strut(4),
-			ejectButton,
+			BoxItem.Component(ejectButton),
 			BoxItem.Strut(12),
-			loopPanel,
+			BoxItem.Component(loopPanel),
 			BoxItem.Strut(12),
 			BoxItem.Glue,
-			cuePointsPanel,
+			BoxItem.Component(cuePointsPanel),
 			BoxItem.Strut(4+2),
-			removeCueButton,
+			BoxItem.Component(removeCueButton),
 			BoxItem.Strut(2),
-			addCueButton
+			BoxItem.Component(addCueButton),
 		)
 
 	val component:JComponent	= panel.component
@@ -169,6 +173,6 @@ final class TransportUI(cueable:Signal[Boolean], playable:Signal[Boolean], playi
 	val removeCue:Events[Unit]			= removeCueButton.actions
 
 	val seeking:Signal[Option[Boolean]]	=
-		seekForwardButton.pressed	upDown
+		seekForwardButton.pressed	`upDown`
 		seekBackwardButton.pressed
 }

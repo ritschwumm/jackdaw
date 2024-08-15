@@ -18,7 +18,7 @@ final case class MusicChord(root:MusicPitch, scale:MusicScale) {
 			}
 		DetunedChord(
 			MusicChord(
-				root move shift,
+				root.move(shift),
 				scale
 			),
 			detune

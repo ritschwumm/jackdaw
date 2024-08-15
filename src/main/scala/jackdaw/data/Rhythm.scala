@@ -70,9 +70,9 @@ final case class Rhythm(anchor:Double, measure:Double, schema:Schema) {
 
 	def index(position:Double):RhythmIndex	=
 		RhythmIndex(
-			beat	= moduloInt(fixFloor(beatRaster		normalize position),	schema.beatsPerMeasure),
-			measure	= moduloInt(fixFloor(measureRaster	normalize position),	schema.measuresPerPhrase),
-			phrase	= 			fixFloor(phraseRaster	normalize position)
+			beat	= moduloInt(fixFloor(beatRaster.normalize(position)),		schema.beatsPerMeasure),
+			measure	= moduloInt(fixFloor(measureRaster.normalize(position)),	schema.measuresPerPhrase),
+			phrase	=			fixFloor(phraseRaster.normalize(position))
 		)
 
 	private val small	= {
@@ -82,12 +82,12 @@ final case class Rhythm(anchor:Double, measure:Double, schema:Schema) {
 
 	/** floor ignoring small errors */
 	private def fixFloor(value:Double):Int	=
-		floor(small round value).toInt
+		floor(small.round(value)).toInt
 
 	//------------------------------------------------------------------------------
 
 	def lines(start:Double, end:Double):Seq[RhythmLine] = {
-		val	firstValue	= beatRaster ceil start
+		val	firstValue	= beatRaster.ceil(start)
 		val firstIndex	= rint((firstValue - anchor) / beat).toInt
 
 		val out		= new mutable.ArrayBuffer[RhythmLine]
@@ -96,7 +96,7 @@ final case class Rhythm(anchor:Double, measure:Double, schema:Schema) {
 		while (value < end) {
 			out		+= (
 				// if (index == 0)	AnchorLine(value)
-				     if (index % schema.beatsPerPhrase  == 0)	RhythmLine(value, RhythmUnit.Phrase)
+				if		(index % schema.beatsPerPhrase  == 0)	RhythmLine(value, RhythmUnit.Phrase)
 				else if (index % schema.beatsPerMeasure == 0)	RhythmLine(value, RhythmUnit.Measure)
 				else											RhythmLine(value, RhythmUnit.Beat)
 			)

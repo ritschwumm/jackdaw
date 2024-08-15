@@ -1,5 +1,7 @@
 package jackdaw.player
 
+import scala.annotation.nowarn
+
 import java.nio.file.Path
 
 import scala.math.*
@@ -43,12 +45,12 @@ object Player {
 	private val interpolation	= Config.sincEnabled.cata(Linear, Sinc)
 
 	// in frames
-	val maxDistance	= interpolation overshot springPitchLimit
+	val maxDistance	= interpolation.overshot(springPitchLimit)
 
-	 // headFrame, fadeFrame, jump, loop
-	 val headCount		= 4
+	// headFrame, fadeFrame, jump, loop
+	val headCount		= 4
 
-	 private val passCoeffs	=  BiQuadCoeffs(1,0,0,0,0)
+	private val passCoeffs	=  BiQuadCoeffs(1,0,0,0,0)
 }
 
 /**
@@ -151,37 +153,37 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 
 	private[player] def react(action:PlayerAction):Unit	=
 		action match {
-			case c@PlayerAction.PlayerChangeControl(_,_,_,_,_,_,_)	=> doChangeControl(c)
-			case PlayerAction.PlayerSetNeedSync(needSync)			=> doSetNeedSync(needSync)
-			case PlayerAction.PlayerSetFile(file)					=> doSetFile(file)
-			case PlayerAction.PlayerSetRhythm(rhythm)				=> doSetRhythm(rhythm)
-			case PlayerAction.PlayerSetRunning(running)				=> doSetRunning(running)
-			case PlayerAction.PlayerPitchAbsolute(pitch, keepSync)	=> doPitchAbsolute(pitch, keepSync)
-			case PlayerAction.PlayerPhaseAbsolute(position)			=> doPlayerPhaseAbsolute(position)
-			case PlayerAction.PlayerPhaseRelative(offset)			=> doPlayerPhaseRelative(offset)
-			case PlayerAction.PlayerPositionAbsolute(frame)			=> doPlayerPositionAbsolute(frame)
-			case PlayerAction.PlayerPositionJump(frame, rhythmUnit)	=> doPlayerPositionJump(frame, rhythmUnit)
-			case PlayerAction.PlayerPositionSeek(offset)			=> doPlayerPositionSeek(offset:RhythmValue)
-			case PlayerAction.PlayerDragAbsolute(v)					=> doDragAbsolute(v)
-			case PlayerAction.PlayerDragEnd							=> doDragEnd()
-			case PlayerAction.PlayerScratchRelative(frames)			=> doScratchRelative(frames)
-			case PlayerAction.PlayerScratchEnd						=> doScratchEnd()
-			case PlayerAction.PlayerLoopEnable(size)				=> doLoopEnable(size)
-			case PlayerAction.PlayerLoopDisable						=> doLoopDisable()
+			case c@PlayerAction.ChangeControl(_,_,_,_,_,_,_)	=> doChangeControl(c)
+			case PlayerAction.SetNeedSync(needSync)			=> doSetNeedSync(needSync)
+			case PlayerAction.SetFile(file)					=> doSetFile(file)
+			case PlayerAction.SetRhythm(rhythm)				=> doSetRhythm(rhythm)
+			case PlayerAction.SetRunning(running)				=> doSetRunning(running)
+			case PlayerAction.PitchAbsolute(pitch, keepSync)	=> doPitchAbsolute(pitch, keepSync)
+			case PlayerAction.PhaseAbsolute(position)			=> doPlayerPhaseAbsolute(position)
+			case PlayerAction.PhaseRelative(offset)			=> doPlayerPhaseRelative(offset)
+			case PlayerAction.PositionAbsolute(frame)			=> doPlayerPositionAbsolute(frame)
+			case PlayerAction.PositionJump(frame, rhythmUnit)	=> doPlayerPositionJump(frame, rhythmUnit)
+			case PlayerAction.PositionSeek(offset)			=> doPlayerPositionSeek(offset:RhythmValue)
+			case PlayerAction.DragAbsolute(v)					=> doDragAbsolute(v)
+			case PlayerAction.DragEnd							=> doDragEnd()
+			case PlayerAction.ScratchRelative(frames)			=> doScratchRelative(frames)
+			case PlayerAction.ScratchEnd						=> doScratchEnd()
+			case PlayerAction.LoopEnable(size)				=> doLoopEnable(size)
+			case PlayerAction.LoopDisable						=> doLoopDisable()
 		}
 
 	//------------------------------------------------------------------------------
 	//## common control
 
 	// TODO ugly abuse of a ctor as a type
-	private def doChangeControl(control:PlayerAction.PlayerChangeControl):Unit	= {
-		trim	target	control.trim
-		filter	target	control.filter
-		low		target	control.low
-		middle	target	control.middle
-		high	target	control.high
-		speaker	target	control.speaker
-		phone	target	control.phone
+	private def doChangeControl(control:PlayerAction.ChangeControl):Unit	= {
+		trim	.target(control.trim)
+		filter	.target(control.filter)
+		low		.target(control.low)
+		middle	.target(control.middle)
+		high	.target(control.high)
+		speaker	.target(control.speaker)
+		phone	.target(control.phone)
 	}
 
 	private def doSetFile(file:Option[Path]):Unit	= {
@@ -194,8 +196,8 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	private def setSample(sample:Option[CacheSample]):Unit	= {
 		this.sample	= sample
 
-		inputL	= sample.cata(Channel.empty, _ channelOrEmpty 0)
-		inputR	= sample.cata(Channel.empty, _ channelOrEmpty 1)
+		inputL	= sample.cata(Channel.empty, _.channelOrEmpty(0))
+		inputR	= sample.cata(Channel.empty, _.channelOrEmpty(1))
 		rate	= sample.cata(1, _.frameRate.toDouble)
 
 		doLoopDisable()
@@ -266,7 +268,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	private def doPlayerPositionSeek(offset:RhythmValue):Unit	= {
 		registerJump {
 			// TODO loader questionable
-			val estimateTarget	= headFrame + (rhythm getOrElse fakeRhythm sizeOf offset)
+			val estimateTarget	= headFrame + (rhythm.getOrElse(fakeRhythm).sizeOf(offset))
 			loaderPreload(estimateTarget)
 			loaderNotifyEngine {
 				registerCancellableFade(
@@ -291,7 +293,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 
 		// keep phase stable over start/stop
 		if (needSync && canSync && mode == PlayerMode.Playing) {
-			oldPhase foreach syncPhaseTo
+			oldPhase.foreach(syncPhaseTo)
 		}
 
 		killFade()
@@ -307,7 +309,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 
 	/** beats per second */
 	private def beatRate:Option[Double]	=
-		rhythm map { rhythmGot =>
+		rhythm.map { rhythmGot =>
 			pitch * rate / rhythmGot.beat
 		}
 
@@ -336,12 +338,12 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	private def keepSpeedSynced():Unit	= {
 		if (!hasSync)	return
 		/*
-		beatRate foreach { beatRateGot =>
+		beatRate.foreach { beatRateGot =>
 			pitch	= pitch * metronome.beatRate / beatRateGot
 			updateVelocity()
 		}
 		*/
-		rhythm foreach { rhythmGot =>
+		rhythm.foreach { rhythmGot =>
 			pitch	= metronome.beatRate * rhythmGot.beat / rate
 			updateVelocity()
 		}
@@ -352,23 +354,23 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 
 	/** set the phase to an absolute value */
 	private def syncPhaseTo(position:RhythmValue):Unit	= {
-		phaseMatch(position.unit) foreach { phaseGot =>
-			movePhaseBy(position move -phaseGot)
+		phaseMatch(position.unit).foreach { phaseGot =>
+			movePhaseBy(position.move(-phaseGot))
 		}
 	}
 
 	/** change the phase by some offset */
 	private def movePhaseBy(offset:RhythmValue):Unit	= {
-		rhythm map { _ sizeOf offset } foreach moveInLoop
+		rhythm.map(_.sizeOf(offset)).foreach(moveInLoop)
 		/*
-		currentRhythmRaster(offset.unit) foreach { raster =>
+		currentRhythmRaster(offset.unit).foreach { raster =>
 			moveInLoop(offset.steps * raster.size)
 		}
 		*/
 	}
 
 	private def phaseValue(rhythmUnit:RhythmUnit):Option[RhythmValue]	=
-		phaseMatch(rhythmUnit) map { RhythmValue(_, rhythmUnit) }
+		phaseMatch(rhythmUnit).map(RhythmValue(_, rhythmUnit))
 
 	private def phaseMatch(rhythmUnit:RhythmUnit):Option[Double]	=
 		if (running)	phaseMetronome(rhythmUnit)
@@ -376,22 +378,22 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 
 	/** how far we are from the rhythm of the Metronome in [-.5..+.5] rhythmUnits for late to early */
 	private def phaseMetronome(rhythmUnit:RhythmUnit):Option[Double]	=
-		currentRhythmPhase(rhythmUnit) map { here =>
-			val there	= metronome	phase rhythmUnit
+		currentRhythmPhase(rhythmUnit).map { here =>
+			val there	= metronome.phase(rhythmUnit)
 			moduloDouble(here - there + 0.5, 1) - 0.5
 		}
 
 	/** how far we are from the track beat in [-.5..+.5] rhythmUnits for late to early */
 	private def phaseStatic(rhythmUnit:RhythmUnit):Option[Double]	=
-		currentRhythmPhase(rhythmUnit) map { here =>
+		currentRhythmPhase(rhythmUnit).map { here =>
 			moduloDouble(here + 0.5, 1) - 0.5
 		}
 
 	private def currentRhythmPhase(rhythmUnit:RhythmUnit):Option[Double]	=
-		currentRhythmRaster(rhythmUnit) map { _ phase headFrame }
+		currentRhythmRaster(rhythmUnit).map(_.phase(headFrame))
 
 	private def currentRhythmRaster(rhythmUnit:RhythmUnit):Option[Raster]	=
-		rhythm map { _ raster rhythmUnit }
+		rhythm.map(_.raster(rhythmUnit))
 
 	//------------------------------------------------------------------------------
 	//## motor position
@@ -411,7 +413,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	/** jump to a given position without while staying in sync  */
 	private def positionJumpWithRaster(frame:Double, unit:RhythmUnit, rhythm:Rhythm):Unit	= {
 		// TODO seek ugly: raster is calculated again in positionSeekWithRaster
-		val raster	= rhythm raster unit
+		val raster	= rhythm.raster(unit)
 		val raw		= (frame - headFrame) / raster.size
 		val steps	= if (running) rint(raw) else raw
 		positionSeekWithRaster(RhythmValue(steps, unit), rhythm)
@@ -426,23 +428,24 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	}
 
 	private def positionSeekWithoutRaster(offset:RhythmValue):Unit	= {
-		val position	= headFrame + (fakeRhythm sizeOf offset)
+		val position	= headFrame + fakeRhythm.sizeOf(offset)
 		startFade(position)
 	}
 
 	/** jump for a given number of rhythm while staying in sync */
 	private def positionSeekWithRaster(offset:RhythmValue, rhythm:Rhythm):Unit	= {
 		val position:Double		=
-			if (running)	headFrame + (rhythm sizeOf offset)
-			else			snappingSeekCalculation(headFrame, offset.steps, rhythm raster offset.unit)
+			if (running)	headFrame + rhythm.sizeOf(offset)
+			else			snappingSeekCalculation(headFrame, offset.steps, rhythm.raster(offset.unit))
 		startFade(position)
 	}
 
 	/** almost ceil for negative offsets, almost floor for positive offsets */
+	@nowarn("msg=unused explicit parameter")
 	private def snappingSeekCalculation(start:Double, steps:Double, raster:Raster):Double	= {
-		val	offset 	= (0.5 - Player.positionEpsilon) * signum(steps)
+		val	offset	= (0.5 - Player.positionEpsilon) * signum(steps)
 		val	raw		= headFrame + (steps - offset) * raster.size
-		raster round raw
+		raster.round(raw)
 		/*
 		// equivalent code:
 		if (steps < 0)	raster ceil		(headFrame + (steps - Player.positionEpsilon) * raster.size)
@@ -509,7 +512,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 
 	private def enterJump():Unit	= {
 		if (!jumpProgress) {
-			jumpLater foreach { it =>
+			jumpLater.foreach { it =>
 				it.apply()
 				jumpProgress	= true
 				jumpLater		= None
@@ -534,23 +537,23 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		}
 
 		// TODO fade only send when loopSpan changes
-		loopSpan foreach { it =>
+		loopSpan.foreach { it =>
 			loaderPreload(it.start)
 		}
 	}
 
 	private def loaderDecode(file:Path):Unit	= {
-		loaderTarget send LoaderAction.Decode(file, setSample)
+		loaderTarget.send(LoaderAction.Decode(file, setSample))
 	}
 
 	private def loaderPreload(centerFrame:Double):Unit	= {
-		sample foreach { it =>
-			loaderTarget send LoaderAction.Preload(it, centerFrame.toInt)
+		sample.foreach { it =>
+			loaderTarget.send(LoaderAction.Preload(it, centerFrame.toInt))
 		}
 	}
 
 	private def loaderNotifyEngine(block: =>Unit):Unit	= {
-		loaderTarget send LoaderAction.NotifyEngine(thunk(block))
+		loaderTarget.send(LoaderAction.NotifyEngine(thunk(block)))
 	}
 
 	//------------------------------------------------------------------------------
@@ -576,9 +579,9 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	}
 
 	private def registerFadeImpl(fade:Fade):Unit	= {
-		fadeLater foreach {
+		fadeLater.foreach(
 			_.cancel()
-		}
+		)
 		fadeLater	= Some(fade)
 	}
 
@@ -597,7 +600,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	@inline
 	private def enterFade():Unit	= {
 		if (!fadeProgress) {
-			fadeLater foreach { it =>
+			fadeLater.foreach { it =>
 				// this calls back to startFade
 				it.execute()
 				fadeProgress	= true
@@ -636,7 +639,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 
 	private def doLoopEnable(preset:LoopDef):Unit	= {
 		loopSpan	= mkLoop(headFrame, preset.size)
-		loopDef		= loopSpan.isDefined option preset
+		loopDef		= loopSpan.isDefined.option(preset)
 	}
 
 	private def doLoopDisable():Unit	= {
@@ -652,9 +655,9 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 
 	// start is rastered by size.unit only. not scaled
 	private def mkLoop(frame:Double, size:RhythmValue):Option[Span]	=
-		currentRhythmRaster(size.unit) map { raster =>
+		currentRhythmRaster(size.unit).map { raster =>
 			Span(
-				raster floor (frame+loopShift),
+				raster.floor(frame+loopShift),
 				raster.size * size.steps
 			)
 		}
@@ -662,10 +665,11 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	/*
 	// moves a loop we're in around the new position
 	private def loopAround(position:Double) {
-		loopSpan	= loopSpan map { it =>
-			if (it contains x)	it move (position - x)
-			else				it
-		}
+		loopSpan	=
+			loopSpan.map { it =>
+				if (it contains x)	it move (position - x)
+				else				it
+			}
 	}
 	*/
 
@@ -674,8 +678,8 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		val newFrame	=
 			loopSpan match {
 				case Some(loopGot) =>
-					if (loopGot contains headFrame) {
-						loopGot lock rawFrame
+					if (loopGot.contains(headFrame)) {
+						loopGot.lock(rawFrame)
 					}
 					else rawFrame
 				case None	=>
@@ -685,7 +689,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	}
 
 	private def jumpBackAfterLoopEnd(oldFrame:Double):Unit	= {
-		loopSpan foreach { loopGot =>
+		loopSpan.foreach { loopGot =>
 			val loopEnd	= loopGot.end
 			if (oldFrame < loopEnd && headFrame >= loopEnd) {
 				registerSimpleFade {
@@ -711,7 +715,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		endFrame	=
 			rhythm.cata(
 				frameCount + outputRate*Player.endDelay,
-				_.measureRaster ceil frameCount
+				_.measureRaster.ceil(frameCount)
 			)
 	}
 
@@ -787,8 +791,8 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 
 			speakerBuffer.add(speakerL, speakerR)
 
-			peakDetector put speakerL
-			peakDetector put speakerR
+			peakDetector.put(speakerL)
+			peakDetector.put(speakerR)
 
 			if (phoneEnabled) {
 				val phoneValue	= phone.current

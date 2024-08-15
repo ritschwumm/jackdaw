@@ -23,50 +23,50 @@ final class Tone {
 	val	high	= cell(TrimRange.neutral)
 
 	// gain values
-	val trimGain:Signal[Double]		= trim
-	val filterValue:Signal[Double]	= filter
-	val	lowGain:Signal[Double]		= low
-	val	middleGain:Signal[Double]	= middle
-	val	highGain:Signal[Double]		= high
+	val trimGain:Signal[Double]		= trim.signal
+	val filterValue:Signal[Double]	= filter.signal
+	val	lowGain:Signal[Double]		= low.signal
+	val	middleGain:Signal[Double]	= middle.signal
+	val	highGain:Signal[Double]		= high.signal
 
 	def moveTrim(steps:Int, fine:Boolean):Unit	= {
-		trim	modify trimModifier(steps, fine)
+		trim.modify(trimModifier(steps, fine))
 	}
 
 	def moveFilter(steps:Int, fine:Boolean):Unit	= {
-		filter	modify filterModifier(steps, fine)
+		filter.modify(filterModifier(steps, fine))
 	}
 
 	def moveLow(steps:Int, fine:Boolean):Unit	= {
-		low		modify trimModifier(steps, fine)
+		low	.modify(trimModifier(steps, fine))
 	}
 
 	def moveMiddle(steps:Int, fine:Boolean):Unit	= {
-		middle	modify trimModifier(steps, fine)
+		middle.modify(trimModifier(steps, fine))
 	}
 
 	def moveHigh(steps:Int, fine:Boolean):Unit	= {
-		high	modify trimModifier(steps, fine)
+		high.modify(trimModifier(steps, fine))
 	}
 
 	def resetTrim():Unit	= {
-		trim	set TrimRange.neutral
+		trim.set(TrimRange.neutral)
 	}
 
 	def resetFilter():Unit	= {
-		filter	set FilterRange.neutral
+		filter.set(FilterRange.neutral)
 	}
 
 	def resetLow():Unit	= {
-		low		set TrimRange.neutral
+		low.set(TrimRange.neutral)
 	}
 
 	def resetMiddle():Unit	= {
-		middle	set TrimRange.neutral
+		middle.set(TrimRange.neutral)
 	}
 
 	def resetHigh():Unit	= {
-		high	set TrimRange.neutral
+		high.set(TrimRange.neutral)
 	}
 
 	def resetAll():Unit	= {
@@ -78,8 +78,8 @@ final class Tone {
 	}
 
 	private def trimModifier(steps:Int, fine:Boolean):Double=>Double	=
-		it => TrimRange clamp (it + steps * (Tone trimStep fine))
+		it => TrimRange.clamp(it + steps * (Tone trimStep fine))
 
 	private def filterModifier(steps:Int, fine:Boolean):Double=>Double	=
-		it => FilterRange clamp (it + steps * (Tone filterStep fine))
+		it => FilterRange.clamp(it + steps * (Tone filterStep fine))
 }

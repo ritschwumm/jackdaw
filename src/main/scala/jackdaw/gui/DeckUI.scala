@@ -9,7 +9,6 @@ import scutil.lang.*
 import scutil.gui.implicits.*
 import scutil.gui.DndFileImport
 import scutil.gui.DndFileExport
-import scutil.gui.GridBagDSL.*
 import scutil.log.*
 
 import screact.*
@@ -18,30 +17,28 @@ import jackdaw.data.*
 import jackdaw.model.*
 import jackdaw.gui.util.*
 
-import GridBagItem.UI_is_GridBagItem
-
 /** gui for a single deck */
 final class DeckUI(deck:Deck, keyboard:Signal[Set[Key]], keyTarget:Signal[Boolean]) extends UI with Observing with Logging {
 	//------------------------------------------------------------------------------
 	//## input
 
 	private val rhythmLines:Signal[Seq[RhythmLine]]	=
-		deck.rhythmLines map { _.flattenMany }
+		deck.rhythmLines.map(_.flattenMany)
 
 	private val cuePoints:Signal[Seq[Double]]	=
 		deck.cuePointsFlat
 
 	private val cuePointsCount:Signal[Int]	=
-		cuePoints map { _.size }
+		cuePoints.map(_.size)
 
 	private val loopChoices:Seq[(LoopDef,Signal[Boolean])]	=
-		LoopDef.all map { it =>
-			val active	= deck.loopDef map { _ ==== (Some(it):Option[LoopDef]) }
+		LoopDef.all.map { it =>
+			val active	= deck.loopDef.map(_ ==== (Some(it):Option[LoopDef]))
 			(it, active)
 		}
 
 	private val rhythmic:Signal[Boolean]	=
-		deck.rhythm map { _.isDefined }
+		deck.rhythm.map(_.isDefined)
 
 	//------------------------------------------------------------------------------
 	//## components
@@ -82,21 +79,21 @@ final class DeckUI(deck:Deck, keyboard:Signal[Set[Key]], keyTarget:Signal[Boolea
 			rhythmic		= rhythmic,
 			cuePointsCount	= cuePointsCount
 		)
-	private val pitchSlider		= UIFactory pitchLinear deck.pitchOctave
+	private val pitchSlider		= UIFactory.pitchLinear(deck.pitchOctave)
 	private val matchUI			= new MatchUI(deck.synced, deck.pitched)
 
-	phaseUI.component		setAllSizes	Style.phase.size
-	pitchSlider.component	setAllSizes	Style.linear.size
+	phaseUI.component.setAllSizes(Style.phase.size)
+	pitchSlider.component.setAllSizes(Style.linear.size)
 
 	private val panel	=
 		GridBagUI(
-			phaseUI		.pos(0,0) .size(1,1) .weight(1,0)	.fill (BOTH)					.insetsTLBR(0,0,2,2),
-			metaUI		.pos(0,1) .size(1,1) .weight(1,0)	.fill (BOTH)					.insetsTLBR(2,0,2,2),
-			detailUI	.pos(0,2) .size(1,1) .weight(1,1)	.fill (BOTH)					.insetsTLBR(2,0,2,2),
-			overviewUI	.pos(0,3) .size(1,1) .weight(1,.33)	.fill (BOTH)					.insetsTLBR(2,0,2,2),
-			transportUI	.pos(0,4) .size(1,1) .weight(1,0)	.fill (BOTH)					.insetsTLBR(2,2,0,2),
-			pitchSlider	.pos(1,0) .size(1,4) .weight(0,1)	.fill (BOTH)					.insetsTLBR(0,2,2,2),
-			matchUI		.pos(2,0) .size(1,4) .weight(0,1)	.fill (NONE) .anchor (CENTER)	.insetsTLBR(2,2,6,0)
+			phaseUI		.gbi.pos(0,0) .size(1,1) .weight(1,0)	.fill("BOTH")					.insetsTLBR(0,0,2,2),
+			metaUI		.gbi.pos(0,1) .size(1,1) .weight(1,0)	.fill("BOTH")					.insetsTLBR(2,0,2,2),
+			detailUI	.gbi.pos(0,2) .size(1,1) .weight(1,1)	.fill("BOTH")					.insetsTLBR(2,0,2,2),
+			overviewUI	.gbi.pos(0,3) .size(1,1) .weight(1,.33)	.fill("BOTH")					.insetsTLBR(2,0,2,2),
+			transportUI	.gbi.pos(0,4) .size(1,1) .weight(1,0)	.fill("BOTH")					.insetsTLBR(2,2,0,2),
+			pitchSlider	.gbi.pos(1,0) .size(1,4) .weight(0,1)	.fill("BOTH")					.insetsTLBR(0,2,2,2),
+			matchUI		.gbi.pos(2,0) .size(1,4) .weight(0,1)	.fill("NONE") .anchor("CENTER")	.insetsTLBR(2,2,6,0)
 		)
 	val component:JComponent	= panel.component
 	component.putClientProperty("STRONG_REF", this)
@@ -104,10 +101,10 @@ final class DeckUI(deck:Deck, keyboard:Signal[Set[Key]], keyTarget:Signal[Boolea
 	//------------------------------------------------------------------------------
 	//## wiring
 
-	private val border	= keyTarget map { _.cata(Style.deck.border.noFocus, Style.deck.border.inFocus) }
-	border observeNow component.setBorder
+	private val border	= keyTarget.map(_.cata(Style.deck.border.noFocus, Style.deck.border.inFocus))
+	border.observeNow(component.setBorder)
 
-	val hovered			= ComponentUtil underMouseSignal component
+	val hovered			= ComponentUtil.underMouseSignal(component)
 	val grabsKeyboard	= metaUI.grabsKeyboard
 
 	import KeyEvent.*
@@ -120,151 +117,151 @@ final class DeckUI(deck:Deck, keyboard:Signal[Set[Key]], keyTarget:Signal[Boolea
 	// modifiers
 
 	private val draggingKey:Signal[Option[Boolean]]	=
-		Key(VK_UP,		KEY_LOCATION_STANDARD).asModifier	upDown
+		Key(VK_UP,		KEY_LOCATION_STANDARD).asModifier	`upDown`
 		Key(VK_DOWN,	KEY_LOCATION_STANDARD).asModifier
 	private val dragging:Signal[Option[Boolean]]	=
-		draggingKey	merge
+		draggingKey	`merge`
 		matchUI.dragging
-	dragging.withFine	observeNow	deck.dragging.set
+	dragging.withFine.observeNow(deck.dragging.set)
 
 	// actions
 
-	overviewUI.jump.withFine	trigger	deck.jumpFrame
+	overviewUI.jump.withFine.trigger(deck.jumpFrame)
 
 	private val phaseSyncKey:Events[Double]	=
-		Key(VK_MINUS ,	KEY_LOCATION_STANDARD).asAction tag 0.0
+		Key(VK_MINUS ,	KEY_LOCATION_STANDARD).asAction.tag(0.0)
 	private val phaseSync:Events[Double]	=
-		phaseSyncKey	orElse
+		phaseSyncKey	`orElse`
 		phaseUI.jump
-	phaseSync observe { phase =>
+	phaseSync.observe { phase =>
 		deck.syncPhase(RhythmUnit.Measure, phase)
 	}
 
 	// TODO crude hack
 	private val pushing16Key:Events[Double]	=
 		Key(VK_COMMA,	KEY_LOCATION_STANDARD).asModifier
-		.edge map { _.cata(-1.0/4, +1.0/4) }
+		.edge.map(_.cata(-1.0/4, +1.0/4))
 	private val dragging8Key:Events[Double]	=
 		Key(VK_PERIOD,	KEY_LOCATION_STANDARD).asModifier
-		.edge map { _.cata(+1.0/2, -1.0/2) }
+		.edge.map(_.cata(+1.0/2, -1.0/2))
 	private val phasingKey:Events[Double]	=
-		pushing16Key orElse
+		pushing16Key `orElse`
 		dragging8Key
-	phasingKey observe { fraction =>
+	phasingKey.observe { fraction =>
 		deck.modifyPhase(RhythmUnit.Beat, fraction)
 	}
 
-	phaseUI.mouseWheel.withFine	trigger	{ (steps, fine)	=>
+	phaseUI.mouseWheel.withFine.trigger	{ (steps, fine)	=>
 		deck.movePhase(RhythmUnit.Measure, steps, fine)
 	}
 
 	private val ejectTrackKey:Events[Unit]	=
 		Key(VK_LESS ,	KEY_LOCATION_STANDARD).asAction
 	private val ejectTrack:Events[Unit]	=
-		ejectTrackKey		orElse
+		ejectTrackKey		`orElse`
 		transportUI.eject
-	ejectTrack trigger deck.ejectTrack _
+	ejectTrack.trigger(deck.ejectTrack)
 
 	private val editAnnotationKey:Events[Unit]	=
 		Key(VK_E,		KEY_LOCATION_STANDARD).asAction
-	editAnnotationKey trigger metaUI.editAnnotation _
+	editAnnotationKey.trigger(metaUI.editAnnotation)
 
 	private val playToggleKey:Events[Unit]	=
 		Key(VK_SPACE,		KEY_LOCATION_STANDARD).asAction
 	private val playToggle:Events[Unit]	=
-		playToggleKey		orElse
-		detailUI.playToggle	orElse
+		playToggleKey		`orElse`
+		detailUI.playToggle	`orElse`
 		transportUI.playToggle
-	playToggle	trigger	deck.playToggle _
+	playToggle.trigger(deck.playToggle)
 
 	private val setLoopKey:Events[Option[LoopDef]]	=
-		Events multiOrElse (
-			(loopChoices zip Seq(VK_U, VK_I, VK_O, VK_P))
+		Events.multiOrElse(
+			loopChoices.zip(Seq(VK_U, VK_I, VK_O, VK_P))
 			.map { case ((loopDef, active), key) =>
-				Key(key, KEY_LOCATION_STANDARD).asAction tag Some(loopDef)
+				Key(key, KEY_LOCATION_STANDARD).asAction.tag(Some(loopDef))
 			}
 		)
 	private val resetLoopKey:Events[Option[LoopDef]]	=
-		Key(VK_NUMBER_SIGN,	KEY_LOCATION_STANDARD).asAction tag None
+		Key(VK_NUMBER_SIGN,	KEY_LOCATION_STANDARD).asAction.tag(None)
 	private val setLoop:Events[Option[LoopDef]]	=
-		setLoopKey		orElse
-		resetLoopKey	orElse
+		setLoopKey		`orElse`
+		resetLoopKey	`orElse`
 		transportUI.setLoop
-	setLoop observe	deck.setLoop
+	setLoop.observe(deck.setLoop)
 
 	private val syncToggleKey:Events[Unit]	=
 		Key(VK_INSERT,		KEY_LOCATION_STANDARD).asAction
 	private val syncToggle:Events[Unit]	=
-		syncToggleKey	orElse
+		syncToggleKey	`orElse`
 		matchUI.syncToggle
-	syncToggle trigger deck.syncToggle _
+	syncToggle.trigger(deck.syncToggle)
 
 	private val resetPitchKey:Events[Unit]	=
 		Key(VK_DELETE,		KEY_LOCATION_STANDARD).asAction
 	private val resetPitch:Events[Unit]	=
-		resetPitchKey	orElse
+		resetPitchKey	`orElse`
 		matchUI.reset
-	resetPitch	trigger deck.resetPitch _
+	resetPitch.trigger(deck.resetPitch)
 
 	private val changePitchKey:Signal[Option[Boolean]]	=
-		Key(VK_HOME,	KEY_LOCATION_STANDARD).asModifier	upDown
+		Key(VK_HOME,	KEY_LOCATION_STANDARD).asModifier	`upDown`
 		Key(VK_END,		KEY_LOCATION_STANDARD).asModifier
 	private val changePitch:Events[Int]	=
-		(changePitchKey merge matchUI.pitch).repeated.steps	orElse
+		changePitchKey.merge(matchUI.pitch).repeated.steps	`orElse`
 		pitchSlider.wheel
-	changePitch.withFine	trigger	deck.changePitch
+	changePitch.withFine.trigger(deck.changePitch)
 
 	private val changeRhythmAnchor:Events[Unit]	=
 		Key(VK_T,			KEY_LOCATION_STANDARD).asAction
-	changeRhythmAnchor trigger deck.changeRhythmAnchor _
+	changeRhythmAnchor.trigger(deck.changeRhythmAnchor)
 
 	private val toggleRhythm:Events[Unit]	=
 		Key(VK_R,			KEY_LOCATION_STANDARD).asAction
-	toggleRhythm trigger deck.toggleRhythm _
+	toggleRhythm.trigger(deck.toggleRhythm)
 
 	private val seekKey:Signal[Option[Boolean]]	=
-		Key(VK_RIGHT,	KEY_LOCATION_STANDARD).asModifier	upDown
+		Key(VK_RIGHT,	KEY_LOCATION_STANDARD).asModifier	`upDown`
 		Key(VK_LEFT,	KEY_LOCATION_STANDARD).asModifier
 	private val seek:Events[Int]	=
-		(seekKey merge transportUI.seeking).repeated.steps	orElse
-		detailUI.seek	orElse
+		seekKey. merge(transportUI.seeking).repeated.steps	`orElse`
+		detailUI.seek	`orElse`
 		overviewUI.seek
-	seek.withFine	trigger	deck.seek
+	seek.withFine.trigger(deck.seek)
 
 	private val resizeRhythmAt:Signal[Option[Boolean]]	=
-		Key(VK_W,	KEY_LOCATION_STANDARD).asModifier	upDown
+		Key(VK_W,	KEY_LOCATION_STANDARD).asModifier	`upDown`
 		Key(VK_Q,	KEY_LOCATION_STANDARD).asModifier
-	resizeRhythmAt.repeated.withFine	trigger	deck.resizeRhythmAt
+	resizeRhythmAt.repeated.withFine.trigger(deck.resizeRhythmAt)
 
 	private val resizeRhythmBy:Signal[Option[Boolean]]	=
-		Key(VK_S,	KEY_LOCATION_STANDARD).asModifier	upDown
+		Key(VK_S,	KEY_LOCATION_STANDARD).asModifier	`upDown`
 		Key(VK_A,	KEY_LOCATION_STANDARD).asModifier
-	resizeRhythmBy.repeated.withFine	trigger	deck.resizeRhythmBy
+	resizeRhythmBy.repeated.withFine.trigger(deck.resizeRhythmBy)
 
 	private val moveRhythmBy:Signal[Option[Boolean]]	=
-		Key(VK_X,	KEY_LOCATION_STANDARD).asModifier	upDown (
-			Key(VK_Y,	KEY_LOCATION_STANDARD).asModifier orElse
+		Key(VK_X,	KEY_LOCATION_STANDARD).asModifier	`upDown` (
+			Key(VK_Y,	KEY_LOCATION_STANDARD).asModifier `orElse`
 			// for US keyboards
 			Key(VK_Z,	KEY_LOCATION_STANDARD).asModifier
 		)
-	moveRhythmBy.repeated.withFine	trigger	deck.moveRhythmBy
+	moveRhythmBy.repeated.withFine.trigger(deck.moveRhythmBy)
 
 	private val addCueKey:Events[Unit]	=
 		Key(VK_ENTER,		KEY_LOCATION_STANDARD).asAction
 	private val addCue:Events[Unit]	=
-		addCueKey	orElse
+		addCueKey	`orElse`
 		transportUI.addCue
-	addCue.unitWithFine	observe deck.addCue
+	addCue.unitWithFine.observe(deck.addCue)
 
 	private val removeCueKey:Events[Unit]	=
 		Key(VK_BACK_SPACE,	KEY_LOCATION_STANDARD).asAction
 	private val removeCue:Events[Unit]	=
-		removeCueKey	orElse
+		removeCueKey	`orElse`
 		transportUI.removeCue
-	removeCue	trigger deck.removeCue _
+	removeCue.trigger(deck.removeCue)
 
 	private val jumpCueKey:Events[Int]	=
-		Events multiOrElse (
+		Events.multiOrElse(
 			Vector(
 				VK_0			-> 0,
 				VK_1			-> 1,
@@ -279,20 +276,20 @@ final class DeckUI(deck:Deck, keyboard:Signal[Set[Key]], keyTarget:Signal[Boolea
 				VK_CIRCUMFLEX	-> 0,
 				VK_BACK_QUOTE	-> 0
 			)
-			.map { case (k, i) =>
-				(Key(k,	KEY_LOCATION_STANDARD).asAction tag i)
+			.map { (k, i) =>
+				(Key(k,	KEY_LOCATION_STANDARD).asAction.tag(i))
 			}
 		)
 	private val jumpCue:Events[Int]	=
-		jumpCueKey	orElse
+		jumpCueKey	`orElse`
 		transportUI.jumpCue
-	jumpCue.withFine	trigger deck.jumpCue
+	jumpCue.withFine.trigger(deck.jumpCue)
 
 	// setters
 
-	metaUI.onAnnotation		observe	deck.setAnnotation
-	detailUI.scratchFrame	observe	deck.scratching.set
-	pitchSlider.changes		observe	deck.setPitchOctave
+	metaUI.onAnnotation.observe(deck.setAnnotation)
+	detailUI.scratchFrame.observe(deck.scratching.set)
+	pitchSlider.changes.observe(deck.setPitchOctave)
 
 	// dnd
 
@@ -302,9 +299,9 @@ final class DeckUI(deck:Deck, keyboard:Signal[Set[Key]], keyTarget:Signal[Boolea
 		_	=> Some {
 			(files:Validated[Nes[Exception],Nes[File]]) => {
 				files
-				.invalidEffect	{ es => ERROR log es.toSeq.map(LogValue.throwable)	}
+				.invalidEffect	{ es => ERROR.log(es.toSeq.map(LogValue.throwable))	}
 				.toOption
-				.map			{ _.head.toPath }
+				.map			(_.head.toPath)
 				.foreach		(deck.loadTrack)
 			}
 		}
@@ -312,6 +309,6 @@ final class DeckUI(deck:Deck, keyboard:Signal[Set[Key]], keyTarget:Signal[Boolea
 
 	DndFileExport.install(
 		component,
-		_ => deck.trackSignal.current map { it => Nes one it.file.toFile }
+		_ => deck.trackSignal.current.map { it => Nes.one(it.file.toFile) }
 	)
 }

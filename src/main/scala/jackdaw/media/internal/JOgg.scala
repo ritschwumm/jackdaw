@@ -51,7 +51,8 @@ object JOgg extends Inspector with Decoder with Logging {
 							_		<-
 									writeWavChecked(output, header.getSampleRate, header.getChannels.toShort) { (append:BufferWriter) =>
 										copyPcm(vorbis, append)
-									} leftEffect {
+									}
+									.leftEffect {
 										_ => Files.delete(output)
 									}
 						}
@@ -98,7 +99,7 @@ object JOgg extends Inspector with Decoder with Logging {
 				for {
 					logical	<-	physical.getLogicalStreams.toIterable.singleOption
 								.map		{ _.asInstanceOf[LogicalOggStream] }
-								.toRight	(Checked problem1 "expected exactly one logical stream")
+								.toRight	(Checked.problem1("expected exactly one logical stream"))
 					out		<- func(logical)
 				}
 				yield out
@@ -118,10 +119,10 @@ object JOgg extends Inspector with Decoder with Logging {
 
 			def writeId(it:String):Unit	= {
 				require(it.length == 4, show"tag id expected to have 4 chars, ${it} has ${it.length}")
-				outFile write (it getBytes us_ascii)
+				outFile.write(it.getBytes(us_ascii))
 			}
-			def writeInt(it:Int):Unit						= outFile.write(ByteArrayUtil fromLittleEndianInt	it)
-			def writeShort(it:Short):Unit					= outFile.write(ByteArrayUtil fromLittleEndianShort	it)
+			def writeInt(it:Int):Unit						= outFile.write(ByteArrayUtil.fromLittleEndianInt(it))
+			def writeShort(it:Short):Unit					= outFile.write(ByteArrayUtil.fromLittleEndianShort(it))
 			def writeBytes(bytes:Array[Byte], len:Int):Unit	= outFile.write(bytes, 0, len)
 
 			def tag(id:String)(content: =>Unit):Unit	= {
@@ -131,16 +132,16 @@ object JOgg extends Inspector with Decoder with Logging {
 				val startPos	= outFile.length
 				content
 				val endPos	= outFile.length
-				outFile seek lengthPos
+				outFile.seek(lengthPos)
 				val tagSize	= endPos - startPos
 				// TODO use Tried
 				require (tagSize <= UIntMaxValue, "maximum RIFF tag size exceeded")
 				writeInt(tagSize.toInt)
 				// add padding
 				if (tagSize%2 == 1) {
-					outFile write 0
+					outFile.write(0)
 				}
-				outFile seek endPos
+				outFile.seek(endPos)
 			}
 
 			val WAVE_FORMAT_PCM			= 1.toShort
@@ -149,7 +150,7 @@ object JOgg extends Inspector with Decoder with Logging {
 			val bytesPerSample:Short	= ((bitsPerSample + 7) / 8).toShort
 			val bytesPerFrame:Short		= (channelCount*bytesPerSample).toShort
 
-			outFile setLength 0L
+			outFile.setLength(0L)
 
 			tag("RIFF") {
 				writeId("WAVE")

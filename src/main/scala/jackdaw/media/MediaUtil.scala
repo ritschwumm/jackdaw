@@ -38,8 +38,8 @@ object MediaUtil extends Logging {
 			}
 
 		val errorGroups:Seq[Group]	= outcome.swap.toOption.flattenMany
-		errorGroups foreach { it =>
-			it.worker +: (it.messages map { "\t" + _ }) foreach { WARN(_) }
+		errorGroups.foreach { it =>
+			(it.worker +: it.messages.map("\t" + _)).foreach(WARN(_))
 		}
 
 		outcome.toOption
@@ -50,7 +50,7 @@ object MediaUtil extends Logging {
 	def requireFileSuffixIn(suffixes:String*):Path=>Checked[Unit]	=
 		file =>
 		Checked.trueWin1(
-			suffixes exists { file.getFileName.toString.toLowerCase endsWith _ },
+			suffixes.exists { file.getFileName.toString.toLowerCase.endsWith(_) },
 			"expected suffix in " + (suffixes mkString ", ")
 		)
 
@@ -58,16 +58,16 @@ object MediaUtil extends Logging {
 		OperatingSystem.current match {
 			case Some(OperatingSystem.Linux) | Some(OperatingSystem.OSX)	=>
 				Checked.trueWin1(
-					(External exec Vector("which", command) result false).rc == 0,
+					External.exec(Vector("which", command)).result(false).rc == 0,
 					show"command ${command} not available"
 				)
 			case _ =>
-				Checked fail1 "external media converters are only supported on OSX and Linux"
+				Checked.fail1("external media converters are only supported on OSX and Linux")
 		}
 
 	def runCommand(command:String*)(using sl:SourceLocation):Checked[ExternalResult]	= {
-		DEBUG log command.toVector.map(LogValue.string)
-		External exec command.toVector result false eitherBy { _.rc == 0 } leftMap { res =>
+		DEBUG.log(command.toVector.map(LogValue.string))
+		External.exec(command.toVector).result(false).eitherBy(_.rc == 0).leftMap { res =>
 			val first	= "command failed: " + (command mkString " ")
 			Nes(first, res.err)
 		}
@@ -76,15 +76,15 @@ object MediaUtil extends Logging {
 	//------------------------------------------------------------------------------
 
 	def checkedExceptions[T](block: =>Checked[T])(using sl:SourceLocation):Checked[T]	=
-		(Catch.exception in block)
+		Catch.exception.in(block)
 		.leftMap { e =>
 			ERROR(e)
-			Checked problem1 e.getMessage
+			Checked.problem1(e.getMessage)
 		}
 		.flatten
 
 	//------------------------------------------------------------------------------
 
 	def extractFrom(lines:Seq[String]):Regex=>Option[String]	=
-		lines collectFirstSome _.unapplySeq flatMap { _.headOption }
+		it => lines.collectFirstSome(it.unapplySeq).flatMap(_.headOption)
 }

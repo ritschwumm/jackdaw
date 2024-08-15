@@ -4,7 +4,7 @@ final class IntQueue(maxSize:Int) {
 	private val items:Array[Int]	= new Array[Int](maxSize)
 	private var curSize:Int			= 0
 
-	def size:Int 		= curSize
+	def size:Int		= curSize
 
 	def full:Boolean	= curSize >= maxSize
 

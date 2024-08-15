@@ -12,7 +12,7 @@ object Metaflac extends Inspector {
 	def readMetadata(input:Path):Checked[Metadata] =
 		for {
 			_		<-	recognizeFile(input)
-			_		<-	MediaUtil requireCommand "metaflac"
+			_		<-	MediaUtil.requireCommand("metaflac")
 			result	<-	MediaUtil.runCommand(
 							"metaflac",
 							"--list",
@@ -20,7 +20,7 @@ object Metaflac extends Inspector {
 						)
 		}
 		yield {
-			val extract	= MediaUtil extractFrom result.out
+			val extract	= MediaUtil.extractFrom(result.out)
 			Metadata(
 				title	= extract(re""".*TITLE=(.*)"""),
 				artist	= extract(re""".*ARTIST=(.*)"""),

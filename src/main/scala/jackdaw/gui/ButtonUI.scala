@@ -18,30 +18,30 @@ final class ButtonUI(size:Dimension, style:Signal[ButtonStyle], enabled:Signal[B
 
 	val component:JComponent	= canvas.component
 	component.putClientProperty("STRONG_REF", this)
-	component	setAllSizes	size
+	component.setAllSizes(size)
 
 	//------------------------------------------------------------------------------
 	//## wiring
 
 	private val down	=
-		(canvas.mouse.leftPress		tag true)	orElse
-		(canvas.mouse.leftRelease	tag false)	hold
+		canvas.mouse.leftPress.tag(true)	`orElse`
+		canvas.mouse.leftRelease.tag(false)	`hold`
 		false
 
-	private val hovered	= ComponentUtil underMouseSignal component
+	private val hovered	= ComponentUtil.underMouseSignal(component)
 	private val armed	= signal { down.current && hovered.current && enabled.current }
-	private val gate	= armed delay false
+	private val gate	= armed.delay(false)
 
 	private val figures	=
 		signal {
 			val	styleCur	= style.current
-				 if (!enabled.current)	styleCur.disabled
+			if		(!enabled.current)	styleCur.disabled
 			else if (armed.current)		styleCur.pressed
 			else if (hovered.current)	styleCur.hovered
 			else						styleCur.inactive
 		}
 
-	figures observeNow canvas.figures.set
+	figures.observeNow(canvas.figures.set)
 
 	//------------------------------------------------------------------------------
 	//## output
@@ -50,5 +50,5 @@ final class ButtonUI(size:Dimension, style:Signal[ButtonStyle], enabled:Signal[B
 		armed
 
 	val actions:Events[Unit]	=
-		canvas.mouse.leftRelease gate gate tag (())
+		canvas.mouse.leftRelease.gate(gate).tag(())
 }

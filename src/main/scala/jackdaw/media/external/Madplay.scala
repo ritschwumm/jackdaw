@@ -14,7 +14,7 @@ object Madplay extends Inspector with Decoder {
 	def readMetadata(input:Path):Checked[Metadata] =
 		for {
 			_		<-	recognizeFile(input)
-			_		<-	MediaUtil requireCommand "madplay"
+			_		<-	MediaUtil.requireCommand("madplay")
 			result	<-	MediaUtil.runCommand(
 							"madplay",
 							"-T",
@@ -22,7 +22,7 @@ object Madplay extends Inspector with Decoder {
 						)
 		}
 		yield {
-			val extract	= MediaUtil extractFrom result.err
+			val extract	= MediaUtil.extractFrom(result.err)
 			Metadata(
 				title	= extract(re"""\s*Title: (.*)"""),
 				artist	= extract(re"""\s*Artist: (.*)"""),
@@ -36,7 +36,7 @@ object Madplay extends Inspector with Decoder {
 	def convertToWav(input:Path, output:Path, preferredFrameRate:Int, preferredChannelCount:Int):Checked[Unit] =
 		for {
 			_	<-	recognizeFile(input)
-			_	<-	MediaUtil requireCommand "madplay"
+			_	<-	MediaUtil.requireCommand("madplay")
 			res	<-	MediaUtil.runCommand(
 						"madplay",
 						"--output",			"wav:" + output.toString,
@@ -65,5 +65,5 @@ object Madplay extends Inspector with Decoder {
 		yield ()
 
 	private val recognizeFile:Path=>Checked[Unit]	=
-		MediaUtil requireFileSuffixIn (".mp3")
+		MediaUtil.requireFileSuffixIn(".mp3")
 }

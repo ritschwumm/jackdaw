@@ -12,7 +12,7 @@ object Faad extends Inspector with Decoder {
 	def readMetadata(input:Path):Checked[Metadata] =
 		for {
 			_		<-	recognizeFile(input)
-			_		<-	MediaUtil requireCommand "faad"
+			_		<-	MediaUtil.requireCommand("faad")
 			result	<-	MediaUtil.runCommand(
 							"faad",
 							"-i",
@@ -20,7 +20,7 @@ object Faad extends Inspector with Decoder {
 						)
 		}
 		yield {
-			val extract	= MediaUtil extractFrom result.err
+			val extract	= MediaUtil.extractFrom(result.err)
 			Metadata(
 				title	= extract(re"""title: (.*)"""),
 				artist	= extract(re"""artist: (.*)"""),
@@ -33,7 +33,7 @@ object Faad extends Inspector with Decoder {
 	def convertToWav(input:Path, output:Path, preferredFrameRate:Int, preferredChannelCount:Int):Checked[Unit] =
 		for {
 			_	<-	recognizeFile(input)
-			_	<-	MediaUtil requireCommand "faad"
+			_	<-	MediaUtil.requireCommand("faad")
 			_	<-	MediaUtil.runCommand(
 						"faad",
 						"-o",	output.toString,

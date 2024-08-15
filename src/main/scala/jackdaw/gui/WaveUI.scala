@@ -38,21 +38,21 @@ final class WaveUI(
 ) extends UI with Observing {
 	val component	= new PaintedComponent(paintComponent)
 	// component setBackground Style.STRONG_BACKGROUND
-	component setOpaque	true
-	component setBorder	Style.wave.border
+	component.setOpaque(true)
+	component.setBorder(Style.wave.border)
 
-	component setDoubleBuffered false
+	component.setDoubleBuffered(false)
 
 	// NOTE this is a def, the ImageUtil is different once the component has a parent
-	private def imageUtil	= ImageUtil forComponent component
+	private def imageUtil	= ImageUtil.forComponent(component)
 
 	//------------------------------------------------------------------------------
 
 	private val innerRect:Signal[IntRect]	=
-		ComponentUtil innerIntRectSignal component
+		ComponentUtil.innerIntRectSignal(component)
 
 	private val waveRenderer:Signal[Option[WaveRenderer]]	=
-		signal { bandCurve.current map { new WaveRenderer(_, imageUtil) } }
+		signal { bandCurve.current.map { new WaveRenderer(_, imageUtil) } }
 
 	private val frameCount:Signal[Int]	=
 		signal { bandCurve.current.cata (0, _.frameCount) }
@@ -89,7 +89,7 @@ final class WaveUI(
 		def value2y(value:Double):Int		= (bottomY - value * sizeY).toInt
 
 		def frame2pixelGuarded(frame:Double):Option[Int]	=
-			frame2pixel(frame) optionBy display
+			frame2pixel(frame).optionBy(display)
 
 		// NOTE clipping fails for extreme values
 		// pixel > -16384 && pixel < 16384 option {
@@ -98,7 +98,7 @@ final class WaveUI(
 			pixel <= (rightX	+ WaveUI.maxFigureWidth)
 
 		def span2pixelsGuarded(span:Span):Option[(Int,Int)]	=
-			(frame2pixel(span.start), frame2pixel(span.end)) optionBy (display2 _).tupled
+			(frame2pixel(span.start), frame2pixel(span.end)).optionBy(display2)
 
 		private def display2(startPixel:Int, endPixel:Int):Boolean	=
 			startPixel	<= leftX	&&
@@ -124,53 +124,53 @@ final class WaveUI(
 				decorator.postRollFigure.toVector
 
 			val loopFigures:Seq[Figure]	=
-				loop.current.toSeq mapFilter decorator.loopSpanFigure
+				loop.current.toSeq.mapFilter(decorator.loopSpanFigure)
 
 			val playerPositionFigures:Seq[Figure]	=
-				(decorator positionLineFigure playerPosition.current).toSeq
+				decorator.positionLineFigure(playerPosition.current).toSeq
 
 			val rhythmLineFigures:Seq[Figure]	=
-				rhythmLines.current flatMap { case RhythmLine(frame, unit) =>
-					val line	= decorator markerLineFigure	frame
+				rhythmLines.current.flatMap { case RhythmLine(frame, unit) =>
+					val line	= decorator.markerLineFigure(frame)
 					val boppel	=
 							unit match {
-								case RhythmUnit.Phrase	=> decorator sixangleBoppelFigure	frame
-								case RhythmUnit.Measure	=> decorator triangleBoppelFigure	frame
+								case RhythmUnit.Phrase	=> decorator.sixangleBoppelFigure(frame)
+								case RhythmUnit.Measure	=> decorator.triangleBoppelFigure(frame)
 								case RhythmUnit.Beat	=> None
 							}
 					flatSeq(line.toVector, boppel.toVector)
 				}
 
 			val rhythmAnchorClickables:Option[(Seq[Figure],Option[Jump])]	=
-				rhythmAnchor.current map { frame =>
-					val line	= decorator markerLineFigure		frame
-					val boppel	= decorator rectangleBoppelFigure	frame
+				rhythmAnchor.current.map { frame =>
+					val line	= decorator.markerLineFigure(frame)
+					val boppel	= decorator.rectangleBoppelFigure(frame)
 					val figures	= flatSeq(line.toVector, boppel.toVector)
-					val action	= boppel map { _ -> frame }
+					val action	= boppel.map { _ -> frame }
 					(figures, action)
 				}
 
 			val rhythmAnchorFigures:Seq[Figure]	=
-				(rhythmAnchorClickables map { _._1 }).flattenMany
+				rhythmAnchorClickables.map(_._1).flattenMany
 
 			val rhythmAnchorJumps:Seq[Jump]	=
-				(rhythmAnchorClickables map { _._2 }).flatten.toSeq
+				rhythmAnchorClickables.map(_._2).flatten.toSeq
 
 			val cuePointClickables:Seq[(Seq[Figure],Option[Jump])]	=
-				cuePoints.current.zipWithIndex map { case (frame, index) =>
-					val line	= decorator.markerLineFigure		(frame)
-					val boppel	= decorator.rectangleBoppelFigure	(frame)
-					val label	= decorator.numberLabelFigure		(frame, index)
+				cuePoints.current.zipWithIndex.map { (frame, index) =>
+					val line	= decorator.markerLineFigure(frame)
+					val boppel	= decorator.rectangleBoppelFigure(frame)
+					val label	= decorator.numberLabelFigure(frame, index)
 					val figures	= flatSeq(line.toVector, boppel.toVector, label.toVector)
-					val action	= boppel map { _ -> frame }
+					val action	= boppel.map { _ -> frame }
 					(figures, action)
 				}
 
 			val cuePointFigures:Seq[Figure]	=
-				(cuePointClickables map { _._1 }).flatten
+				cuePointClickables.map(_._1).flatten
 
 			val cuePointJumps:Seq[Jump]	=
-				(cuePointClickables map { _._2 }).flattenOption
+				cuePointClickables.map(_._2).flattenOption
 
 			val figures:Seq[Figure]	= rollFigures ++ loopFigures ++ rhythmLineFigures ++ rhythmAnchorFigures ++ cuePointFigures ++ playerPositionFigures
 			val jumps:Seq[Jump]		= rhythmAnchorJumps ++ cuePointJumps
@@ -187,57 +187,57 @@ final class WaveUI(
 
 	private final class Decorator(coords:Coords) {
 		def preRollFigure:Option[Figure]	=
-			coords frame2pixel 0 optionBy { _ > coords.leftX } map { before =>
+			coords.frame2pixel(0).optionBy{ _ > coords.leftX }.map { before =>
 				val shape	= new Rectangle2D.Double(coords.leftX, coords.bottomY-Style.wave.roll.height, before-coords.leftX, Style.wave.roll.height)
 				FillShape(shape, Style.wave.roll.paint)
 			}
 
 		def postRollFigure:Option[Figure]	=
-			coords frame2pixel frameCount.current optionBy { _ < coords.rightX } map { after =>
+			coords.frame2pixel(frameCount.current).optionBy{ _ < coords.rightX }.map { after =>
 				val shape	= new Rectangle2D.Double(after, coords.bottomY-Style.wave.roll.height, coords.rightX-after, Style.wave.roll.height)
 				FillShape(shape, Style.wave.roll.paint)
 			}
 
 		def loopSpanFigure(loop:Span):Option[Figure]	=
-			coords span2pixelsGuarded loop map { case (startPixel, endPixel) =>
+			coords.span2pixelsGuarded(loop).map { (startPixel, endPixel) =>
 				val shape	= spanShape(startPixel, endPixel)
 				FillShape(shape, Style.wave.loop.color)
 			}
 
 		def positionLineFigure(frame:Double):Option[Figure]	=
-			coords frame2pixelGuarded frame map { pixel =>
+			coords.frame2pixelGuarded(frame).map { pixel =>
 				val shape	= lineShape(pixel)
 				StrokeShape(shape, Style.wave.position.color,	Style.wave.position.stroke)
 			}
 
 		def markerLineFigure(frame:Double):Option[Figure]	=
-			coords frame2pixelGuarded frame map { pixel =>
+			coords.frame2pixelGuarded(frame).map { pixel =>
 				val shape	= lineShape(pixel)
 				StrokeShape(shape, Style.wave.marker.color,		Style.wave.marker.stroke)
 			}
 
 		def rectangleBoppelFigure(frame:Double):Option[Figure]	=
-			coords frame2pixelGuarded frame map { pixel =>
+			coords.frame2pixelGuarded(frame).map { pixel =>
 				val shape	= rectangleBoppelShape(pixel)
 				FillShape(shape, Style.wave.marker.color)
 			}
 
 		def triangleBoppelFigure(frame:Double):Option[Figure]	=
-			coords frame2pixelGuarded frame map { pixel =>
+			coords.frame2pixelGuarded(frame).map { pixel =>
 				val shape	= triangleBoppelShape(pixel)
 				FillShape(shape, Style.wave.marker.color)
 			}
 
 		def sixangleBoppelFigure(frame:Double):Option[Figure]	=
-			coords frame2pixelGuarded frame map { pixel =>
+			coords.frame2pixelGuarded(frame).map { pixel =>
 				val shape	= sixangleBoppelShape(pixel)
 				FillShape(shape, Style.wave.marker.color)
 			}
 
 		def numberLabelFigure(frame:Double, number:Int):Option[Figure]	=
 			for {
-				image	<- numberImages lift number
-				pixel	<- coords frame2pixelGuarded frame
+				image	<- numberImages.lift(number)
+				pixel	<- coords.frame2pixelGuarded(frame)
 			}
 			yield {
 				val size	= Style.wave.marker.rectangle.width
@@ -294,8 +294,8 @@ final class WaveUI(
 	private val numberImages:Seq[BufferedImage]	= {
 		val size	= Style.wave.marker.number.size
 		val end		= Style.wave.marker.number.end
-		val bounds	= SgRectangle zeroSized SgPoint(end.x, end.y)
-		LEDShape shapes bounds map { shape	=>
+		val bounds	= SgRectangle.zeroSized(SgPoint(end.x, end.y))
+		LEDShape.shapes(bounds).map { shape	=>
 			val figure	= StrokeShape(shape, Style.wave.marker.number.color, Style.wave.marker.number.stroke)
 			imageUtil.renderImage(size, true, figure.paint)
 		}
@@ -309,80 +309,79 @@ final class WaveUI(
 	private val scratchRelative:Events[Double]	=
 		for {
 			press	<- mouse.leftPress
-			zoom1 	= zoom.current
+			zoom1	= zoom.current
 			drag	<- mouse.leftDrag
 		}
 		yield zoom1 * (drag.getX - press.getX)
 
 	val scratchFrame:Signal[Option[Double]]		=
-		mouse.leftPress		tag
-		0.0					orElse
-		scratchRelative		sum
-		mouse.leftRelease	map
-		{ _.left.toOption }	hold
-		None
+		mouse.leftPress
+		.tag(0.0)
+		.orElse(scratchRelative)
+		.sum(mouse.leftRelease)
+		.map(_.left.toOption)
+		.hold(None)
 
 	val playToggle:Events[Unit]	=
-		mouse.rightPress tag (())
+		mouse.rightPress.tag(())
 
 	val seek:Events[Int]	=
 		mouse.wheelRotation
 
 	private val jumpFlag:Events[Double]	=
-		((mouse.leftPress snapshotWith jumps) { (ev, jumps) =>
-			jumps collectFirstSome { case (figure, frame) =>
-				figure pick ev.getPoint option frame
+		(mouse.leftPress.snapshotWith(jumps) { (ev, jumps) =>
+			jumps.collectFirstSome { (figure, frame) =>
+				figure.pick(ev.getPoint).option(frame)
 			}
 		})
 		.flattenOption
 
 	private val jumpOutside:Events[Double]	=
-		(mouse.leftPress orElse mouse.leftDrag snapshotWith coords) {
+		mouse.leftPress.orElse(mouse.leftDrag).snapshotWith(coords) {
 			_.getX |> _.pixel2frame
 		}
 
 	val jump:Events[Double]	=
-		jumpFlag orElse jumpOutside
+		jumpFlag `orElse` jumpOutside
 
 	//------------------------------------------------------------------------------
 	//## repaint
 
 	// repaint everything on size, origin or source changes
 	private val fullRepaints:Events[Seq[Rectangle]]	=
-		innerRect.edge		orElse
-		bandCurve.edge		orElse
-		frameOrigin.edge	tag
-		Vector(new Rectangle(component.getSize()))
+		innerRect.edge.orElse(bandCurve.edge).orElse(frameOrigin.edge).tag(
+			Vector(new Rectangle(component.getSize()))
+		)
 
 	// repaint figures when they change in any way
 	private val partialRepaints:Events[Seq[Rectangle]]	=
 		figures slide { (older, newer) =>
-			((older ++ newer) map { _.bounds.getBounds }).distinct
+			((older ++ newer).map { _.bounds.getBounds }).distinct
 		}
 
 	// full repaints coalesce partial repaints
 	private val repaints:Events[Seq[Rectangle]]	=
-		fullRepaints orElse partialRepaints
+		fullRepaints `orElse` partialRepaints
 
-	repaints observe { _ =>
+	repaints.observe { _ =>
 		val g	= component.getGraphics.asInstanceOf[Graphics2D]
 		if (g ne null) {
-			val oldClip= g.getClip
-			g setClip new Rectangle(component.getSize())
+			val oldClip	= g.getClip
+			g.setClip(new Rectangle(component.getSize()))
 			// NOTE paintCompoment(g) works, but doesn't paint the border
-			component paint g
-			g setClip oldClip
+			component.paint(g)
+			g.setClip(oldClip)
 			Toolkit.getDefaultToolkit.sync()
 		}
 	}
-	// repaints observe { _ foreach component.repaint }
-	// completeRepaints observe { _ => component.paintImmediately(0,0,component.getWidth,component.getHeight) }
+	// repaints.observe(_.foreach(component.repaint))
+	// completeRepaints.observe { _ => component.paintImmediately(0,0,component.getWidth,component.getHeight) }
 
 	//------------------------------------------------------------------------------
 	//## painting
 
 	private def paintComponent(g:Graphics2D):Unit	= {
-		// g setRenderingHint (RenderingHints.KEY_ANTIALIASING, 		RenderingHints.VALUE_ANTIALIAS_ON)
+		// g setRenderingHint (RenderingHints.KEY_ANTIALIASING,			RenderingHints.VALUE_ANTIALIAS_ON)
 		// g setRenderingHint (RenderingHints.KEY_TEXT_ANTIALIASING,	RenderingHints.VALUE_TEXT_ANTIALIAS_ON)	// VALUE_TEXT_ANTIALIAS_GASP
 		// g setRenderingHint (RenderingHints.KEY_INTERPOLATION,		RenderingHints.VALUE_INTERPOLATION_BICUBIC)
 		// g setRenderingHint (RenderingHints.KEY_COLOR_RENDERING,		RenderingHints.VALUE_COLOR_RENDER_QUALITY)
@@ -442,6 +441,6 @@ final class WaveUI(
 		}
 
 		// figures
-		figures.current foreach { _ paint bg }
+		figures.current.foreach(_.paint(bg))
 	}
 }

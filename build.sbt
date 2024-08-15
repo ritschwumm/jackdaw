@@ -4,26 +4,26 @@ ThisBuild / versionScheme := Some("early-semver")
 
 name			:= "jackdaw"
 organization	:= "de.djini"
-version			:= "1.46.0"
+version			:= "1.47.0"
 
-scalaVersion	:= "3.1.3"
+scalaVersion	:= "3.5.0"
 scalacOptions	++= Seq(
 	"-feature",
 	"-deprecation",
 	"-unchecked",
+	"-source:future",
 	"-Wunused:all",
 	"-Xfatal-warnings",
-	"-Ykind-projector:underscores",
+	"-Xkind-projector:underscores",
 )
 
-conflictManager		:= ConflictManager.strict withOrganization "^(?!(org\\.scala-lang|org\\.scala-js)(\\..*)?)$"
 libraryDependencies	++= Seq(
-	"de.djini"		%%	"scutil-jdk"	% "0.230.0"	% "compile",
-	"de.djini"		%%	"scutil-gui"	% "0.230.0"	% "compile",
-	"de.djini"		%%	"scaudio"		% "0.236.0"	% "compile",
-	"de.djini"		%%	"scjson-io"		% "0.258.0"	% "compile",
-	"de.djini"		%%	"screact"		% "0.243.0"	% "compile",
-	"de.djini"		%%	"sc2d"			% "0.46.0"	% "compile",
+	"de.djini"		%%	"scutil-jdk"	% "0.250.0"	% "compile",
+	"de.djini"		%%	"scutil-gui"	% "0.250.0"	% "compile",
+	"de.djini"		%%	"scaudio"		% "0.258.0"	% "compile",
+	"de.djini"		%%	"scjson-io"		% "0.278.0"	% "compile",
+	"de.djini"		%%	"screact"		% "0.263.0"	% "compile",
+	"de.djini"		%%	"sc2d"			% "0.47.0"	% "compile",
 	"de.djini"		%	"jkeyfinder"	% "0.4.1"	% "compile",
 	"javazoom"		%	"jlayer"		% "1.0.1"	% "compile",
 	"com.mpatric"	%	"mp3agic"		% "0.9.1"	% "compile",
@@ -69,7 +69,7 @@ val vmOptions	= Seq(
 )
 val systemProperties	= Map(
 	// java.lang.IllegalArgumentException: Comparison method violates its general contract!
-	// 	at java.util.TimSort.mergeHi(TimSort.java:868)
+	//	at java.util.TimSort.mergeHi(TimSort.java:868)
 	//	...
 	//	at sun.awt.datatransfer.DataTransferer.setToSortedDataFlavorArray(DataTransferer.java:2407)
 	// @see http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7193557

@@ -4,7 +4,6 @@ import java.nio.file.*
 import java.io.*
 
 import scutil.core.implicits.*
-import scutil.jdk.implicits.*
 import scutil.log.*
 
 import jackdaw.curve.BandCurve
@@ -36,9 +35,9 @@ final class BandCurvePersister extends Persister[BandCurve] with Logging {
 	def save(file:Path)(curve:BandCurve):Unit	= {
 		try {
 			new ObjectOutputStream(Files.newOutputStream(file)) use { out =>
-				out writeDouble	curve.fragmentRate
-				out writeInt	curve.rasterFrames
-				out writeInt	curve.chunkCount
+				out.writeDouble(curve.fragmentRate)
+				out.writeInt(curve.rasterFrames)
+				out.writeInt(curve.chunkCount)
 				writeFloatArray(out, curve.valuesFull)
 				writeFloatArray(out, curve.valuesLow)
 				writeFloatArray(out, curve.valuesMiddle)
@@ -63,7 +62,7 @@ final class BandCurvePersister extends Persister[BandCurve] with Logging {
 	private def writeFloatArray(out:ObjectOutputStream, array:Array[Float]):Unit	= {
 		var i = 0
 		while (i < array.length) {
-			out writeFloat array(i)
+			out.writeFloat(array(i))
 			i	= i + 1
 		}
 	}

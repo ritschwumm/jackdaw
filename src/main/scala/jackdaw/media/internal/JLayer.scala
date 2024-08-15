@@ -7,7 +7,6 @@ import javazoom.jl.converter.*
 import javazoom.jl.converter.Converter.{ ProgressListener as ConverterProgressListener }
 
 import scutil.core.implicits.*
-import scutil.jdk.implicits.*
 import scutil.log.*
 import scutil.io.*
 
@@ -19,7 +18,7 @@ object JLayer extends Decoder with Logging {
 	def convertToWav(input:Path, output:Path, preferredFrameRate:Int, preferredChannelCount:Int):Checked[Unit] =
 		for {
 			_	<-	recognizeFile(input)
-			_ 	<-	MoreFiles.withInputStream(input) { ist =>
+			_	<-	MoreFiles.withInputStream(input) { ist =>
 						DEBUG(show"decoding with ${name}")
 
 						try {
@@ -28,7 +27,7 @@ object JLayer extends Decoder with Logging {
 						}
 						catch { case e:JavaLayerException =>
 							ERROR(show"${name} failed", e)
-							Checked fail1 show"${name} failed: ${e.getMessage}"
+							Checked.fail1(show"${name} failed: ${e.getMessage}")
 						}
 					}
 		}

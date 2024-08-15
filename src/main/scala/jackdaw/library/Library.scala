@@ -30,7 +30,7 @@ object Library extends Logging {
 				.reverse
 
 		INFO("migrating library")
-		content foreach autoMigrate
+		content.foreach(autoMigrate)
 
 		INFO("cleaning library")
 		cleanup(content)
@@ -58,21 +58,21 @@ object Library extends Logging {
 
 	private def autoMigrate(tf:TrackFiles):Unit	=
 		synchronized {
-			Migration migrate tf
+			Migration.migrate(tf)
 		}
 
 	/** lately modified tracks come first in the list */
 	private def cleanup(allTracks:Seq[TrackFiles]):Unit	= {
 		// how many to keep, prefers the ones early in the list
 		val (keepTracks, deleteTracks)	= {
-			val needs	= allTracks map spaceNeeded
-			val sums	= (needs scanLeft 0L) { _+_ }
-			val keeps	= sums.tail takeWhile { _ < Config.maxCacheSize }
-			val pos		= keeps.size max Config.minCacheCount
-			allTracks splitAt pos
+			val needs	= allTracks.map(spaceNeeded)
+			val sums	= needs.scanLeft(0L)(_ + _)
+			val keeps	= sums.tail.takeWhile(_ < Config.maxCacheSize)
+			val pos		= keeps.size `max` Config.minCacheCount
+			allTracks.splitAt(pos)
 		}
 
-		deleteTracks foreach { it =>
+		deleteTracks.foreach { it =>
 			Files.deleteIfExists(it.wav)
 			Files.deleteIfExists(it.curve)
 		}
@@ -96,7 +96,7 @@ object Library extends Logging {
 
 	private def info(tracks:Seq[TrackFiles]):String	= {
 		val count	= tracks.size
-		val space	= (tracks map spaceNeeded).sum
+		val space	= tracks.map(spaceNeeded).sum
 		(Human roundedBinary space) + "B for " +
 		count.toString + " " + (count == 1).cata("tracks", "track")
 	}
@@ -105,8 +105,8 @@ object Library extends Logging {
 	private def findTrackFiles():Seq[TrackFiles]	= {
 		def walk(dir:Path):Seq[TrackFiles]	=  {
 			val candidate	= TrackFiles(dir)
-				 if (seemsLegit(candidate))		Vector(candidate)
-			else if (Files.isDirectory(dir))	MoreFiles.listFiles(dir).flattenMany flatMap walk
+			if		(seemsLegit(candidate))		Vector(candidate)
+			else if (Files.isDirectory(dir))	MoreFiles.listFiles(dir).flattenMany.flatMap(walk)
 			else								Vector.empty
 		}
 		walk(metaBase)
@@ -115,14 +115,14 @@ object Library extends Logging {
 	private def seemsLegit(it:TrackFiles):Boolean	=
 		Files.isDirectory(it.meta) && {
 			val standardFiles	=
-					Set(
-						it.wav,
-						it.curve,
-						it.data
-					)
+				Set(
+					it.wav,
+					it.curve,
+					it.data
+				)
 			val migrationFiles	=
-					Migration involved it
-			(standardFiles ++ migrationFiles) exists { Files.isRegularFile(_) }
+				Migration.involved(it)
+			(standardFiles ++ migrationFiles).exists(Files.isRegularFile(_))
 		}
 
 	private def spaceNeeded(it:TrackFiles):Long	=
@@ -142,7 +142,7 @@ object Library extends Logging {
 		.zipWithIndex
 		.mapFilter { case (file, index) =>
 			val name	= Option(file.getFileName).map(_.toString).flatMap(_.optionNonEmpty)
-			if (index == 0)	name orElse prefixPath(file.toString)
+			if (index == 0)	name.orElse(prefixPath(file.toString))
 			else			name
 		}
 
@@ -150,7 +150,7 @@ object Library extends Logging {
 	private def prefixPath(path:String):Option[String]	=
 		if		(path == "/")					None
 		else if	(path == """\\""")				Some("UNC")
-		else if	(path matches """[A-Z]:\\""")	Some(path.substring(0,1))
+		else if	(path.matches("""[A-Z]:\\"""))	Some(path.substring(0,1))
 		else {
 			ERROR(show"unexpected root path ${path}")
 			None

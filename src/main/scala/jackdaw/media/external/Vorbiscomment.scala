@@ -12,14 +12,14 @@ object Vorbiscomment extends Inspector {
 	def readMetadata(input:Path):Checked[Metadata] =
 		for {
 			_		<-	recognizeFile(input)
-			_		<-	MediaUtil requireCommand "vorbiscomment"
+			_		<-	MediaUtil.requireCommand("vorbiscomment")
 			result	<-	MediaUtil.runCommand(
 							"vorbiscomment",
 							input.toString
 						)
 		}
 		yield {
-			val extract	= MediaUtil extractFrom result.out
+			val extract	= MediaUtil.extractFrom(result.out)
 			Metadata(
 				title	= extract(re"""TITLE=(.*)"""),
 				artist	= extract(re"""ARTIST=(.*)"""),
@@ -29,5 +29,5 @@ object Vorbiscomment extends Inspector {
 		}
 
 	private val recognizeFile:Path=>Checked[Unit]	=
-		MediaUtil requireFileSuffixIn (".ogg")
+		MediaUtil.requireFileSuffixIn(".ogg")
 }

@@ -2,31 +2,27 @@ package jackdaw.gui
 
 import javax.swing.*
 
-import scutil.gui.GridBagDSL.*
-
 import screact.*
 
 import jackdaw.model.*
-
-import GridBagItem.UI_is_GridBagItem
 
 /** metadata for a track */
 final class MetaUI(deck:Deck) extends UI {
 	//------------------------------------------------------------------------------
 	//## input
 
-	private val title		= signal { deck.metadata.current flatMap { _.title 	} orElse deck.fileName.current getOrElse "" }
-	private val artist		= signal { deck.metadata.current flatMap { _.artist	} getOrElse "" }
+	private val title		= signal { deck.metadata.current.flatMap(_.title).orElse(deck.fileName.current).getOrElse("") }
+	private val artist		= signal { deck.metadata.current.flatMap(_.artist).getOrElse("") }
 
-	private val location	= deck.playerRhythmIndex	map Render.rhythmIndexOpt
-	private val remains		= deck.playerBeforeCuePoint	map Render.rhythmIndexOpt
+	private val location	= deck.playerRhythmIndex	.map(Render.rhythmIndexOpt)
+	private val remains		= deck.playerBeforeCuePoint	.map(Render.rhythmIndexOpt)
 	/*
-	private val remains		= deck.playerRemainingSeconds	map Render.secondsOpt
+	private val remains		= deck.playerRemainingSeconds	.map(Render.secondsOpt)
 	*/
 
-	private val	bpm			= deck.beatRate		map Render.bpmOpt
-	private val	pitch		= deck.pitchOctave	map Render.cents
-	private val	key			= deck.effectiveKey	map Render.effectiveKeyOpt
+	private val	bpm			= deck.beatRate		.map(Render.bpmOpt)
+	private val	pitch		= deck.pitchOctave	.map(Render.cents)
+	private val	key			= deck.effectiveKey	.map(Render.effectiveKeyOpt)
 
 	//------------------------------------------------------------------------------
 	//## components
@@ -45,17 +41,17 @@ final class MetaUI(deck:Deck) extends UI {
 
 	private val panel	=
 		GridBagUI(
-			titleDisplay		.pos(0,0) .size(1,1) .weight(1,1) .fill(HORIZONTAL) .insetsTLBR(2,4,0,4),
-			artistDisplay		.pos(0,1) .size(1,1) .weight(1,1) .fill(HORIZONTAL) .insetsTLBR(0,4,0,4),
-			locationDisplay 	.pos(1,0) .size(1,1) .weight(0,1) .fill(HORIZONTAL) .insetsTLBR(2,4,0,4),
-			remainsDisplay		.pos(1,1) .size(1,1) .weight(0,1) .fill(HORIZONTAL) .insetsTLBR(0,4,0,4),
-			bpmDisplay			.pos(2,0) .size(1,1) .weight(0,1) .fill(HORIZONTAL) .insetsTLBR(2,4,0,4),
-			pitchDisplay		.pos(2,1) .size(1,1) .weight(0,1) .fill(HORIZONTAL) .insetsTLBR(0,4,0,4),
-			annotationEditor	.pos(0,2) .size(2,1) .weight(1,1) .fill(HORIZONTAL) .insetsTLBR(0,4,2,4),
-			keyDisplay			.pos(2,2) .size(1,1) .weight(0,1) .fill(HORIZONTAL) .insetsTLBR(0,4,2,4)
+			titleDisplay		.gbi.pos(0,0) .size(1,1) .weight(1,1) .fill("HORIZONTAL") .insetsTLBR(2,4,0,4),
+			artistDisplay		.gbi.pos(0,1) .size(1,1) .weight(1,1) .fill("HORIZONTAL") .insetsTLBR(0,4,0,4),
+			locationDisplay		.gbi.pos(1,0) .size(1,1) .weight(0,1) .fill("HORIZONTAL") .insetsTLBR(2,4,0,4),
+			remainsDisplay		.gbi.pos(1,1) .size(1,1) .weight(0,1) .fill("HORIZONTAL") .insetsTLBR(0,4,0,4),
+			bpmDisplay			.gbi.pos(2,0) .size(1,1) .weight(0,1) .fill("HORIZONTAL") .insetsTLBR(2,4,0,4),
+			pitchDisplay		.gbi.pos(2,1) .size(1,1) .weight(0,1) .fill("HORIZONTAL") .insetsTLBR(0,4,0,4),
+			annotationEditor	.gbi.pos(0,2) .size(2,1) .weight(1,1) .fill("HORIZONTAL") .insetsTLBR(0,4,2,4),
+			keyDisplay			.gbi.pos(2,2) .size(1,1) .weight(0,1) .fill("HORIZONTAL") .insetsTLBR(0,4,2,4)
 		)
-	panel.component setBackground	Style.meta.background.color
-	panel.component setBorder		Style.meta.border
+	panel.component.setBackground(Style.meta.background.color)
+	panel.component.setBorder(Style.meta.border)
 
 	val component:JComponent	= panel.component
 	component.putClientProperty("STRONG_REF", this)

@@ -1,11 +1,9 @@
 package jackdaw.key
 
-object Detune {
-	case object VeryLow		extends Detune
-	case object Low			extends Detune
-	case object InTune		extends Detune
-	case object High		extends Detune
-	case object VeryHigh	extends Detune
+enum Detune {
+	case VeryLow
+	case Low
+	case InTune
+	case High
+	case VeryHigh
 }
-
-sealed trait Detune

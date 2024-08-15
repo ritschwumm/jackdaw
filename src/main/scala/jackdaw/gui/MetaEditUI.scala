@@ -17,19 +17,19 @@ final class MetaEditUI(value:Signal[Option[String]], strong:Boolean) extends UI 
 	//## input
 
 	private val display:Signal[String]	=
-		value map { _ getOrElse "" }
+		value.map(_.getOrElse(""))
 
 	private val editable:Signal[Boolean]	=
-		value map { _.isDefined }
+		value.map(_.isDefined)
 
 	//------------------------------------------------------------------------------
 	//## components
 
 	private val field	= new JTextField
-	field	setFont			strong.cata(Style.meta.edit.weak.font,	Style.meta.edit.strong.font)
-	field	setBorder		null
+	field.setFont(strong.cata(Style.meta.edit.weak.font,	Style.meta.edit.strong.font))
+	field.setBorder(null)
 	// file dropping should not focus this
-	field	setDropTarget	null
+	field.setDropTarget(null)
 
 	val component:JComponent	= field
 	component.putClientProperty("STRONG_REF", this)
@@ -38,11 +38,11 @@ final class MetaEditUI(value:Signal[Option[String]], strong:Boolean) extends UI 
 	//## keyboard
 
 	(component:KeyCaster) connect { ev =>
-		component.getParent.optionNotNull foreach { parent =>
+		component.getParent.optionNotNull.foreach { parent =>
 			import KeyEvent.*
 			(ev.getID, ev.getKeyCode) match {
-				case (KEY_PRESSED, 	VK_ESCAPE)	=> parent.requestFocusInWindow()
-				case (KEY_PRESSED, 	VK_ENTER)	=> parent.requestFocusInWindow()
+				case (KEY_PRESSED, VK_ESCAPE)	=> parent.requestFocusInWindow()
+				case (KEY_PRESSED, VK_ENTER)	=> parent.requestFocusInWindow()
 				case _	=>
 			}
 		}
@@ -59,12 +59,12 @@ final class MetaEditUI(value:Signal[Option[String]], strong:Boolean) extends UI 
 			field.setText
 		)
 
-	editable observeNow { it =>
-		field setEditable	it
-		field setFocusable	it
+	editable.observeNow { it =>
+		field.setEditable(it)
+		field.setFocusable(it)
 	}
 
-	field onFocusGained	{ _ =>
+	field.onFocusGained	{ _ =>
 		edt {
 			field.selectAll()
 		}
@@ -87,5 +87,5 @@ final class MetaEditUI(value:Signal[Option[String]], strong:Boolean) extends UI 
 		)
 
 	val changes:Events[String]	=
-		textChanges gate editable
+		textChanges.gate(editable)
 }

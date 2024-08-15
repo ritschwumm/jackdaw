@@ -12,14 +12,14 @@ object Opusinfo extends Inspector {
 	def readMetadata(input:Path):Checked[Metadata] =
 		for {
 			_		<-	recognizeFile(input)
-			_		<-	MediaUtil requireCommand "opusinfo"
+			_		<-	MediaUtil.requireCommand("opusinfo")
 			result	<-	MediaUtil.runCommand(
 							"opusinfo",
 							input.toString
 						)
 		}
 		yield {
-			val extract	= MediaUtil extractFrom result.out
+			val extract	= MediaUtil.extractFrom(result.out)
 			Metadata(
 				title	= extract(re"""\ttitle=(.*)"""),
 				artist	= extract(re"""\tartist=(.*)"""),

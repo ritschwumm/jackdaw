@@ -19,7 +19,7 @@ import screact.swing.*
 object ComponentUtil extends Logging {
 	private val componentUnderMouse	=
 		new ComponentUnderMouse(
-			100.millis,
+			100.duration.millis,
 			(message,exception)	=> ERROR(message, exception)
 		)
 
@@ -37,10 +37,10 @@ object ComponentUtil extends Logging {
 
 	def underMouseSignal(component:JComponent):Signal[Boolean]	= {
 		val out	= cell(component.underMousePointer)
-		val set	= out.set _
+		val set	= out.set(_)
 		// NOTE ugly backref to keep ComponentUnderMouse from dropping the connection
 		component.putClientProperty("UNDER_MOUSE", set)
 		componentUnderMouse.listen(component, set)
-		out
+		out.signal
 	}
 }

@@ -64,27 +64,27 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 
 		var xx	= x
 		while (xx - tm < x + width) {
-		provideTileImage(height, ti) foreach { tile =>
-			// first visible, tile's first real (inset) pixel is painted here
-			val tilePos = xx - tm
-			// first physical pixel of the tile would be painted here, but is clipped away
-			val drawPos = tilePos - tileInset
+			provideTileImage(height, ti).foreach { tile =>
+				// first visible, tile's first real (inset) pixel is painted here
+				val tilePos = xx - tm
+				// first physical pixel of the tile would be painted here, but is clipped away
+				val drawPos = tilePos - tileInset
 
-			// clip away tileInset
-			val oldClip = g.getClip
-			g.clipRect	(tilePos, 0, tileOffset, height)
-			g.drawImage (tile, drawPos, y, null)
-			g.setClip	(oldClip)
-		}
+				// clip away tileInset
+				val oldClip = g.getClip
+				g.clipRect	(tilePos, 0, tileOffset, height)
+				g.drawImage (tile, drawPos, y, null)
+				g.setClip	(oldClip)
+			}
 
-		// next tile
-		xx	+= tileOffset
-		ti	+= 1
+			// next tile
+			xx	+= tileOffset
+			ti	+= 1
 		}
 	}
 
 	private def provideTileImage(height:Int, index:Int):Option[BufferedImage]	=
-		index optionBy { it => it >= 0 && it < tileCount } map { index =>
+		index.optionBy { it => it >= 0 && it < tileCount }.map { index =>
 			// first: provide the map
 			// second: provide tiles in the map
 			val lru:LRU[Int,BufferedImage]	=
@@ -100,7 +100,7 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 
 				}
 			tileImageCache	= Some((height, lru))
-			lru load index
+			lru.load(index)
 		}
 
 	//------------------------------------------------------------------------------
@@ -243,7 +243,7 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 		val kernel	=
 			new Kernel(
 				3, 5,
-				raw map { _ / raw.sum }
+				raw.map(_ / raw.sum)
 			)
 		val operation	=
 			new ConvolveOp(

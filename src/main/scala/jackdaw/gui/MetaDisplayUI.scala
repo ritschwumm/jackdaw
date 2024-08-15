@@ -11,9 +11,9 @@ final class MetaDisplayUI(value:Signal[String], strong:Boolean, start:Boolean) e
 	//## components
 
 	private val label	= new JLabel
-	label setFont					strong	.cata(Style.meta.display.weak.font,		Style.meta.display.strong.font)
-	label setForeground 			strong	.cata(Style.meta.display.weak.color,	Style.meta.display.strong.color)
-	label setHorizontalAlignment	start	.cata(SwingConstants.RIGHT,				SwingConstants.LEFT)
+	label.setFont		(strong.cata(Style.meta.display.weak.font,		Style.meta.display.strong.font))
+	label.setForeground	(strong.cata(Style.meta.display.weak.color,	Style.meta.display.strong.color))
+	label.setHorizontalAlignment(start.cata(SwingConstants.RIGHT,	SwingConstants.LEFT))
 
 	val component:JComponent	= label
 	component.putClientProperty("STRONG_REF", this)
@@ -21,5 +21,5 @@ final class MetaDisplayUI(value:Signal[String], strong:Boolean, start:Boolean) e
 	//------------------------------------------------------------------------------
 	//## wiring
 
-	value observeNow label.setText
+	value.observeNow(label.setText)
 }
