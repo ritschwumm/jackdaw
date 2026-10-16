@@ -33,7 +33,7 @@ final case class TrackData(
 	// BETTER make this a class
 
 	def addCuePoint(frame:Double):TrackData	=
-		copy(cuePoints = (cuePoints :+ frame).sorted(Ordering.Double.TotalOrdering))
+		copy(cuePoints = (cuePoints :+ frame).sorted(using Ordering.Double.TotalOrdering))
 
 	def removeCuePoint(nearFrame:Double):TrackData	=
 		(	for {
@@ -48,7 +48,7 @@ final case class TrackData(
 		cuePoints
 		.map	{ frame => abs(frame - nearFrame) }
 		.zipWithIndex
-		.sortBy	(_._1)(Ordering.Double.TotalOrdering)
+		.sortBy	(_._1)(using Ordering.Double.TotalOrdering)
 		.headOption
 		.map	(_._2)
 }

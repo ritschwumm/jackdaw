@@ -34,7 +34,7 @@ object Migration extends Logging {
 	private def migrateStep(tf:TrackFiles)(step:Migration):Unit	= {
 		val oldData	= tf.dataByVersion(step.oldVersion)
 		val newData	= tf.dataByVersion(step.newVersion)
-		if (Files.exists(oldData) && !Files.exists(newData)) {
+		if Files.exists(oldData) && !Files.exists(newData) then {
 			INFO("migrating", oldData)
 			migrateFile(step, oldData, newData)
 		}

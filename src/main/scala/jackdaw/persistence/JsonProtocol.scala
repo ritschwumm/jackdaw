@@ -51,8 +51,8 @@ object JsonProtocol {
 			"chord"		-> subWriter(cc1AutoWriter[MusicKey.Chord],	MusicKey.P.Chord.get),
 		)
 
-	given[T:JsonReader]:JsonReader[Stamped[T]]	= cc2AutoReader[Stamped[T]]
-	given[T:JsonWriter]:JsonWriter[Stamped[T]]	= cc2AutoWriter[Stamped[T]]
+	given [T:JsonReader] => JsonReader[Stamped[T]]	= cc2AutoReader[Stamped[T]]
+	given [T:JsonWriter] => JsonWriter[Stamped[T]]	= cc2AutoWriter[Stamped[T]]
 
 	given JsonReader[TrackData]	= cc6AutoReader[TrackData]
 	given JsonWriter[TrackData]	= cc6AutoWriter[TrackData]

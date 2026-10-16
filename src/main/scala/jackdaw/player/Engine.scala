@@ -33,7 +33,7 @@ object Engine {
 											output.outputInfo.rate,
 											output.outputInfo.headphone
 										)
-			output					<-	output.runProducerUsingConsumer(producer)
+			_						<-	output.runProducerUsingConsumer(producer)
 		}
 		yield {
 			incomingActionQueue.send(_)
@@ -64,11 +64,11 @@ extends FrameProducer with Logging {
 
 	def produce(speakerBuffer:FrameBuffer, phoneBuffer:FrameBuffer):Unit	= {
 		val talkToGui	= frame % Config.guiIntervalFrames == 0
-		if (talkToGui) {
+		if talkToGui then {
 			receiveActions()
 		}
 		val talkToLoader	= frame % Config.loaderIntervalFrames == 0
-		if (talkToLoader) {
+		if talkToLoader then {
 			// this indirectly executed loader answer thunks registered by the player
 			receiveLoading()
 			player1.talkToLoader()
@@ -83,7 +83,7 @@ extends FrameProducer with Logging {
 		val speakerScale	= speaker.current.toFloat
 		speakerBuffer.mul(speakerScale, speakerScale)
 
-		if (phoneEnabled) {
+		if phoneEnabled then {
 			val phoneScale	= phone.current.toFloat
 			phoneBuffer.mul(phoneScale, phoneScale)
 		}
@@ -99,7 +99,7 @@ extends FrameProducer with Logging {
 		speaker.step()
 		phone.step()
 
-		if (talkToGui) {
+		if talkToGui then {
 			sendFeedback()
 			// Thread.`yield`()
 		}

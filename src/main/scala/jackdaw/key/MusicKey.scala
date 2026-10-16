@@ -3,10 +3,7 @@ package jackdaw.key
 import scutil.lang.*
 
 object MusicKey {
-	object P {
-		val Silence		= Prism.subType[MusicKey,MusicKey.Silence.type]
-		val Chord		= Prism.subType[MusicKey,MusicKey.Chord]
-	}
+	val P	= Prism.Gen[MusicKey]
 }
 
 enum MusicKey {

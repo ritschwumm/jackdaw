@@ -66,9 +66,9 @@ object MediaUtil extends Logging {
 		}
 
 	def runCommand(command:String*)(using sl:SourceLocation):Checked[ExternalResult]	= {
-		DEBUG.log(command.toVector.map(LogValue.string))
+		DEBUG.log(command.toVector.map(LogValue.of(_)))
 		External.exec(command.toVector).result(false).eitherBy(_.rc == 0).leftMap { res =>
-			val first	= "command failed: " + (command mkString " ")
+			val first	= "command failed: " + command.mkString(" ")
 			Nes(first, res.err)
 		}
 	}

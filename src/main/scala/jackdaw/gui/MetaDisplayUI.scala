@@ -11,7 +11,7 @@ final class MetaDisplayUI(value:Signal[String], strong:Boolean, start:Boolean) e
 	//## components
 
 	private val label	= new JLabel
-	label.setFont		(strong.cata(Style.meta.display.weak.font,		Style.meta.display.strong.font))
+	label.setFont		(strong.cata(Style.meta.display.weak.font,	Style.meta.display.strong.font))
 	label.setForeground	(strong.cata(Style.meta.display.weak.color,	Style.meta.display.strong.color))
 	label.setHorizontalAlignment(start.cata(SwingConstants.RIGHT,	SwingConstants.LEFT))
 

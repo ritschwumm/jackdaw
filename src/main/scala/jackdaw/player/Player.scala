@@ -214,7 +214,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	}
 
 	private def doSetNeedSync(needSync:Boolean):Unit	= {
-		if (needSync == this.needSync)	return
+		if needSync == this.needSync	then return
 		this.needSync	= needSync
 
 		keepSpeedSynced()
@@ -292,7 +292,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		updateVelocity()
 
 		// keep phase stable over start/stop
-		if (needSync && canSync && mode == PlayerMode.Playing) {
+		if needSync && canSync && mode == PlayerMode.Playing then {
 			oldPhase.foreach(syncPhaseTo)
 		}
 
@@ -317,7 +317,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	//## motor speed
 
 	private def doPitchAbsolute(pitch:Double, keepSync:Boolean):Unit	=  {
-		if (this.pitch == pitch)	return
+		if this.pitch == pitch	then return
 		this.pitch	= pitch
 		updateVelocity()
 
@@ -336,7 +336,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 
 	// depends on metronome.beatRate, beatRate (sample&rhythm) and needSync
 	private def keepSpeedSynced():Unit	= {
-		if (!hasSync)	return
+		if !hasSync	then return
 		/*
 		beatRate.foreach { beatRateGot =>
 			pitch	= pitch * metronome.beatRate / beatRateGot
@@ -373,8 +373,9 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		phaseMatch(rhythmUnit).map(RhythmValue(_, rhythmUnit))
 
 	private def phaseMatch(rhythmUnit:RhythmUnit):Option[Double]	=
-		if (running)	phaseMetronome(rhythmUnit)
-		else			phaseStatic(rhythmUnit)
+		if running
+		then phaseMetronome(rhythmUnit)
+		else phaseStatic(rhythmUnit)
 
 	/** how far we are from the rhythm of the Metronome in [-.5..+.5] rhythmUnits for late to early */
 	private def phaseMetronome(rhythmUnit:RhythmUnit):Option[Double]	=
@@ -415,7 +416,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		// TODO seek ugly: raster is calculated again in positionSeekWithRaster
 		val raster	= rhythm.raster(unit)
 		val raw		= (frame - headFrame) / raster.size
-		val steps	= if (running) rint(raw) else raw
+		val steps	= if running then rint(raw) else raw
 		positionSeekWithRaster(RhythmValue(steps, unit), rhythm)
 	}
 
@@ -435,8 +436,9 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	/** jump for a given number of rhythm while staying in sync */
 	private def positionSeekWithRaster(offset:RhythmValue, rhythm:Rhythm):Unit	= {
 		val position:Double		=
-			if (running)	headFrame + rhythm.sizeOf(offset)
-			else			snappingSeekCalculation(headFrame, offset.steps, rhythm.raster(offset.unit))
+			if running
+			then headFrame + rhythm.sizeOf(offset)
+			else snappingSeekCalculation(headFrame, offset.steps, rhythm.raster(offset.unit))
 		startFade(position)
 	}
 
@@ -448,8 +450,9 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		raster.round(raw)
 		/*
 		// equivalent code:
-		if (steps < 0)	raster ceil		(headFrame + (steps - Player.positionEpsilon) * raster.size)
-		else			raster floor	(headFrame + (steps + Player.positionEpsilon) * raster.size)
+		if steps < 0
+		then raster ceil		(headFrame + (steps - Player.positionEpsilon) * raster.size)
+		else raster floor	(headFrame + (steps + Player.positionEpsilon) * raster.size)
 		*/
 	}
 
@@ -470,7 +473,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	}
 
 	private def doScratchRelative(frames:Double):Unit	= {
-		if (mode != PlayerMode.Scratching)	{
+		if mode != PlayerMode.Scratching then {
 			scratchBegin()
 		}
 		springOriginFrame	= scratchBaseFrame - frames
@@ -491,7 +494,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	}
 
 	private def doDragAbsolute(speed:Double):Unit	= {
-		if (mode != PlayerMode.Dragging) {
+		if mode != PlayerMode.Dragging then {
 			dragBegin()
 		}
 		velocity	= speed * rate
@@ -511,7 +514,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	}
 
 	private def enterJump():Unit	= {
-		if (!jumpProgress) {
+		if !jumpProgress then {
 			jumpLater.foreach { it =>
 				it.apply()
 				jumpProgress	= true
@@ -532,7 +535,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 
 		loaderPreload(headFrame)
 
-		if (fadeProgress) {
+		if fadeProgress then {
 			loaderPreload(fadeFrame)
 		}
 
@@ -599,7 +602,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 
 	@inline
 	private def enterFade():Unit	= {
-		if (!fadeProgress) {
+		if !fadeProgress then {
 			fadeLater.foreach { it =>
 				// this calls back to startFade
 				it.execute()
@@ -611,9 +614,9 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 
 	@inline
 	private def exitFade():Unit	= {
-		if (fadeProgress) {
+		if fadeProgress then {
 			fadeValue	+= fadeStep
-			if (fadeValue >= fadeMax) {
+			if fadeValue >= fadeMax then {
 				fadeProgress	= false
 			}
 		}
@@ -630,9 +633,9 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	// returns a filter mode
 	@inline
 	private def filterMode(value:Double):Int	=
-		if		(value < -Player.filterEpsilon)	Player.filterLP
-		else if	(value > +Player.filterEpsilon)	Player.filterHP
-		else									Player.filterOff
+		if		value < -Player.filterEpsilon	then	Player.filterLP
+		else if	value > +Player.filterEpsilon	then	Player.filterHP
+		else											Player.filterOff
 
 	//------------------------------------------------------------------------------
 	//## loop calculation
@@ -678,7 +681,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		val newFrame	=
 			loopSpan match {
 				case Some(loopGot) =>
-					if (loopGot.contains(headFrame)) {
+					if loopGot.contains(headFrame) then {
 						loopGot.lock(rawFrame)
 					}
 					else rawFrame
@@ -691,7 +694,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 	private def jumpBackAfterLoopEnd(oldFrame:Double):Unit	= {
 		loopSpan.foreach { loopGot =>
 			val loopEnd	= loopGot.end
-			if (oldFrame < loopEnd && headFrame >= loopEnd) {
+			if oldFrame < loopEnd && headFrame >= loopEnd then {
 				registerSimpleFade {
 					startFade(headFrame - loopGot.size)
 				}
@@ -704,8 +707,8 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 
 	// depends on running, mode, pitch, rate
 	private def updateVelocity():Unit	= {
-		if (mode != PlayerMode.Scratching) {
-			velocity	= if (running) pitch * rate else 0
+		if mode != PlayerMode.Scratching then {
+			velocity	= if running then pitch * rate else 0
 		}
 	}
 
@@ -721,7 +724,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 
 	def generate(speakerBuffer:FrameBuffer, phoneBuffer:FrameBuffer):Unit	= {
 		// NOTE hack
-		if (running && mode == PlayerMode.Playing && afterEnd) {
+		if running && mode == PlayerMode.Playing && afterEnd then {
 			doSetRunning(false)
 		}
 
@@ -735,7 +738,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		// optionally fade out pre-jump head
 		var audioL	= 0d
 		var audioR	= 0d
-		if (fadeProgress) {
+		if fadeProgress then {
 			val fadeoutL	= Player.interpolation.interpolate(inputL, fadeFrame, headSpeed)
 			val fadeoutR	= Player.interpolation.interpolate(inputR, fadeFrame, headSpeed)
 			audioL	= fadeinL * fadeValue + fadeoutL * (1-fadeValue)
@@ -757,7 +760,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		val filterValue		= filter.current
 		// reset filter when the mode changed
 		val filterModeNow	= filterMode(filterValue)
-		if (filterModeNow != filterModeOld) {
+		if filterModeNow != filterModeOld then {
 			filterModeOld	= filterModeNow
 
 			filterL.reset()
@@ -766,11 +769,11 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		// NOTE this only has to be done when filterValue changed,
 		// but moving this inside an if-block to change actually kills performance
 		// recalculate coeffients when the mode or frequency changed
-		if (filterModeNow == Player.filterLP) {
+		if filterModeNow == Player.filterLP then {
 			val freq		= filterFreq(filterValue + 1)
 			biquadCoeffs	= BiQuadCoeffs.lp(freq, Config.filterQ)
 		}
-		else if (filterModeNow == Player.filterHP) {
+		else if filterModeNow == Player.filterHP then {
 			val freq		= filterFreq(filterValue + 0)
 			biquadCoeffs	= BiQuadCoeffs.hp(freq, Config.filterQ)
 		}
@@ -782,7 +785,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 		val filteredR	= filterR.process(equalizedR, biquadCoeffs)
 
 		// NOTE hack: output only when moving
-		if (velocity != zeroFrequency) {	// playing || scratchMode
+		if velocity != zeroFrequency then {	// playing || scratchMode
 			val trimGain		= trim.current
 			val speakerValue	= speaker.current
 			val combinedGain	= speakerValue * trimGain
@@ -794,7 +797,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 			peakDetector.put(speakerL)
 			peakDetector.put(speakerR)
 
-			if (phoneEnabled) {
+			if phoneEnabled then {
 				val phoneValue	= phone.current
 				val phoneL		= (audioL * phoneValue).toFloat
 				val phoneR		= (audioR * phoneValue).toFloat
@@ -803,7 +806,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 			}
 		}
 
-		if (mode == PlayerMode.Scratching) {
+		if mode == PlayerMode.Scratching then {
 			val	c				= Player.springDamping * 2 * sqrt(Player.springHardness * Player.springMass)
 			// spring is assumed to have zero length when not stretched
 			val springStretch	= headFrame - springOriginFrame
@@ -819,7 +822,7 @@ final class Player(metronome:Metronome, outputRate:Double, phoneEnabled:Boolean,
 
 		exitFade()
 
-		if (mode == PlayerMode.Playing) {
+		if mode == PlayerMode.Playing then {
 			jumpBackAfterLoopEnd(oldFrame)
 		}
 

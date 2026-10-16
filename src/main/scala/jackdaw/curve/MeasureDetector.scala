@@ -54,7 +54,7 @@ object MeasureDetector {
 	private def differences(values:IndexedSeq[Float], measureFragments:Int):Float = {
 		var	i	= 0
 		var d	= 0f
-		while (i+measureFragments < values.size) {
+		while i+measureFragments < values.size do {
 			d	+= abs(values(i) - values(i+measureFragments)).toFloat
 			i	+= 1
 		}

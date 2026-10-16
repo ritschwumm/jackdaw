@@ -1,6 +1,6 @@
 package jackdaw.gui
 
-import java.awt.{ List as _, Canvas as _, * }
+import java.awt.{ Dimension }
 import javax.swing.*
 
 import scutil.gui.implicits.*
@@ -35,10 +35,10 @@ final class ButtonUI(size:Dimension, style:Signal[ButtonStyle], enabled:Signal[B
 	private val figures	=
 		signal {
 			val	styleCur	= style.current
-			if		(!enabled.current)	styleCur.disabled
-			else if (armed.current)		styleCur.pressed
-			else if (hovered.current)	styleCur.hovered
-			else						styleCur.inactive
+			if		!enabled.current	then	styleCur.disabled
+			else if armed.current		then	styleCur.pressed
+			else if hovered.current		then	styleCur.hovered
+			else								styleCur.inactive
 		}
 
 	figures.observeNow(canvas.figures.set)

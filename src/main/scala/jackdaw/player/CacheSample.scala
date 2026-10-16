@@ -64,8 +64,9 @@ final class CacheSample(peer:Sample) extends Sample {
 
 	@inline
 	private def chunkIndexByFrame(frame:Int):Int	=
-		if (frame >= 0)	frame / chunkFrames
-		else			frame / chunkFrames - 1
+		if frame >= 0
+		then frame / chunkFrames
+		else frame / chunkFrames - 1
 
 	@inline
 	private def firstFrameByChunk(chunkIndex:Int):Int	=
@@ -84,13 +85,13 @@ final class CacheSample(peer:Sample) extends Sample {
 	}
 
 	private def getSample(frame:Int, channelIndex:Int):Float	= {
-		if (!validChannelIndex(channelIndex))	return 0f
+		if !validChannelIndex(channelIndex)	then return 0f
 
 		val chunkIndex	= chunkIndexByFrame(frame)
-		if (!validChunkIndex(chunkIndex))		return 0f
+		if !validChunkIndex(chunkIndex)		then return 0f
 
 		val chunk	= chunks(chunkIndex)
-		if (chunk eq null)						return 0f
+		if chunk eq null					then return 0f
 
 		val sampleIndex	= (frame & chunkMask) * channelCount + channelIndex
 		chunk(sampleIndex)
@@ -106,8 +107,8 @@ final class CacheSample(peer:Sample) extends Sample {
 		val end		= center + bufferChunks
 		var index	= start
 		var changed	= false
-		while (index < end) {
-			if (validChunkIndex(index)) {
+		while index < end do {
+			if validChunkIndex(index) then {
 				changed	= changed | provideChunk(index)
 			}
 			index	+= 1
@@ -117,13 +118,13 @@ final class CacheSample(peer:Sample) extends Sample {
 
 	@inline
 	private def provideChunk(index:Int):Boolean	= {
-		if (chunks(index) ne null) {
+		if chunks(index) ne null then {
 			// refresh existing chunk
 			lru.removeEqual(index)
 			lru.push(index)
 			false
 		}
-		else if (!lru.full) {
+		else if !lru.full then {
 			// allocate new chunk
 			// TODO cache should be taken from a global pool
 			val buffer	= new Chunk(chunkSamples)
@@ -149,9 +150,9 @@ final class CacheSample(peer:Sample) extends Sample {
 		var outSample	= 0
 
 		var frameIndex	= 0
-		while (frameIndex < chunkFrames) {
+		while frameIndex < chunkFrames do {
 			var channelIndex	= 0
-			while (channelIndex < channelCount) {
+			while channelIndex < channelCount do {
 				chunk(outSample)	= peer.channels(channelIndex).get(inFrame)
 				channelIndex	+= 1
 				outSample		+= 1

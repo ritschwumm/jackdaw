@@ -52,7 +52,7 @@ final class Loader(engineTarget:Target[LoaderFeedback]) extends Logging {
 
 	private def doPreload(sample:CacheSample, centerFrame:Int):Unit	= {
 		val changed		= sample.provide(centerFrame)
-		if (changed) {
+		if changed then {
 			sample.writeBarrier()
 			// BETTER don't close over the sample, we already know it
 			doInEngine(thunk {

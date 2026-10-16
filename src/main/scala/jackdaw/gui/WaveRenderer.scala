@@ -1,6 +1,6 @@
 package jackdaw.gui
 
-import java.awt.{ List as _, * }
+import java.awt.{ Color, Graphics2D }
 import java.awt.image.*
 
 import scala.math.*
@@ -14,7 +14,7 @@ import jackdaw.util.LRU
 import jackdaw.gui.util.ImageUtil
 
 final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
-	private var fullImageCache:Option[(IntPoint,BufferedImage)] = None
+	private var fullImageCache:Option[(IntPoint, BufferedImage)] = None
 
 	def drawFully(g:Graphics2D, target:IntRect):Unit	= {
 		val size	= target.size
@@ -28,11 +28,13 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 	}
 
 	private def provideFullImage(size:IntPoint):BufferedImage	=
-		fullImageCache collect { case (`size`, image) => image } match {
+		fullImageCache
+		.collect { case (`size`, image) => image }
+		.match {
 			case Some(image)	=>
 				image
 			case None	=>
-				renderScaled(curve, size) doto { image =>
+				renderScaled(curve, size).doto { image =>
 					fullImageCache	= Some((size, image))
 				}
 		}
@@ -47,7 +49,7 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 	// derived from a maximum WaveUI width of 4096
 	private val tileCached	= 4096 / tileSize
 
-	private var tileImageCache:Option[(Int,LRU[Int,BufferedImage])] = None
+	private var tileImageCache:Option[(Int, LRU[Int, BufferedImage])] = None
 
 	def drawPartial(g:Graphics2D, target:IntRect, offset:Int):Unit	= {
 		val x		= target.left
@@ -57,13 +59,14 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 
 		// which tile first
 		var ti	=
-			if (offset < 0) (offset - tileOffset + 1) / tileOffset
-			else			offset / tileOffset
+			if offset < 0
+			then (offset - tileOffset + 1) / tileOffset
+			else offset / tileOffset
 		// where in the tile
 		val tm	= moduloInt(offset, tileOffset)
 
 		var xx	= x
-		while (xx - tm < x + width) {
+		while xx - tm < x + width do {
 			provideTileImage(height, ti).foreach { tile =>
 				// first visible, tile's first real (inset) pixel is painted here
 				val tilePos = xx - tm
@@ -111,8 +114,8 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 			val bottomY = height-1
 			var x		= 0
 			var c		= index * tileOffset - tileInset
-			while (x < tileSize) {
-				if (c >= 0 && c < curve.chunkCount) {
+			while x < tileSize do {
+				if c >= 0 && c < curve.chunkCount then {
 					val valueLow	= curve valuesLow		c
 					val valueMiddle = curve valuesMiddle	c
 					val valueHigh	= curve valuesHigh		c
@@ -132,7 +135,7 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 			val sizeY	= height-1
 			val bottomY = height-1
 			var x	= 0
-			while (x < curve.chunkCount) {
+			while x < curve.chunkCount do {
 				val valueLow	= curve valuesLow		x
 				val valueMiddle = curve valuesMiddle	x
 				val valueHigh	= curve valuesHigh		x
@@ -154,7 +157,7 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 			val width	= size.x
 			val step	= curve.chunkCount.toDouble * curve.rasterFrames.toDouble / (width+1).toDouble
 			var x	= 0
-			while (x < width) {
+			while x < width do {
 				val startX	= floor((x+0) * step).toInt
 				val endX	= floor((x+1) * step).toInt
 				val sizeX	= endX - startX
@@ -202,9 +205,9 @@ final class WaveRenderer(curve:BandCurve, imageUtil:ImageUtil) {
 	private def sumColor(low:Float, middle:Float, high:Float):Color = {
 		val max = max3Float(low, middle, high)
 		new Color(
-		low		/ max,
-		middle	/ max,
-		high	/ max
+			low		/ max,
+			middle	/ max,
+			high	/ max
 		)
 	}
 

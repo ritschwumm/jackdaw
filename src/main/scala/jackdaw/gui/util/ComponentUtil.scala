@@ -6,7 +6,7 @@ import scutil.core.implicits.*
 import scutil.lang.*
 import scutil.geom.*
 import scutil.gui.implicits.*
-import scutil.gui.CasterInstances.*
+import scutil.gui.AllCasters.*
 import scutil.gui.ComponentUnderMouse
 import scutil.gui.geom.*
 import scutil.gui.geom.extensions.*
@@ -25,13 +25,13 @@ object ComponentUtil extends Logging {
 
 	def innerIntRectSignal(component:JComponent):Signal[IntRect]	=
 		SwingWidget.signal(
-			(component:ComponentCaster).connect,
+			component.onComponentEvent,
 			thunk { component.innerRectangle.toIntRect }
 		)
 
 	def innerSgRectangleSignal(component:JComponent):Signal[SgRectangle]	=
 		SwingWidget.signal(
-			(component:ComponentCaster).connect,
+			component.onComponentEvent,
 			thunk { component.innerRectangle.toSgRectangle }
 		)
 

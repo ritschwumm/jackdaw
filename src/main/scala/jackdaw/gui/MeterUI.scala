@@ -1,6 +1,6 @@
 package jackdaw.gui
 
-import java.awt.{ List as _, Canvas as _, * }
+import java.awt.{ LinearGradientPaint, Shape }
 import javax.swing.*
 import java.awt.image.*
 
@@ -103,7 +103,7 @@ final class MeterUI(value:Signal[Float], meterRange:MeterRange, vertical:Boolean
 			val componentBoundsCur	= canvas.bounds.current
 			val activeImageCur		= activeImage.current
 			// LinearGradientPaint does not like an empty rectangle
-			if (componentBoundsCur.empty || activeImageCur == null) {
+			if componentBoundsCur.empty || activeImageCur == null then {
 				Seq.empty
 			}
 			else {

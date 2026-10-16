@@ -78,7 +78,7 @@ object Library extends Logging {
 		}
 
 		// inform user
-		if (deleteTracks.nonEmpty) {
+		if deleteTracks.nonEmpty then {
 			INFO(
 				show"cleaned library",
 				show"was ${info(allTracks)}",
@@ -105,9 +105,9 @@ object Library extends Logging {
 	private def findTrackFiles():Seq[TrackFiles]	= {
 		def walk(dir:Path):Seq[TrackFiles]	=  {
 			val candidate	= TrackFiles(dir)
-			if		(seemsLegit(candidate))		Vector(candidate)
-			else if (Files.isDirectory(dir))	MoreFiles.listFiles(dir).flattenMany.flatMap(walk)
-			else								Vector.empty
+			if		seemsLegit(candidate)	then Vector(candidate)
+			else if Files.isDirectory(dir)	then MoreFiles.listFiles(dir).flattenMany.flatMap(walk)
+			else Vector.empty
 		}
 		walk(metaBase)
 	}
@@ -130,8 +130,9 @@ object Library extends Logging {
 		sizeOrZero(it.curve)
 
 	private def sizeOrZero(file:Path):Long	=
-		if (Files.exists(file))	Files.size(file)
-		else					0
+		if Files.exists(file)
+		then Files.size(file)
+		else 0
 
 	//------------------------------------------------------------------------------
 
@@ -142,15 +143,16 @@ object Library extends Logging {
 		.zipWithIndex
 		.mapFilter { case (file, index) =>
 			val name	= Option(file.getFileName).map(_.toString).flatMap(_.optionNonEmpty)
-			if (index == 0)	name.orElse(prefixPath(file.toString))
-			else			name
+			if index == 0
+			then name.orElse(prefixPath(file.toString))
+			else name
 		}
 
 	/** path element for a file system root */
 	private def prefixPath(path:String):Option[String]	=
-		if		(path == "/")					None
-		else if	(path == """\\""")				Some("UNC")
-		else if	(path.matches("""[A-Z]:\\"""))	Some(path.substring(0,1))
+		if		path == "/"						then None
+		else if	path == """\\"""				then Some("UNC")
+		else if	path.matches("""[A-Z]:\\""")	then Some(path.substring(0,1))
 		else {
 			ERROR(show"unexpected root path ${path}")
 			None

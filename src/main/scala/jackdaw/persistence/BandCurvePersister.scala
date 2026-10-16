@@ -52,7 +52,7 @@ final class BandCurvePersister extends Persister[BandCurve] with Logging {
 	private def readFloatArray(in:ObjectInputStream, size:Int):Array[Float] = {
 		val array	= Array.ofDim[Float](size)
 		var i	= 0
-		while (i < size) {
+		while i < size do {
 			array(i)	= in.readFloat
 			i	= i + 1
 		}
@@ -61,7 +61,7 @@ final class BandCurvePersister extends Persister[BandCurve] with Logging {
 
 	private def writeFloatArray(out:ObjectOutputStream, array:Array[Float]):Unit	= {
 		var i = 0
-		while (i < array.length) {
+		while i < array.length do {
 			out.writeFloat(array(i))
 			i	= i + 1
 		}

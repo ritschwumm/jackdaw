@@ -1,6 +1,6 @@
 package jackdaw.gui
 
-import java.awt.{ List as _, * }
+import java.awt.{ Graphics2D, Shape, Rectangle, Polygon, Toolkit }
 import java.awt.geom.*
 import java.awt.image.BufferedImage
 
@@ -365,7 +365,7 @@ final class WaveUI(
 
 	repaints.observe { _ =>
 		val g	= component.getGraphics.asInstanceOf[Graphics2D]
-		if (g ne null) {
+		if g ne null then {
 			val oldClip	= g.getClip
 			g.setClip(new Rectangle(component.getSize()))
 			// NOTE paintCompoment(g) works, but doesn't paint the border
@@ -389,7 +389,7 @@ final class WaveUI(
 
 		val coord	= coords.current
 		// NOTE if very small the inner size might become negative
-		if (coord.goodSize) {
+		if coord.goodSize then {
 			// renderToGraphics(coord, g)
 			renderUsingImage(coord, g)
 		}
@@ -404,7 +404,7 @@ final class WaveUI(
 	private def renderToImage(coord:Coords):BufferedImage	= {
 		import coord.*
 
-		if (bufferImage == null || bufferImage.getWidth != sizeX || bufferImage.getHeight != sizeY) {
+		if bufferImage == null || bufferImage.getWidth != sizeX || bufferImage.getHeight != sizeY then {
 			bufferImage	= imageUtil.createImage (inner.size, false)
 		}
 		bufferImage.createGraphics.asInstanceOf[Graphics2D] use { bg =>
@@ -436,8 +436,9 @@ final class WaveUI(
 			// g setRenderingHint (RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC)
 			// g setRenderingHint (RenderingHints.KEY_RENDER_QUALITY, RenderingHints.VALUE_RENDER_QUALITY)
 
-			if (shrink)	waveRenderer.drawFully		(bg, inner)
-			else		waveRenderer.drawPartial	(bg, inner, src(leftX))
+			if shrink
+			then waveRenderer.drawFully		(bg, inner)
+			else waveRenderer.drawPartial	(bg, inner, src(leftX))
 		}
 
 		// figures

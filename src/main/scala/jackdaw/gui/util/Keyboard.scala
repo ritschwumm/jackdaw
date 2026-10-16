@@ -8,7 +8,6 @@ import javax.swing.Timer
 import scutil.core.implicits.*
 import scutil.lang.*
 import scutil.gui.GlobalAWTEvent
-import scutil.gui.ListenerInstances.*
 
 import screact.*
 
@@ -25,8 +24,8 @@ object Keyboard {
 								keysCell.set(
 									state.updateAndGet{ state =>
 										state filter {
-											case (key, Some(when))	=> now - when < maxAge
-											case (key, None)		=> true
+											case (_, Some(when))	=> now - when < maxAge
+											case (_, None)			=> true
 										}
 									}.keySet
 								)
@@ -35,10 +34,10 @@ object Keyboard {
 									case ev:KeyEvent	=>
 										val when	= ev.getWhen
 										val key		= Key(ev.getKeyCode, ev.getKeyLocation)
-										if (ev.getID == KeyEvent.KEY_PRESSED) {
+										if ev.getID == KeyEvent.KEY_PRESSED then {
 											state updateAndGet { _ + (key -> None) }
 										}
-										else if (ev.getID == KeyEvent.KEY_RELEASED) {
+										else if ev.getID == KeyEvent.KEY_RELEASED then {
 											state updateAndGet { _ + (key -> Some(when)) }
 										}
 										update(when)
@@ -57,7 +56,7 @@ object Keyboard {
 
 	private def timer(delay:Int, action:ActionEvent=>Unit):IoResource[Unit]	=
 		IoResource.unsafe.disposing {
-			new Timer(delay, mkActionListener(action)).doto(_.start())
+			new Timer(delay, action(_)).doto(_.start())
 		}{
 			_.stop()
 		}

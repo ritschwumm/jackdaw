@@ -177,7 +177,7 @@ final class DeckUI(deck:Deck, keyboard:Signal[Set[Key]], keyTarget:Signal[Boolea
 	private val setLoopKey:Events[Option[LoopDef]]	=
 		Events.multiOrElse(
 			loopChoices.zip(Seq(VK_U, VK_I, VK_O, VK_P))
-			.map { case ((loopDef, active), key) =>
+			.map { case ((loopDef, _), key) =>
 				Key(key, KEY_LOCATION_STANDARD).asAction.tag(Some(loopDef))
 			}
 		)
@@ -299,7 +299,7 @@ final class DeckUI(deck:Deck, keyboard:Signal[Set[Key]], keyTarget:Signal[Boolea
 		_	=> Some {
 			(files:Validated[Nes[Exception],Nes[File]]) => {
 				files
-				.invalidEffect	{ es => ERROR.log(es.toSeq.map(LogValue.throwable))	}
+				.invalidEffect	{ es => ERROR.log(es.toSeq.map(LogValue.of(_)))	}
 				.toOption
 				.map			(_.head.toPath)
 				.foreach		(deck.loadTrack)

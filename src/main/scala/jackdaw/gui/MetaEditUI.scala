@@ -5,7 +5,7 @@ import javax.swing.*
 
 import scutil.core.implicits.*
 import scutil.lang.*
-import scutil.gui.CasterInstances.*
+import scutil.gui.AllCasters.*
 import scutil.gui.SwingUtil.*
 
 import screact.*
@@ -37,7 +37,7 @@ final class MetaEditUI(value:Signal[Option[String]], strong:Boolean) extends UI 
 	//------------------------------------------------------------------------------
 	//## keyboard
 
-	(component:KeyCaster) connect { ev =>
+	component.onKeyEvent { ev =>
 		component.getParent.optionNotNull.foreach { parent =>
 			import KeyEvent.*
 			(ev.getID, ev.getKeyCode) match {
@@ -54,7 +54,7 @@ final class MetaEditUI(value:Signal[Option[String]], strong:Boolean) extends UI 
 	private val textChanges:Events[String]	=
 		SwingWidget.transformer(
 			display,
-			(field.getDocument:DocumentCaster).connect,
+			field.getDocument.onDocumentEvent,
 			thunk { field.getText },
 			field.setText
 		)
@@ -82,7 +82,7 @@ final class MetaEditUI(value:Signal[Option[String]], strong:Boolean) extends UI 
 
 	val focussed:Signal[Boolean]	=
 		SwingWidget.signal(
-			(component:FocusCaster).connect,
+			component.onFocusEvent,
 			thunk { component.hasFocus }
 		)
 

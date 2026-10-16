@@ -1,6 +1,6 @@
 package jackdaw.gui.util
 
-import java.awt.{ List as _, * }
+import java.awt.{ Graphics, Graphics2D }
 import javax.swing.*
 
 final class PaintedComponent(paintFunc:Graphics2D=>Unit) extends JComponent {

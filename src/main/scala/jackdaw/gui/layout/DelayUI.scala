@@ -1,6 +1,6 @@
 package jackdaw.gui
 
-import java.awt.{ List as _, * }
+import java.awt.{ BorderLayout }
 import javax.swing.*
 
 /** used to break cycles between UI components */

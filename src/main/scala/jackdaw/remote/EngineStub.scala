@@ -120,7 +120,7 @@ object EngineStub extends Logging {
 				case x@ToStub.Started(_, _)	=> ERROR("unexpected message", x.toString);	false
 			}
 		}
-		catch { case e:Exception =>
+		catch { case _:Exception =>
 			// TODO using this occurs on disposal, where it is not actually unexpected -
 			// we explicitly _told_ the engine process to die with a ToSkeleton.Kill
 			ERROR("child (skeleton) died unexpectedly")

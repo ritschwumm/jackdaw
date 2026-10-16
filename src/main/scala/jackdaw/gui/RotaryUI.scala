@@ -1,6 +1,6 @@
 package jackdaw.gui
 
-import java.awt.{ List as _, Canvas as _, * }
+import java.awt.{ BasicStroke, Point, Shape }
 import java.awt.event.*
 import java.awt.geom.*
 import javax.swing.*
@@ -190,8 +190,9 @@ final class RotaryUI(value:Signal[Double], minimum:Double, maximum:Double, neutr
 			//	180				0
 			//		270/-90
 			val angle3	=
-				if (angle2 < -90)	angle2 + 360
-				else				angle2
+				if angle2 < -90
+				then angle2 + 360
+				else angle2
 
 			// half opening overshot is allowed and limited
 			(angle3 >= Style.rotary.angle.max - Style.rotary.angle.opening/2) &&

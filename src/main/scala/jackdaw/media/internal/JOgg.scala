@@ -63,7 +63,7 @@ object JOgg extends Inspector with Decoder with Logging {
 
 	private def copyPcm(vorbisStream:VorbisStream, append:(Array[Byte], Int)=>Unit):Unit	= {
 		val buffer	= new Array[Byte](16384)
-		while (true) {
+		while true do {
 			try {
 				val len = vorbisStream.readPcm(buffer, 0, buffer.length)
 				// BETTER use AudioFormat_S2LE.putShort?
@@ -71,7 +71,7 @@ object JOgg extends Inspector with Decoder with Logging {
 				swapEndianShort(buffer, len)
 				append(buffer, len)
 			}
-			catch { case e:EndOfOggStreamException =>
+			catch { case _:EndOfOggStreamException =>
 				return
 			}
 		}
@@ -79,7 +79,7 @@ object JOgg extends Inspector with Decoder with Logging {
 
 	private def swapEndianShort(it:Array[Byte], byteCount:Int):Unit	= {
 		var i	= 0
-		while (i < byteCount) {
+		while i < byteCount do {
 			val h	= it(i)
 			val l	= it(i+1)
 			it(i)	= l
@@ -138,7 +138,7 @@ object JOgg extends Inspector with Decoder with Logging {
 				require (tagSize <= UIntMaxValue, "maximum RIFF tag size exceeded")
 				writeInt(tagSize.toInt)
 				// add padding
-				if (tagSize%2 == 1) {
+				if tagSize%2 == 1 then {
 					outFile.write(0)
 				}
 				outFile.seek(endPos)

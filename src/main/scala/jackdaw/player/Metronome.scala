@@ -23,8 +23,9 @@ final class Metronome(outputRate:Double) {
 	}
 
 	private[player] def step(running:Boolean):Unit	= {
-		if (running)	mPhase	= (mPhase + mIncrement) % 1.0
-		else			mPhase	= 0
+		if running
+		then mPhase	= (mPhase + mIncrement) % 1.0
+		else mPhase	= 0
 	}
 
 	//------------------------------------------------------------------------------

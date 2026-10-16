@@ -1,7 +1,5 @@
 package jackdaw.model
 
-import scala.annotation.nowarn
-
 import java.nio.file.*
 
 import scala.ref.WeakReference
@@ -91,7 +89,6 @@ final class Track private(val file:Path) extends Observing with Logging {
 
 	//------------------------------------------------------------------------------
 
-	@nowarn("msg=unused local definition")
 	def setAnnotation(it:String):Unit	= {
 		modifyData(TrackData.L.annotation set it)
 	}
@@ -117,7 +114,6 @@ final class Track private(val file:Path) extends Observing with Logging {
 		updateRhythm(position, data.current.rhythm.isEmpty)
 	}
 
-	@nowarn("msg=unused local definition")
 	private def updateRhythm(position:Double, activate:Boolean):Unit	= {
 		val it	=
 			activate.cata(
@@ -155,7 +151,6 @@ final class Track private(val file:Path) extends Observing with Logging {
 	}
 
 	/** does not modify if the rhythm would not be useful afterwards */
-	@nowarn("msg=unused local definition")
 	private def modifyRhythm(func:Rhythm=>Rhythm):Unit	= {
 		modifyData(TrackData.L.rhythm mod { curr	=>
 			val valid	=
@@ -179,7 +174,6 @@ final class Track private(val file:Path) extends Observing with Logging {
 	private val curvePersister	= new BandCurvePersister
 
 	// NOTE using swing here is ugly
-	@nowarn("msg=unused local definition")
 	def load():Unit	= {
 		worker {
 			try {

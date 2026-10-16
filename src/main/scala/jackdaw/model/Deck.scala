@@ -20,8 +20,6 @@ import jackdaw.curve.BandCurve
 import jackdaw.key.*
 import jackdaw.player.*
 
-import jackdaw.player.PlayerAction
-
 object Deck {
 	import Config.{ curveRaster as cr }
 	import PitchMath.cents
@@ -285,7 +283,7 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 	def loadTrack(file:Path):Unit	= {
 		// NOTE ugly hack
 		val done	= track.current.exists { _.file ==== file }
-		if (done) {
+		if done then {
 			INFO("rejected drop of already loaded file", file)
 			return
 		}
@@ -316,7 +314,7 @@ final class Deck(strip:Strip, tone:Tone, notifyPlayer:Effect[PlayerAction], play
 
 	def jumpCue(index:Int, fine:Boolean):Unit	= {
 		cuePointsFlat.current.lift(index).foreach { frame =>
-			changeTrack { track =>
+			changeTrack { _ =>
 				jumpFrame(frame, fine)
 			}
 		}

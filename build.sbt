@@ -4,27 +4,32 @@ ThisBuild / versionScheme := Some("early-semver")
 
 name			:= "jackdaw"
 organization	:= "de.djini"
-version			:= "1.47.0"
+version			:= "1.48.0"
 
-scalaVersion	:= "3.5.0"
+scalaVersion	:= "3.10.0"
 scalacOptions	++= Seq(
+	"-preview",
 	"-feature",
 	"-deprecation",
 	"-unchecked",
 	"-source:future",
 	"-Wunused:all",
-	"-Xfatal-warnings",
+	// TODO enable this
+	// "-Wsafe-init",
+	"-Wshadow:all",
+	"-Wtostring-interpolated",
+	"-Werror",
 	"-Xkind-projector:underscores",
 )
 
 libraryDependencies	++= Seq(
-	"de.djini"		%%	"scutil-jdk"	% "0.250.0"	% "compile",
-	"de.djini"		%%	"scutil-gui"	% "0.250.0"	% "compile",
-	"de.djini"		%%	"scaudio"		% "0.258.0"	% "compile",
-	"de.djini"		%%	"scjson-io"		% "0.278.0"	% "compile",
-	"de.djini"		%%	"screact"		% "0.263.0"	% "compile",
-	"de.djini"		%%	"sc2d"			% "0.47.0"	% "compile",
-	"de.djini"		%	"jkeyfinder"	% "0.4.1"	% "compile",
+	"de.djini"		%%	"scutil-jdk"	% "0.270.0"	% "compile",
+	"de.djini"		%%	"scutil-gui"	% "0.270.0"	% "compile",
+	"de.djini"		%%	"scaudio"		% "0.278.0"	% "compile",
+	"de.djini"		%%	"scjson-io"		% "0.298.0"	% "compile",
+	"de.djini"		%%	"screact"		% "0.283.0"	% "compile",
+	"de.djini"		%%	"sc2d"			% "0.50.0"	% "compile",
+	"de.djini"		%	"jkeyfinder"	% "0.5.0"	% "compile",
 	"javazoom"		%	"jlayer"		% "1.0.1"	% "compile",
 	"com.mpatric"	%	"mp3agic"		% "0.9.1"	% "compile",
 	"de.jarnbjo"	%	"j-ogg-all"		% "1.0.0"	% "compile"
@@ -36,7 +41,6 @@ wartremoverErrors ++= Seq(
 	Wart.OptionPartial,
 	Wart.Enumeration,
 	Wart.FinalCaseClass,
-	Wart.JavaConversions,
 	Wart.Option2Iterable,
 	Wart.TryPartial
 )

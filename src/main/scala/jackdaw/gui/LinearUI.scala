@@ -1,6 +1,6 @@
 package jackdaw.gui
 
-import java.awt.{ List as _, Canvas as _, * }
+import java.awt.{ Shape }
 import javax.swing.*
 
 import scutil.core.implicits.*

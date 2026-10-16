@@ -26,7 +26,7 @@ extends AutoCloseable {
 			t
 		case None	=>
 			// prune if necessary
-			if (keys.size >= size) {
+			if keys.size >= size then {
 				val	ss	= keys.dequeue()
 				val tt	= cache(ss)
 				cache remove ss

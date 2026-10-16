@@ -62,8 +62,9 @@ object Render {
 
 	def cents(octave:Double):String = {
 		val cents	= octave * 12 * 100
-		if (abs(cents) >= centsEpsilon)	"%+.1f".formatLocal(Locale.US, cents)
-		else							"0"
+		if abs(cents) >= centsEpsilon
+		then "%+.1f".formatLocal(Locale.US, cents)
+		else "0"
 	}
 
 	/*

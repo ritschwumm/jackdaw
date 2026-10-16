@@ -16,7 +16,7 @@ object KeyDetector {
 			def get(frame:Int):Float	= {
 				var out	= 0f
 				var i = 0
-				while (i < channelCount) {
+				while i < channelCount do {
 					out	+= channels(i).get(frame)
 					i	+= 1
 				}
@@ -41,7 +41,7 @@ object KeyDetector {
 	}
 
 	private def convertKey(it:Optional[Key]):MusicKey	=
-		if (it.isPresent) {
+		if it.isPresent then {
 			val orig	= it.get
 			MusicKey.Chord(
 				MusicChord(

@@ -3,7 +3,7 @@ package jackdaw.model
 import scutil.lang.*
 import scutil.time.*
 
-import screact.{ Engine as _, * }
+import screact.*
 import screact.swing.*
 
 import jackdaw.Config

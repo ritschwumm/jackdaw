@@ -47,9 +47,9 @@ object LEDShape {
 
 		def number(it:Number):Poly	=
 			Poly(
-				numberSegments(it).toSeq.map(segment)
+				numberSegments(it).toVector.map(segment)
 			)
 
-		numbers.map { it => polyShape(number(it)) }
+		numbers.map { it => number(it).toShape }
 	}
 }

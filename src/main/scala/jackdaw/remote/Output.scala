@@ -226,7 +226,7 @@ final class Output(val st:OutputStream) {
 	}
 
 	def writeBoolean(it:Boolean):Unit	= {
-		writeByte(if (it) 1 else 0)
+		writeByte(if it then 1 else 0)
 	}
 	def writeChar(it:Char):Unit	= {
 		writeShort(it.toShort)

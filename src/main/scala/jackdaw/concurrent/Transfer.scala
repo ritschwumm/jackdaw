@@ -17,7 +17,7 @@ final class Transfer[T] {
 	@tailrec
 	def receiveAll(effect:Effect[T]):Unit	= {
 		val item	= queue.poll
-		if (item != null) {
+		if item != null then {
 			effect(item)
 			receiveAll(effect)
 		}

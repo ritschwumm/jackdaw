@@ -4,7 +4,6 @@ import scutil.lang.*
 import scutil.time.*
 
 import scjson.converter.*
-import scjson.converter.{ SumConverters	as SC }
 import scjson.converter.JsonFormat.{given, *}
 
 import jackdaw.library.TrackVersion
@@ -46,7 +45,7 @@ object V4 {
 		given JsonWriter[MusicChord]	= cc2AutoWriter[MusicChord]
 
 		given JsonReader[MusicKey]	=
-			SC.extractTag	>=>
+			SumConverters.extractTag	>=>
 			sumReaderVar(
 				"silence"	-> subReader(coReader(MusicKey.Silence)),
 				"chord"		-> subReader(cc1AutoReader[MusicKey.Chord]),
@@ -56,10 +55,10 @@ object V4 {
 				"silence"	-> subWriter(coWriter(MusicKey.Silence),	MusicKey.P.Silence.get),
 				"chord"		-> subWriter(cc1AutoWriter[MusicKey.Chord],	MusicKey.P.Chord.get),
 			) >=>
-			SC.injectTag
+			SumConverters.injectTag
 
-		given [T:JsonReader]:JsonReader[Stamped[T]]	= cc2AutoReader[Stamped[T]]
-		given [T:JsonWriter]:JsonWriter[Stamped[T]]	= cc2AutoWriter[Stamped[T]]
+		given [T:JsonReader] => JsonReader[Stamped[T]]	= cc2AutoReader[Stamped[T]]
+		given [T:JsonWriter] => JsonWriter[Stamped[T]]	= cc2AutoWriter[Stamped[T]]
 
 		given JsonReader[TrackData]	= cc6AutoReader[TrackData]
 		given JsonWriter[TrackData]	= cc6AutoWriter[TrackData]

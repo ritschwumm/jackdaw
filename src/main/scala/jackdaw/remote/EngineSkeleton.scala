@@ -43,7 +43,7 @@ object EngineSkeleton extends Logging {
 		yield Io delay {
 			// TODO using move this out
 			var keepOn	= true
-			while (keepOn) {
+			while keepOn do {
 				try {
 					tcpConnection.receive() match {
 						case ToSkeleton.Send(action)	=> enqueueAction(action)

@@ -9,7 +9,7 @@ import scutil.io.*
 import scjson.converter.*
 import scjson.io.*
 
-final class JsonPersister[T:JsonReader:JsonWriter] extends Persister[T] with Logging {
+final class JsonPersister[T:{ JsonReader, JsonWriter }] extends Persister[T] with Logging {
 	def load(file:Path):Option[T]	= {
 		JsonIo.loadFile(file)
 		.leftEffect { e =>

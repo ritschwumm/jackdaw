@@ -1,6 +1,6 @@
 package jackdaw.gui
 
-import java.awt.{ List as _, Canvas as _, * }
+import java.awt.{ Dimension, Shape, Paint, Stroke }
 
 import scutil.lang.implicits.*
 import scutil.gui.geom.*
@@ -27,14 +27,29 @@ object ButtonStyleFactory {
 	private val medium		= (small+big)/2
 	private val seri		= Vector(small, smallish, smallisher, medium, biggisher, biggish, big)
 
+	/*
+	all our shapes are built on these coordinate grid
+
+	a1	b1	c1	d1	e1	f1	g1
+	a2	b2	c2	d2	e2	f2	g2
+	a3	b3	c3	d3	e3	f3	g3
+	a4	b4	c4	d4	e4	f4	g4
+	a5	b5	c5	d5	e5	f5	g5
+	a6	b6	c6	d6	e6	f6	g6
+	a7	b7	c7	d7	e7	f7	g7
+	*/
+
 	// protected to avoid unused warnings
-	protected val Vector(a1,b1,c1,d1,e1,f1,g1)	= seri.map { SgPoint(_, small)		}: @unchecked
-	protected val Vector(a2,b2,c2,d2,e2,f2,g2)	= seri.map { SgPoint(_, smallish)	}: @unchecked
-	protected val Vector(a3,b3,c3,d3,e3,f3,g3)	= seri.map { SgPoint(_, smallisher)	}: @unchecked
-	protected val Vector(a4,b4,c4,d4,e4,f4,g4)	= seri.map { SgPoint(_, medium)		}: @unchecked
-	protected val Vector(a5,b5,c5,d5,e5,f5,g5)	= seri.map { SgPoint(_, biggisher)	}: @unchecked
-	protected val Vector(a6,b6,c6,d6,e6,f6,g6)	= seri.map { SgPoint(_, biggish)	}: @unchecked
-	protected val Vector(a7,b7,c7,d7,e7,f7,g7)	= seri.map { SgPoint(_, big)		}: @unchecked
+	protected val Vector(a1,b1,c1,d1,e1,f1,g1)	= seri.map { SgPoint(_, small)		}
+	protected val Vector(a2,b2,c2,d2,e2,f2,g2)	= seri.map { SgPoint(_, smallish)	}
+	protected val Vector(a3,b3,c3,d3,e3,f3,g3)	= seri.map { SgPoint(_, smallisher)	}
+	protected val Vector(a4,b4,c4,d4,e4,f4,g4)	= seri.map { SgPoint(_, medium)		}
+	protected val Vector(a5,b5,c5,d5,e5,f5,g5)	= seri.map { SgPoint(_, biggisher)	}
+	protected val Vector(a6,b6,c6,d6,e6,f6,g6)	= seri.map { SgPoint(_, biggish)	}
+	protected val Vector(a7,b7,c7,d7,e7,f7,g7)	= seri.map { SgPoint(_, big)		}
+
+	import Poly.{ of as poly }
+	import Draft.{ of as draft }
 
 	val PLAY	= outlineButtonStyle(poly(
 		draft(	a1,	g4,	a7, a1	)
@@ -77,17 +92,21 @@ object ButtonStyleFactory {
 		draft(	a4,	g4	)
 	))
 
+
+
 	def LOOP_ON(digit:Int):ButtonStyle	=
 		loopButtonStyle(
 			poly(
-				draft(	/*f1,g2*/g4, g6, f7, b7, a6, a4/*a2,b1*/	)
+				draft(a5, a6, b7),
+				draft(g5, g6, f7),
 			),
 			DIGITS.lift(digit)
 		)
 	def LOOP_OFF(digit:Int):ButtonStyle	=
 		loopButtonStyle(
 			poly(
-				draft(	e1, f1, g2, g6, f7, b7, a6, a2, b1, c1	)
+				draft(b1, a2, /* a3, */ a5, a6, b7),
+				draft(f1, g2, /* g3, */ g5, g6, f7),
 			),
 			DIGITS.lift(digit)
 		)
@@ -132,7 +151,7 @@ object ButtonStyleFactory {
 
 	private def outlineButtonStyle(poly:Poly):ButtonStyle	=
 		buttonStyle { (shapePaint, shapeStroke) =>
-			val shape	= polyShape(poly)
+			val shape	= poly.toShape
 			Vector(
 				StrokeShape(shape, shapePaint, shapeStroke)
 			)
@@ -153,31 +172,31 @@ object ButtonStyleFactory {
 	// just puts a digit on top
 	private def loopButtonStyle(base:Poly, digit:Option[Shape]):ButtonStyle	=
 		buttonStyle { (shapePaint, shapeStroke) =>
-			val shape	= polyShape(base)
+			val shape	= base.toShape
 			Vector(
 				StrokeShape(shape, shapePaint, shapeStroke)
 			) ++
-			digit.map { it =>
+			digit.toVector.map { it =>
 				StrokeShape(it, shapePaint, Style.button.label.stroke)
-			}.toVector
+			}
 		}
 
 	// fills the inner part
 	private def cueButtonStyle(base:Poly, digit:Option[Shape]):ButtonStyle	=
 		buttonStyle { (shapePaint, shapeStroke) =>
-			val shape	= polyShape(base)
+			val shape	= base.toShape
 			Vector(
 				FillShape(shape, shapePaint),
 				StrokeShape(shape, shapePaint, shapeStroke)
 			) ++
-			digit.map { it =>
+			digit.toVector.map { it =>
 				StrokeShape(it, Style.button.label.color, Style.button.label.stroke)
-			}.toVector
+			}
 		}
 
 	private def trialButtonStyle(base:Poly, state:Option[Boolean]):ButtonStyle	=
 		buttonStyle { (shapePaint, shapeStroke) =>
-			val shape	= polyShape(base)
+			val shape	= base.toShape
 			Vector(
 				FillShape(shape, trialPaint(state)),
 				StrokeShape(shape, shapePaint, shapeStroke)

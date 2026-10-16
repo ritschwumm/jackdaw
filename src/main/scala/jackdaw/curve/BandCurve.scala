@@ -28,10 +28,10 @@ object BandCurve {
 		var energyHigh		= 0.0
 		var summed	= 0
 
-		while (frame < sample.frameCount) {
+		while frame < sample.frameCount do {
 			var	channel	= 0
 			var mono	= 0.0
-			while (channel < sample.channels.size) {
+			while channel < sample.channels.size do {
 				mono	+= sample.channels(channel).get(frame)
 				channel	+= 1
 			}
@@ -50,7 +50,7 @@ object BandCurve {
 			frame	+= 1
 			summed	+= 1
 
-			if (frame % rasterFrames == 0 || frame == sample.frameCount) {
+			if frame % rasterFrames == 0 || frame == sample.frameCount then {
 				valuesFull(chunk)	= energyFull.toFloat	/ summed
 				valuesLow(chunk)	= energyLow.toFloat		/ summed
 				valuesMiddle(chunk)	= energyMiddle.toFloat	/ summed
@@ -96,12 +96,12 @@ final case class BandCurve(
 		val endR	= clampInt(end   / rasterFrames, 0, chunkCount-1)
 
 		val sizeR	= endR - startR
-		if (sizeR <= 0)	return 0
-		if (sizeR == 1)	return values(startR)
+		if sizeR <= 0	then return 0
+		if sizeR == 1	then return values(startR)
 
 		var energyV		= 0f
 		var	currentR	= startR
-		while (currentR < endR) {
+		while currentR < endR do {
 			energyV		+= values(currentR)
 			currentR	+= 1
 		}

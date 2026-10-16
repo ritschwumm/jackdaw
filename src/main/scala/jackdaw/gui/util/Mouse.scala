@@ -4,7 +4,7 @@ import java.awt.Component
 import java.awt.event.*
 
 import scutil.core.implicits.*
-import scutil.gui.CasterInstances.*
+import scutil.gui.AllCasters.*
 import scutil.gui.InputEventPredicates.*
 
 import screact.*
@@ -12,9 +12,9 @@ import screact.swing.*
 
 final class Mouse(component:Component) {
 	val events	=
-		SwingWidget.events((component:MouseCaster).connect)			`orElse`
-		SwingWidget.events((component:MouseMotionCaster).connect)	`orElse`
-		SwingWidget.events((component:MouseWheelCaster).connect)
+		SwingWidget.events(component.onMouseEvent)			`orElse`
+		SwingWidget.events(component.onMouseMotionEvent)	`orElse`
+		SwingWidget.events(component.onMouseWheelMoved)
 
 	val leftPress	= events.filter(mousePressed	&& button1)
 	val leftRelease	= events.filter(mouseReleased	&& button1)
@@ -25,7 +25,7 @@ final class Mouse(component:Component) {
 	val wheel		= events.filter(mouseWheeled)
 
 	val wheelRotation:Events[Int]	=
-		wheel collect {
+		wheel.collect {
 			case ev:MouseWheelEvent => -ev.getWheelRotation
 		}
 }

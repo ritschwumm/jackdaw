@@ -13,13 +13,13 @@ final class PeakDetector {
 	/** lowpass-filtered peak value with different filter coefficient for raising and falling peak values */
 	def decay:Float = {
 		val lower	= FloatUtil.ftz(current * (1-decayMul) - decayAdd)
-		current		= if (peak > lower)	peak else lower
+		current		= if peak > lower then peak else lower
 		peak		= 0
 		current
 	}
 
 	def put(next:Float):Unit	= {
-		val abs	= if (next >= 0)	next	else -next
-		peak	= if (abs > peak)	abs		else peak
+		val abs	= if next >= 0	then next	else -next
+		peak	= if abs > peak	then abs	else peak
 	}
 }

@@ -10,18 +10,19 @@ import scutil.gui.geom.*
 object GeomUtil {
 	val bottomRightInsets	= SgRectangleInsets.symmetric(SgSpanInsets.startEnd(0, 1))
 
-	def normalRectangle(bounds:SgRectangle):Shape	=
-		bounds.normalize.toAwtRectangle2D
-
 	def smallerRectangle(bounds:SgRectangle):Shape	=
 		bounds.normalize.inset(bottomRightInsets).toAwtRectangle2D
+
+	def normalRectangle(bounds:SgRectangle):Shape	=
+		bounds.normalize.toAwtRectangle2D
 
 	def spanDeflate(span:SgSpan, size:Double):SgSpan	=
 		SgSpan.startEnd(span.start + size/2, span.end - size/2)
 
 	def clampValue(span:SgSpan, value:Double):Double	=
-		if (span.normal)	clampDouble(value, span.start, span.end)
-		else				clampDouble(value, span.start, span.end)
+		if span.normal
+		then clampDouble(value, span.start, span.end)
+		else clampDouble(value, span.start, span.end)
 
 	def containsInclusive(span:SgSpan, epsilon:Double):Predicate[Double]	= {
 		val	normal	= span.normalize

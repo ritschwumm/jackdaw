@@ -11,7 +11,7 @@ final class IntQueue(maxSize:Int) {
 	def shift():Int	= {
 		val out	= items(0)
 		var ptr	= 0
-		while (ptr < curSize-1) {
+		while ptr < curSize-1 do {
 			items(ptr)	= items(ptr+1)
 			ptr	+= 1
 		}
@@ -27,9 +27,9 @@ final class IntQueue(maxSize:Int) {
 	def removeEqual(toRemove:Int):Unit	= {
 		var inPtr	= 0
 		var outPtr	= 0
-		while (inPtr < curSize) {
+		while inPtr < curSize do {
 			val item	= items(inPtr)
-			if (item != toRemove) {
+			if item != toRemove then {
 				items(outPtr)	= item
 				outPtr	+= 1
 			}

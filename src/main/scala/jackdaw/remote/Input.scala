@@ -210,8 +210,9 @@ final class Input(val st:InputStream) {
 	//------------------------------------------------------------------------------
 
 	def readOption[T](delegate: =>T):Option[T]	= {
-		if (readBoolean())	Some(delegate)
-		else				None
+		if readBoolean()
+		then Some(delegate)
+		else None
 	}
 
 	def readString():String	= {
@@ -222,7 +223,7 @@ final class Input(val st:InputStream) {
 
 	def readByte():Byte	= {
 		val x	= st.read()
-		if (x == -1) sys error "unexpected end of stream"
+		if x == -1	then sys.error("unexpected end of stream")
 		x.toByte
 	}
 	def readShort():Short = {
@@ -265,9 +266,9 @@ final class Input(val st:InputStream) {
 		val length	= readInt()
 		val out	= new Array[Byte](length)
 		var i = 0
-		while (i < length) {
+		while i < length do {
 			val len	= st.read(out, i, length-i)
-			if (len == -1)	sys error "unexpected end of stream"
+			if len == -1	then sys.error("unexpected end of stream")
 			i	= i + len
 		}
 		out

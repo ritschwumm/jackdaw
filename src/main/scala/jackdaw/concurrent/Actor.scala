@@ -13,7 +13,7 @@ object Actor {
 			// NOTE this is uses a LinkedTransferQueue instead of a an ConcurrentLinkedQueue because
 			// we _want_ to be able to block on reads when there is nothing available in the queue
 			queue	<-	IoResource.delay { new LinkedTransferQueue[T] }
-			worker	<-	SimpleWorker.create(
+			_		<-	SimpleWorker.create(
 							name,
 							priority,
 							Io delay {

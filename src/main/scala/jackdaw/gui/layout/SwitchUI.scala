@@ -1,6 +1,6 @@
 package jackdaw.gui
 
-import java.awt.{ List as _, * }
+import java.awt.{ BorderLayout, Dimension }
 import javax.swing.*
 
 import screact.*

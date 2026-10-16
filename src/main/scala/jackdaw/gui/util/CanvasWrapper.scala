@@ -1,6 +1,6 @@
 package jackdaw.gui.util
 
-import java.awt.{ List as _, Canvas as _, * }
+import java.awt.{ Paint }
 
 import screact.*
 import sc2d.*

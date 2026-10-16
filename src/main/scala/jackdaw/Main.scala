@@ -6,7 +6,7 @@ import javax.swing.*
 import scutil.jdk.implicits.*
 import scutil.lang.*
 import scutil.gui.instances.given
-import scutil.gui.CasterInstances.*
+import scutil.gui.AllCasters.*
 
 import screact.*
 import screact.swing.*
@@ -33,7 +33,7 @@ object Main extends Observing {
 		yield Io delay {
 			val windowActiveFb:Events[Boolean]	=
 				SwingWidget
-				.events	((frame:WindowCaster).connect)
+				.events	(frame.onWindowEvent)
 				.map	{ _.getWindow.isActive }
 
 			windowActiveFb.observe(windowActive.set)
@@ -55,18 +55,18 @@ object Main extends Observing {
 			// TODO use setAboutHandler to display out own dialog
 
 			try {
-				Desktop.getDesktop.setQuitHandler { (ev, res) =>
+				Desktop.getDesktop.setQuitHandler { (_, _) =>
 					shutdown.unsafeRun()
 				}
 			}
-			catch { case e:UnsupportedOperationException =>
+			catch { case _:UnsupportedOperationException =>
 				//e.printStackTrace()
 			}
 
 			try {
 				Taskbar.getTaskbar.setIconImage(Style.application.icon)
 			}
-			catch { case e:UnsupportedOperationException =>
+			catch { case _:UnsupportedOperationException =>
 				//e.printStackTrace()
 			}
 

@@ -46,8 +46,9 @@ final case class Rhythm(anchor:Double, measure:Double, schema:Schema) {
 		val	change		= offset / distance
 		val changed		= measure * (change + 1)
 		// don't let the size come near zero
-		if (changed >= abs(offset))	copy(measure=changed)
-		else						this
+		if changed >= abs(offset)
+		then copy(measure=changed)
+		else this
 	}
 
 	//------------------------------------------------------------------------------
@@ -93,12 +94,12 @@ final case class Rhythm(anchor:Double, measure:Double, schema:Schema) {
 		val out		= new mutable.ArrayBuffer[RhythmLine]
 		var index	= firstIndex
 		var value	= firstValue
-		while (value < end) {
+		while value < end do {
 			out		+= (
 				// if (index == 0)	AnchorLine(value)
-				if		(index % schema.beatsPerPhrase  == 0)	RhythmLine(value, RhythmUnit.Phrase)
-				else if (index % schema.beatsPerMeasure == 0)	RhythmLine(value, RhythmUnit.Measure)
-				else											RhythmLine(value, RhythmUnit.Beat)
+				if		index % schema.beatsPerPhrase  == 0	then	RhythmLine(value, RhythmUnit.Phrase)
+				else if index % schema.beatsPerMeasure == 0	then	RhythmLine(value, RhythmUnit.Measure)
+				else												RhythmLine(value, RhythmUnit.Beat)
 			)
 			value	+= beat
 			index	+= 1

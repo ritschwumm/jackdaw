@@ -121,7 +121,6 @@ object Style {
 				val color	= inactive.color.darker
 				val stroke	= FAT_STROKE
 			}
-
 		}
 		object label {
 			val color	= STRONG_BACKGROUND

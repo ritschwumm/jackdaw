@@ -1,6 +1,6 @@
 package jackdaw.gui.util
 
-import java.awt.{ List as _, * }
+import java.awt.{ Component, Graphics2D, GraphicsEnvironment, GraphicsConfiguration, Transparency }
 import java.awt.image.*
 
 import scutil.core.implicits.*

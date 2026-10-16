@@ -58,7 +58,7 @@ final class PhaseUI(value:Signal[Option[Double]], rhythm:Signal[Option[Rhythm]])
 					value	<- valueCur
 					rect	=
 							// extreme values fill complete area
-							if (PhaseRange inside value) {
+							if PhaseRange.inside(value) then {
 								// NOTE hack to make it change less often
 								rint(value2guiCur(value)).spanTo(guiNeutral).rectangleWith(trackBoundsCur.y)
 							}
